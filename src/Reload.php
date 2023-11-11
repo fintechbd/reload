@@ -1,8 +1,8 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace Fintech\Reload;
 
-class Skeleton
+class Reload
 {
     //** Crud Service Method Point Do not Remove **//
 }

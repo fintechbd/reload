@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Fintech\Reload\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class ReloadCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'reload';
 
     public $description = 'My command';
 

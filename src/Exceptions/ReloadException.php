@@ -1,14 +1,14 @@
 <?php
 
-namespace VendorName\Skeleton\Exceptions;
+namespace Fintech\Reload\Exceptions;
 
 use Exception;
 use Throwable;
 
 /**
- * Class SkeletonException
+ * Class ReloadException
  */
-class SkeletonException extends Exception
+class ReloadException extends Exception
 {
     /**
      * CoreException constructor.
