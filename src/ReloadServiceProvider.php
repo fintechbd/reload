@@ -2,9 +2,9 @@
 
 namespace Fintech\Reload;
 
-use Illuminate\Support\ServiceProvider;
 use Fintech\Reload\Commands\InstallCommand;
 use Fintech\Reload\Commands\ReloadCommand;
+use Illuminate\Support\ServiceProvider;
 
 class ReloadServiceProvider extends ServiceProvider
 {

@@ -6,24 +6,23 @@ use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\DepositRepository as InterfacesDepositRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 use InvalidArgumentException;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class DepositRepository
- * @package Fintech\Reload\Repositories\Mongodb
  */
 class DepositRepository extends MongodbRepository implements InterfacesDepositRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.reload.deposit_model', \Fintech\Reload\Models\Deposit::class));
+        $model = app(config('fintech.reload.deposit_model', \Fintech\Reload\Models\Deposit::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**
@@ -47,7 +46,7 @@ class DepositRepository extends MongodbRepository implements InterfacesDepositRe
         }
 
         //Display Trashed
-        if (isset($filters['trashed']) && !empty($filters['trashed'])) {
+        if (isset($filters['trashed']) && ! empty($filters['trashed'])) {
             $query->onlyTrashed();
         }
 

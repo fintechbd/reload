@@ -2,26 +2,22 @@
 
 namespace Fintech\Reload\Services;
 
-
 use Fintech\Reload\Interfaces\DepositRepository;
 
 /**
  * Class DepositService
- * @package Fintech\Reload\Services
- *
  */
 class DepositService
 {
     /**
      * DepositService constructor.
-     * @param DepositRepository $depositRepository
      */
-    public function __construct(DepositRepository $depositRepository) {
+    public function __construct(DepositRepository $depositRepository)
+    {
         $this->depositRepository = $depositRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

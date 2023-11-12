@@ -2,9 +2,9 @@
 
 namespace Fintech\Reload\Tests;
 
+use Fintech\Reload\ReloadServiceProvider;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Fintech\Reload\ReloadServiceProvider;
 
 class TestCase extends Orchestra
 {

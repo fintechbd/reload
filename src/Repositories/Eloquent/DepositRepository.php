@@ -11,19 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Class DepositRepository
- * @package Fintech\Reload\Repositories\Eloquent
  */
 class DepositRepository extends EloquentRepository implements InterfacesDepositRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.reload.deposit_model', \Fintech\Reload\Models\Deposit::class));
+        $model = app(config('fintech.reload.deposit_model', \Fintech\Reload\Models\Deposit::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**
@@ -47,7 +46,7 @@ class DepositRepository extends EloquentRepository implements InterfacesDepositR
         }
 
         //Display Trashed
-        if (isset($filters['trashed']) && !empty($filters['trashed'])) {
+        if (isset($filters['trashed']) && ! empty($filters['trashed'])) {
             $query->onlyTrashed();
         }
 
