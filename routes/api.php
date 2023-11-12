@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 if (Config::get('fintech.reload.enabled')) {
     Route::prefix('reload')->name('reload.')->group(function () {
+
+        Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class);
+        Route::post('deposits/{deposit}/restore', [\Fintech\Reload\Http\Controllers\DepositController::class, 'restore'])->name('deposits.restore');
 
         //DO NOT REMOVE THIS LINE//
     });

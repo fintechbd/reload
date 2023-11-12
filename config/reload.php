@@ -5,6 +5,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enable Module APIs
+    |--------------------------------------------------------------------------
+    | this setting enable the api will be available or not
+    */
+    'enabled' => env('PACKAGE_RELOAD_ENABLED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Reload Group Root Prefix
     |--------------------------------------------------------------------------
     |
@@ -15,6 +23,16 @@ return [
     */
 
     'root_prefix' => 'test/',
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Deposit Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'deposit_model' => \Fintech\Reload\Models\Deposit::class,
 
     //** Model Config Point Do not Remove **//
 
@@ -27,6 +45,8 @@ return [
     */
 
     'repositories' => [
+        \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
+
         //** Repository Binding Config Point Do not Remove **//
     ],
 
