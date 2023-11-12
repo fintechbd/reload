@@ -35,4 +35,7 @@
             <directory suffix=".php">./src</directory>
         </include>
     </source>
+    <php>
+        <env name="PACKAGE_RELOAD_ENABLED" value="true"/>
+    </php>
 </phpunit>
