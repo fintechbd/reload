@@ -14,11 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 if (Config::get('fintech.reload.enabled')) {
-    Route::prefix('reload')->name('reload.')->group(function () {
+    Route::prefix('reload')->name('reload.')
+        ->middleware(config('fintech.auth.middleware'))
+        ->group(function () {
+            Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class);
+            Route::post('deposits/{deposit}/restore', [\Fintech\Reload\Http\Controllers\DepositController::class, 'restore'])->name('deposits.restore');
 
-        Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class);
-        Route::post('deposits/{deposit}/restore', [\Fintech\Reload\Http\Controllers\DepositController::class, 'restore'])->name('deposits.restore');
-
-        //DO NOT REMOVE THIS LINE//
-    });
+            //DO NOT REMOVE THIS LINE//
+        });
 }

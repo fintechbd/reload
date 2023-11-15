@@ -37,6 +37,7 @@ class StoreDepositRequest extends FormRequest
             'is_refunded' => ['required', 'boolean'],
             'order_data' => ['nullable', 'array'],
             'status' => ['required', 'string'],
+            'slip' => ['nullable', 'string'],
         ];
     }
 
@@ -46,13 +47,15 @@ class StoreDepositRequest extends FormRequest
 
         $data = [
             'transaction_form_id' => 1,
-            'user_id' => 1,
-            'sender_receiver_id' => 1,
+            'user_id' => $user->getKey(),
+            'sender_receiver_id' => $user->getKey(),
             'is_refunded' => false,
             'order_data' => [],
             'status' => OrderStatus::Processing->value,
             'risk' => RiskProfile::Low->value,
         ];
+
+        $this->merge($data);
     }
 
     /**
