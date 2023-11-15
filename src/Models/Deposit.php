@@ -11,8 +11,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Deposit extends Model implements HasMedia
 {
     use AuditableTrait;
-    use SoftDeletes;
     use InteractsWithMedia;
+    use SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------

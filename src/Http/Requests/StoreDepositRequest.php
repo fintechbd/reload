@@ -30,7 +30,7 @@ class StoreDepositRequest extends FormRequest
             'user_id' => ['required', 'integer', 'min:1'],
             'service_id' => ['required', 'integer', 'min:1'],
             'transaction_form_id' => ['required', 'integer', 'min:1'],
-            'ordered_at' => ['required', 'date', 'date_format:Y-m-d', 'before_or_equal:' . date('Y-m-d')],
+            'ordered_at' => ['required', 'date', 'date_format:Y-m-d', 'before_or_equal:'.date('Y-m-d')],
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
             'risk' => ['required', 'string'],
