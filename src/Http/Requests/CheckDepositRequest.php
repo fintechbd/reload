@@ -23,8 +23,7 @@ class CheckDepositRequest extends FormRequest
     {
         return [
             'password' => ['string', 'required_without:pin'],
-            'pin' => ['string', 'required_without:password']
+            'pin' => ['string', 'required_without:password'],
         ];
     }
-
 }

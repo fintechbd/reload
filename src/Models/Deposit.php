@@ -76,7 +76,7 @@ class Deposit extends Model implements HasMedia
             'cancel' => action_link(route('reload.deposits.cancel', $primaryKey), __('reload::messages.action.cancel'), 'post'),
         ];
 
-        }
+    }
 
     /*
     |--------------------------------------------------------------------------
