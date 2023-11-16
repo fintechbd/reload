@@ -40,7 +40,7 @@ class Deposit extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('slip')
-            ->acceptsMimeTypes(['image/jpeg', 'application/pdf'])
+            ->acceptsMimeTypes(['image/*', 'application/pdf'])
             ->useDisk(config('filesystems.default', 'public'))
             ->singleFile();
     }

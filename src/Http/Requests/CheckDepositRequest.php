@@ -4,7 +4,7 @@ namespace Fintech\Reload\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateDepositRequest extends FormRequest
+class CheckDepositRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,31 +22,9 @@ class UpdateDepositRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'password' => ['string', 'required_without:pin'],
+            'pin' => ['string', 'required_without:password']
         ];
     }
 
-    /**
-     * Get the validation attributes that apply to the request.
-     *
-     * @return array
-     */
-    public function attributes()
-    {
-        return [
-            //
-        ];
-    }
-
-    /**
-     * Get the validation messages that apply to the request.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        return [
-            //
-        ];
-    }
 }

@@ -17,8 +17,10 @@ if (Config::get('fintech.reload.enabled')) {
     Route::prefix('reload')->name('reload.')
         ->middleware(config('fintech.auth.middleware'))
         ->group(function () {
-            Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class);
-            Route::post('deposits/{deposit}/restore', [\Fintech\Reload\Http\Controllers\DepositController::class, 'restore'])->name('deposits.restore');
+            Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class)->only(['index', 'store', 'show']);
+            Route::post('deposits/{deposit}/reject', [\Fintech\Reload\Http\Controllers\DepositController::class, 'reject'])->name('deposits.reject');
+            Route::post('deposits/{deposit}/accept', [\Fintech\Reload\Http\Controllers\DepositController::class, 'accept'])->name('deposits.accept');
+            Route::post('deposits/{deposit}/cancel', [\Fintech\Reload\Http\Controllers\DepositController::class, 'cancel'])->name('deposits.cancel');
 
             //DO NOT REMOVE THIS LINE//
         });

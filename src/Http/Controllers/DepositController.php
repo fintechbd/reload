@@ -12,7 +12,7 @@ use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportDepositRequest;
 use Fintech\Reload\Http\Requests\IndexDepositRequest;
 use Fintech\Reload\Http\Requests\StoreDepositRequest;
-use Fintech\Reload\Http\Requests\UpdateDepositRequest;
+use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Resources\DepositCollection;
 use Fintech\Reload\Http\Resources\DepositResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -115,116 +115,19 @@ class DepositController extends Controller
         }
     }
 
-    /**
-     * @lrd:start
-     * Update a specified *Deposit* resource using id.
-     *
-     * @lrd:end
-     *
-     * @throws ModelNotFoundException
-     * @throws UpdateOperationException
-     */
-    public function update(UpdateDepositRequest $request, string|int $id): JsonResponse
+    public function reject(CheckDepositRequest $request, string|int $id)
     {
-        try {
-
-            $deposit = Reload::deposit()->find($id);
-
-            if (! $deposit) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            $inputs = $request->validated();
-
-            if (! Reload::deposit()->update($id, $inputs)) {
-
-                throw (new UpdateOperationException)->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            return $this->updated(__('core::messages.resource.updated', ['model' => 'Deposit']));
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
+        //pre status == processing
     }
 
-    /**
-     * @lrd:start
-     * Soft delete a specified *Deposit* resource using id.
-     *
-     * @lrd:end
-     *
-     * @return JsonResponse
-     *
-     * @throws ModelNotFoundException
-     * @throws DeleteOperationException
-     */
-    public function destroy(string|int $id)
+    public function accept(CheckDepositRequest $request, string|int $id)
     {
-        try {
-
-            $deposit = Reload::deposit()->find($id);
-
-            if (! $deposit) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            if (! Reload::deposit()->destroy($id)) {
-
-                throw (new DeleteOperationException())->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            return $this->deleted(__('core::messages.resource.deleted', ['model' => 'Deposit']));
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
+        //pre status == processing
     }
 
-    /**
-     * @lrd:start
-     * Restore the specified *Deposit* resource from trash.
-     * ** ```Soft Delete``` needs to enabled to use this feature**
-     *
-     * @lrd:end
-     *
-     * @return JsonResponse
-     */
-    public function restore(string|int $id)
+    public function cancel(CheckDepositRequest $request, string|int $id)
     {
-        try {
-
-            $deposit = Reload::deposit()->find($id, true);
-
-            if (! $deposit) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            if (! Reload::deposit()->restore($id)) {
-
-                throw (new RestoreOperationException())->setModel(config('fintech.reload.deposit_model'), $id);
-            }
-
-            return $this->restored(__('core::messages.resource.restored', ['model' => 'Deposit']));
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
+        //pre status == accept
     }
 
     /**
