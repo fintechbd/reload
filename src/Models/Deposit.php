@@ -69,21 +69,14 @@ class Deposit extends Model implements HasMedia
     {
         $primaryKey = $this->getKey();
 
-        $links = [
+        return [
             'show' => action_link(route('reload.deposits.show', $primaryKey), __('core::messages.action.show'), 'get'),
-            'update' => action_link(route('reload.deposits.update', $primaryKey), __('core::messages.action.update'), 'put'),
-            'destroy' => action_link(route('reload.deposits.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-            'restore' => action_link(route('reload.deposits.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
+            'reject' => action_link(route('reload.deposits.reject', $primaryKey), __('reload::messages.action.reject'), 'post'),
+            'accept' => action_link(route('reload.deposits.accept', $primaryKey), __('reload::messages.action.accept'), 'post'),
+            'cancel' => action_link(route('reload.deposits.cancel', $primaryKey), __('reload::messages.action.cancel'), 'post'),
         ];
 
-        if ($this->getAttribute('deleted_at') == null) {
-            unset($links['restore']);
-        } else {
-            unset($links['destroy']);
         }
-
-        return $links;
-    }
 
     /*
     |--------------------------------------------------------------------------
