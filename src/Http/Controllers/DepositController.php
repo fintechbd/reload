@@ -68,7 +68,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->create($inputs);
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.deposit_model'));
             }
 
@@ -97,7 +97,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->find($id);
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
             }
 
@@ -117,6 +117,7 @@ class DepositController extends Controller
      * @lrd:start
      * Reject a  specified *Deposit* resource found by id.
      * if and only if deposit status is processing
+     *
      * @lrd:end
      *
      * @throws ModelNotFoundException
@@ -130,17 +131,17 @@ class DepositController extends Controller
             $rejectedDeposit['status'] = OrderStatus::Rejected->value;
             $rejectedDeposit['parent_id'] = $deposit->getKey();
 
-            if (!Reload::deposit()->create($rejectedDeposit)) {
+            if (! Reload::deposit()->create($rejectedDeposit)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => OrderStatus::Rejected->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => OrderStatus::Rejected->name,
+                ])
                 );
             }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => OrderStatus::Rejected->name
-                ])
+                'status' => OrderStatus::Rejected->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -157,6 +158,7 @@ class DepositController extends Controller
      * @lrd:start
      * Accept a  specified *Deposit* resource found by id.
      * if and only if deposit status is processing
+     *
      * @lrd:end
      *
      * @throws ModelNotFoundException
@@ -165,24 +167,24 @@ class DepositController extends Controller
     {
         try {
 
-            $deposit = $this->authenticateDeposit($id, OrderStatus::Processing,OrderStatus::Accepted);
+            $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Accepted);
             $acceptedDeposit = $deposit->toArray();
             $acceptedDeposit['status'] = OrderStatus::Accepted->value;
             $acceptedDeposit['parent_id'] = $deposit->getKey();
 
-            if (!Reload::deposit()->create($acceptedDeposit)) {
+            if (! Reload::deposit()->create($acceptedDeposit)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => OrderStatus::Accepted->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => OrderStatus::Accepted->name,
+                ])
                 );
             }
 
             Reload::deposit()->destroy($deposit->getKey());
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => OrderStatus::Accepted->name
-                ])
+                'status' => OrderStatus::Accepted->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -199,6 +201,7 @@ class DepositController extends Controller
      * @lrd:start
      * Cancel a  specified *Deposit* resource found by id.
      * if and only if deposit status is accepted
+     *
      * @lrd:end
      *
      * @throws ModelNotFoundException
@@ -207,25 +210,25 @@ class DepositController extends Controller
     {
         try {
 
-            $deposit = $this->authenticateDeposit($id, OrderStatus::Accepted,OrderStatus::Cancelled);
+            $deposit = $this->authenticateDeposit($id, OrderStatus::Accepted, OrderStatus::Cancelled);
 
             $acceptedDeposit = $deposit->toArray();
             $acceptedDeposit['status'] = OrderStatus::Cancelled->value;
             $acceptedDeposit['parent_id'] = $deposit->getKey();
 
-            if (!Reload::deposit()->create($acceptedDeposit)) {
+            if (! Reload::deposit()->create($acceptedDeposit)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => OrderStatus::Accepted->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => OrderStatus::Accepted->name,
+                ])
                 );
             }
 
             Reload::deposit()->destroy($deposit->getKey());
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => OrderStatus::Cancelled->name
-                ])
+                'status' => OrderStatus::Cancelled->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -239,24 +242,21 @@ class DepositController extends Controller
     }
 
     /**
-     * @param string|int $id
-     * @param \BackedEnum $requiredStatus
-     * @param \BackedEnum $targetStatus
      * @throws Exception
      */
     private function authenticateDeposit(string|int $id, \BackedEnum $requiredStatus, \BackedEnum $targetStatus): \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model
     {
         $deposit = Reload::deposit()->find($id);
 
-        if (!$deposit) {
+        if (! $deposit) {
             throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
         }
 
         if ($deposit->currentStatus() != $requiredStatus->value) {
             throw new Exception(__('reload::messages.deposit.invalid_status', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => $targetStatus->name,
-                ])
+                'current_status' => $deposit->currentStatus(),
+                'target_status' => $targetStatus->name,
+            ])
             );
         }
 
@@ -291,9 +291,6 @@ class DepositController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param ImportDepositRequest $request
-     * @return DepositCollection|JsonResponse
      */
     public function import(ImportDepositRequest $request): DepositCollection|JsonResponse
     {
