@@ -7,18 +7,15 @@ use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
+use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Requests\ImportDepositRequest;
 use Fintech\Reload\Http\Requests\IndexDepositRequest;
 use Fintech\Reload\Http\Requests\StoreDepositRequest;
-use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Resources\DepositCollection;
 use Fintech\Reload\Http\Resources\DepositResource;
-use Fintech\Transaction\Models\Order;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use UnitEnum;
 
 /**
  * Class DepositController
@@ -245,7 +242,6 @@ class DepositController extends Controller
      * @param string|int $id
      * @param \BackedEnum $requiredStatus
      * @param \BackedEnum $targetStatus
-     * @return Model|\MongoDB\Laravel\Eloquent\Model
      * @throws Exception
      */
     private function authenticateDeposit(string|int $id, \BackedEnum $requiredStatus, \BackedEnum $targetStatus): \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model

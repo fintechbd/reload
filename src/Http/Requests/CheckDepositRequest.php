@@ -30,5 +30,4 @@ class CheckDepositRequest extends FormRequest
 
         ];
     }
-
 }
