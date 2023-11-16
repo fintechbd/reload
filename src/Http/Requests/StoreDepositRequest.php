@@ -2,8 +2,8 @@
 
 namespace Fintech\Reload\Http\Requests;
 
-use Fintech\Auth\Enums\RiskProfile;
-use Fintech\Transaction\Enums\OrderStatus;
+use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDepositRequest extends FormRequest

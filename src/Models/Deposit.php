@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Models;
 
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Traits\AuditableTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,6 +45,11 @@ class Deposit extends Model implements HasMedia
             ->useDisk(config('filesystems.default', 'public'))
             ->singleFile();
     }
+
+    public function currentStatus()
+    {
+        return $this->status;
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -69,13 +75,22 @@ class Deposit extends Model implements HasMedia
     {
         $primaryKey = $this->getKey();
 
-        return [
+        $links = [
             'show' => action_link(route('reload.deposits.show', $primaryKey), __('core::messages.action.show'), 'get'),
             'reject' => action_link(route('reload.deposits.reject', $primaryKey), __('reload::messages.action.reject'), 'post'),
             'accept' => action_link(route('reload.deposits.accept', $primaryKey), __('reload::messages.action.accept'), 'post'),
             'cancel' => action_link(route('reload.deposits.cancel', $primaryKey), __('reload::messages.action.cancel'), 'post'),
         ];
 
+        if ($this->currentStatus() == OrderStatus::Processing->value) {
+            unset($links['cancel']);
+        }
+
+        if ($this->currentStatus() == OrderStatus::Accepted->value) {
+            unset($links['reject']);
+        }
+
+        return $links;
         }
 
     /*

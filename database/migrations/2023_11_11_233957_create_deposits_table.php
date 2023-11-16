@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->longText('notes')->nullable();
                 $table->boolean('is_refunded')->nullable()->default(false)->comment('if money has refunded');
                 $table->json('order_data')->nullable();
-                $table->string('status')->default(\Fintech\Transaction\Enums\OrderStatus::Processing->value);
+                $table->string('status')->default(\Fintech\Core\Enums\Transaction\OrderStatus::Processing->value);
                 $table->foreignId('creator_id')->nullable();
                 $table->foreignId('editor_id')->nullable();
                 $table->foreignId('destroyer_id')->nullable();
