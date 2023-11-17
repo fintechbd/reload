@@ -91,7 +91,7 @@ class Deposit extends Model implements HasMedia
         }
 
         return $links;
-        }
+    }
 
     /*
     |--------------------------------------------------------------------------

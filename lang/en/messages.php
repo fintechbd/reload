@@ -19,6 +19,6 @@ return [
     'deposit' => [
         'invalid_status' => 'Deposit with :current_status status can not changed to :target_status.',
         'status_change_failed' => 'Failed to change from :current_status to :target_status status.',
-        'status_change_success' => 'Deposit moved to :status status successfully.'
-    ]
+        'status_change_success' => 'Deposit moved to :status status successfully.',
+    ],
 ];
