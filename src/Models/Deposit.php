@@ -15,11 +15,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Deposit extends Model implements HasMedia
 {
     use AuditableTrait;
-    use InteractsWithMedia;
-    use SoftDeletes;
     use AuthRelations;
     use BusinessRelations;
+    use InteractsWithMedia;
     use MetaDataRelations;
+    use SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
