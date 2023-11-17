@@ -33,11 +33,11 @@ class DepositSeeder extends Seeder
                 }
             }
 
-            $serviceStateData = $this->serviceState();
+            $serviceStateData = $this->serviceStat();
             foreach (array_chunk($serviceStateData, 200) as $block) {
                 set_time_limit(2100);
                 foreach ($block as $entry) {
-                    \Fintech\Business\Facades\Business::serviceState()->customStore($entry);
+                    \Fintech\Business\Facades\Business::serviceStat()->customStore($entry);
                 }
             }
         }
@@ -107,7 +107,7 @@ class DepositSeeder extends Seeder
 
     }
 
-    private function serviceState(): array
+    private function serviceStat(): array
     {
         $serviceLists = $this->service();
         $serviceStates = [];
