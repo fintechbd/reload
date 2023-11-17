@@ -5,6 +5,7 @@ namespace Fintech\Reload\Http\Controllers;
 use Exception;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
@@ -66,6 +67,7 @@ class DepositController extends Controller
     {
         try {
             $inputs = $request->validated();
+
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
             $inputs['user_id'] = auth()->user()->getKey();
@@ -73,12 +75,24 @@ class DepositController extends Controller
             $inputs['is_refunded'] = false;
             $inputs['status'] = OrderStatus::Processing->value;
             $inputs['risk'] = RiskProfile::Low->value;
+            $inputs['order_data']['created_by'] = $request->user()->name;
+            $inputs['order_data']['created_by_mobile_number'] = $request->user()->mobile;
+            $inputs['order_data']['created_at'] = now();
+            $inputs['order_data']['current_amount'] = 0;
+            $inputs['order_data']['previous_amount'] = 0;
+            $inputs['converted_amount'] = $inputs['amount'];
+            $inputs['converted_currency'] = $inputs['currency'];
 
             $deposit = Reload::deposit()->create($inputs);
 
-            if (! $deposit) {
+            if (!$deposit) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.deposit_model'));
             }
+
+            $order_data = $deposit->order_data;
+            $order_data['purchase_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Purchased->value);
+
+            Reload::deposit()->update($deposit->getKey(), ['order_data' => $order_data]);
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Deposit']),
@@ -105,7 +119,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->find($id);
 
-            if (! $deposit) {
+            if (!$deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
             }
 
@@ -135,21 +149,24 @@ class DepositController extends Controller
         try {
             $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Rejected);
 
-            $rejectedDeposit = $deposit->toArray();
-            $rejectedDeposit['status'] = OrderStatus::Rejected->value;
-            $rejectedDeposit['parent_id'] = $deposit->getKey();
+            $updateData = $deposit->toArray();
+            $updateData['status'] = OrderStatus::Rejected->value;
+            $updateData['order_data']['rejected_by'] = $request->user()->name;
+            $updateData['order_data']['rejected_at'] = now();
+            $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+            $updateData['order_data']['rejected_by_mobile_number'] = $request->user()->mobile;
 
-            if (! Reload::deposit()->create($rejectedDeposit)) {
+            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Rejected->name,
-                ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => OrderStatus::Rejected->name,
+                    ])
                 );
             }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Rejected->name,
-            ])
+                    'status' => OrderStatus::Rejected->name,
+                ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -176,23 +193,26 @@ class DepositController extends Controller
         try {
 
             $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Accepted);
-            $acceptedDeposit = $deposit->toArray();
-            $acceptedDeposit['status'] = OrderStatus::Accepted->value;
-            $acceptedDeposit['parent_id'] = $deposit->getKey();
+            $updateData = $deposit->toArray();
+            $updateData['status'] = OrderStatus::Accepted->value;
+            $updateData['order_data']['accepted_by'] = $request->user()->name;
+            $updateData['order_data']['accepted_at'] = now();
+            $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
+            $updateData['order_data']['accepted_by_mobile_number'] = $request->user()->mobile;
+            $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
+            $updateData['order_data']['previous_amount'] = 0;
 
-            if (! Reload::deposit()->create($acceptedDeposit)) {
+            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Accepted->name,
-                ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => OrderStatus::Accepted->name,
+                    ])
                 );
             }
 
-            Reload::deposit()->destroy($deposit->getKey());
-
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Accepted->name,
-            ])
+                    'status' => OrderStatus::Accepted->name,
+                ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -220,23 +240,26 @@ class DepositController extends Controller
 
             $deposit = $this->authenticateDeposit($id, OrderStatus::Accepted, OrderStatus::Cancelled);
 
-            $acceptedDeposit = $deposit->toArray();
-            $acceptedDeposit['status'] = OrderStatus::Cancelled->value;
-            $acceptedDeposit['parent_id'] = $deposit->getKey();
+            $updateData = $deposit->toArray();
+            $updateData['status'] = OrderStatus::Cancelled->value;
+            $updateData['order_data']['cancelled_by'] = $request->user()->name;
+            $updateData['order_data']['cancelled_at'] = now();
+            $updateData['order_data']['cancelled_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
+            $updateData['order_data']['cancelled_by_mobile_number'] = $request->user()->mobile;
+            $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
+            $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
 
-            if (! Reload::deposit()->create($acceptedDeposit)) {
+            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Accepted->name,
-                ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => OrderStatus::Cancelled->name,
+                    ])
                 );
             }
 
-            Reload::deposit()->destroy($deposit->getKey());
-
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Cancelled->name,
-            ])
+                    'status' => OrderStatus::Cancelled->name,
+                ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -256,15 +279,15 @@ class DepositController extends Controller
     {
         $deposit = Reload::deposit()->find($id);
 
-        if (! $deposit) {
+        if (!$deposit) {
             throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
         }
 
         if ($deposit->currentStatus() != $requiredStatus->value) {
             throw new Exception(__('reload::messages.deposit.invalid_status', [
-                'current_status' => $deposit->currentStatus(),
-                'target_status' => $targetStatus->name,
-            ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => $targetStatus->name,
+                ])
             );
         }
 

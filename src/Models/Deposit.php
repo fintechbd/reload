@@ -4,6 +4,9 @@ namespace Fintech\Reload\Models;
 
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Traits\AuditableTrait;
+use Fintech\Reload\Traits\AuthRelations;
+use Fintech\Reload\Traits\BusinessRelations;
+use Fintech\Reload\Traits\MetaDataRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,6 +17,9 @@ class Deposit extends Model implements HasMedia
     use AuditableTrait;
     use InteractsWithMedia;
     use SoftDeletes;
+    use AuthRelations;
+    use BusinessRelations;
+    use MetaDataRelations;
 
     /*
     |--------------------------------------------------------------------------
@@ -41,7 +47,7 @@ class Deposit extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('slip')
-            ->acceptsMimeTypes(['image/*', 'application/pdf'])
+            ->acceptsMimeTypes(['image/jpg', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'application/pdf'])
             ->useDisk(config('filesystems.default', 'public'))
             ->singleFile();
     }
