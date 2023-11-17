@@ -68,6 +68,15 @@
             }
         }
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./../Transaction",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true
 }
