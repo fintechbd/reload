@@ -107,7 +107,6 @@ class DepositSeeder extends Seeder
 
     }
 
-
     private function serviceStat(): array
     {
         $serviceLists = $this->service();
