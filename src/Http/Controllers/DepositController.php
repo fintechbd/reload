@@ -15,6 +15,7 @@ use Fintech\Reload\Http\Requests\IndexDepositRequest;
 use Fintech\Reload\Http\Requests\StoreDepositRequest;
 use Fintech\Reload\Http\Resources\DepositCollection;
 use Fintech\Reload\Http\Resources\DepositResource;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -194,11 +195,12 @@ class DepositController extends Controller
 
             $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Accepted);
             $updateData = $deposit->toArray();
-            $updateData['status'] = OrderStatus::Accepted->value;
+            //$updateData['status'] = OrderStatus::Accepted->value;
             $updateData['order_data']['accepted_by'] = $request->user()->name;
             $updateData['order_data']['accepted_at'] = now();
             $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
             $updateData['order_data']['accepted_by_mobile_number'] = $request->user()->mobile;
+            //TODO Comming from UserAccount
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
             $updateData['order_data']['previous_amount'] = 0;
 
@@ -209,6 +211,8 @@ class DepositController extends Controller
                 ])
                 );
             }
+            Transaction::orderDetail()->userTransaction(Transaction::order()->find($deposit->getKey()));
+
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => OrderStatus::Accepted->name,
