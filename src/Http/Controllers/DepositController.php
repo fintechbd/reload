@@ -213,7 +213,6 @@ class DepositController extends Controller
             }
             Transaction::orderDetail()->userTransaction(Transaction::order()->find($deposit->getKey()));
 
-
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => OrderStatus::Accepted->name,
             ])
