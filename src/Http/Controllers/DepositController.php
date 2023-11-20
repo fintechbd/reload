@@ -200,7 +200,7 @@ class DepositController extends Controller
             $updateData['order_data']['accepted_at'] = now();
             $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
             $updateData['order_data']['accepted_by_mobile_number'] = $request->user()->mobile;
-            //TODO Comming from UserAccount
+            //TODO Coming from UserAccount
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
             $updateData['order_data']['previous_amount'] = 0;
 
