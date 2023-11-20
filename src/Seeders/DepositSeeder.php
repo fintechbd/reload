@@ -120,7 +120,7 @@ class DepositSeeder extends Seeder
                 'source_country_id' => [39, 133, 192, 231],
                 'destination_country_id' => [19, 39, 101, 132, 133, 167, 192, 231],
                 'service_vendor_id' => 1,
-                'service_state_data' => [
+                'service_stat_data' => [
                     [
                         'lower_limit' => '10.00',
                         'higher_limit' => '5000.00',
