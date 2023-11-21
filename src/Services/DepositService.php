@@ -91,7 +91,7 @@ class DepositService
         $data->amount = -calculate_flat_percent($data->amount, $serviceStatData['charge']);
         $data->converted_amount = -calculate_flat_percent($data->converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
+        $data->order_detail_parent_id = $orderDetailStore->getKey();
         //MASTER
         $data->notes = "Deposit Charge Receive from ";
         $data->step = 3;
