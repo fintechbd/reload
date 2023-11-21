@@ -3,6 +3,7 @@
 namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Enums\Transaction\OrderStatusConfig;
@@ -15,6 +16,7 @@ use Fintech\Reload\Http\Requests\IndexDepositRequest;
 use Fintech\Reload\Http\Requests\StoreDepositRequest;
 use Fintech\Reload\Http\Resources\DepositCollection;
 use Fintech\Reload\Http\Resources\DepositResource;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -70,8 +72,10 @@ class DepositController extends Controller
 
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
-            $inputs['user_id'] = auth()->user()->getKey();
+            $inputs['user_id'] = $inputs['user_id'] ?? auth()->user()->getKey();
+            //TODO Find Master User ID for this serving country
             $inputs['sender_receiver_id'] = 1;
+            ///
             $inputs['is_refunded'] = false;
             $inputs['status'] = OrderStatus::Processing->value;
             $inputs['risk'] = RiskProfile::Low->value;
@@ -92,7 +96,7 @@ class DepositController extends Controller
             $order_data = $deposit->order_data;
             $order_data['purchase_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Purchased->value);
 
-            Reload::deposit()->update($deposit->getKey(), ['order_data' => $order_data]);
+            Reload::deposit()->update($deposit->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Deposit']),
@@ -154,6 +158,7 @@ class DepositController extends Controller
             $updateData['order_data']['rejected_by'] = $request->user()->name;
             $updateData['order_data']['rejected_at'] = now();
             $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+            $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
             $updateData['order_data']['rejected_by_mobile_number'] = $request->user()->mobile;
 
             if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
@@ -198,10 +203,13 @@ class DepositController extends Controller
             $updateData['order_data']['accepted_by'] = $request->user()->name;
             $updateData['order_data']['accepted_at'] = now();
             $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
+            $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
             $updateData['order_data']['accepted_by_mobile_number'] = $request->user()->mobile;
-            $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
-            $updateData['order_data']['previous_amount'] = 0;
+            $updateData['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData($deposit);
 
+            //TODO Coming from UserAccount
+            $updateData['order_data']['previous_amount'] = 0;
+            $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
             if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
@@ -209,6 +217,8 @@ class DepositController extends Controller
                 ])
                 );
             }
+            $transactionOrder = Transaction::order()->find($deposit->getKey());
+            $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => OrderStatus::Accepted->name,
@@ -245,6 +255,7 @@ class DepositController extends Controller
             $updateData['order_data']['cancelled_by'] = $request->user()->name;
             $updateData['order_data']['cancelled_at'] = now();
             $updateData['order_data']['cancelled_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
+            $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
             $updateData['order_data']['cancelled_by_mobile_number'] = $request->user()->mobile;
             $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
