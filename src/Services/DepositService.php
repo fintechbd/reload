@@ -63,7 +63,6 @@ class DepositService
     }
 
     /**
-     * @param $data
      * @return int[]
      */
     public function depositAccept($data): array
@@ -72,7 +71,7 @@ class DepositService
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         //TODO receiver name
-        $data->note = "Point purchases by";
+        $data->note = 'Point purchases by';
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -93,7 +92,7 @@ class DepositService
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         //MASTER
-        $data->notes = "Deposit Charge Receive from ";
+        $data->notes = 'Deposit Charge Receive from ';
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -104,12 +103,12 @@ class DepositService
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($data->converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
         //TODO USER
-        $orderDetailStoreForChargeForMaster->notes = "Deposit Charge Send to ";
+        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Send to ';
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        $data->amount = calculate_flat_percent($data->amount, $serviceStatData['discount']);;
-        $data->converted_amount = calculate_flat_percent($data->converted_amount, $serviceStatData['discount']);;
+        $data->amount = calculate_flat_percent($data->amount, $serviceStatData['discount']);
+        $data->converted_amount = calculate_flat_percent($data->converted_amount, $serviceStatData['discount']);
         //TODO MASTER
         $data->order_detail_cause_name = 'Discount form ';
         //$data->notes = "charge";
@@ -124,15 +123,16 @@ class DepositService
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($data->converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
         //TODO USER
-        $orderDetailStoreForDiscountForMaster->notes = "Deposit Discount to ";
+        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to ';
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
+
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
-        return array(
+        return [
             'previous_amount' => 0,
-            'current_amount' => 0
-        );
+            'current_amount' => 0,
+        ];
 
     }
 }
