@@ -22,6 +22,7 @@ class StoreDepositRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => ['nullable', 'integer', 'min:1'],
             'source_country_id' => ['required', 'integer', 'min:1'],
             'destination_country_id' => ['required', 'integer', 'min:1', 'same:source_country_id'],
             'service_id' => ['required', 'integer', 'min:1'],
