@@ -268,6 +268,9 @@ class DepositController extends Controller
                 );
             }
 
+            $transactionOrder = Transaction::order()->find($deposit->getKey());
+            $get_some_data = Reload::deposit()->depositCancel($transactionOrder);
+
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => OrderStatus::Cancelled->name,
             ])
