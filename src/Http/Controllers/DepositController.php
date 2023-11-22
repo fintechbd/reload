@@ -5,6 +5,7 @@ namespace Fintech\Reload\Http\Controllers;
 use Exception;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\StoreOperationException;
@@ -70,21 +71,33 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
+            $depositor = $request->user('sanctum');
+
+            $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                'user_id' => $depositor->getKey(),
+            ])->first();
+
+            $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                'role_name' => SystemRole::MasterUser->value,
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+            ])->first();
+
+            if (! $masterUser) {
+                throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+            }
+
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
-            $inputs['user_id'] = $inputs['user_id'] ?? auth()->user()->getKey();
-            //Transaction::order()->transactionDelayCheck($inputs);
-            //TODO Find Master User ID for this serving country
-            $inputs['sender_receiver_id'] = 1;
-            ///
+            $inputs['user_id'] = $request->input('user_id', $depositor->getKey());
+            $inputs['sender_receiver_id'] = $masterUser->getKey();
             $inputs['is_refunded'] = false;
             $inputs['status'] = DepositStatus::Processing->value;
             $inputs['risk'] = RiskProfile::Low->value;
-            $inputs['order_data']['created_by'] = $request->user()->name;
-            $inputs['order_data']['created_by_mobile_number'] = $request->user()->mobile;
+            $inputs['order_data']['created_by'] = $depositor->name;
+            $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
             $inputs['order_data']['created_at'] = now();
-            $inputs['order_data']['current_amount'] = 0;
-            $inputs['order_data']['previous_amount'] = 0;
+            $inputs['order_data']['current_amount'] = ($depositAccount->user_account_data['available_amount'] ?? 0) + $inputs['amount'];
+            $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
             $inputs['converted_amount'] = $inputs['amount'];
             $inputs['converted_currency'] = $inputs['currency'];
 

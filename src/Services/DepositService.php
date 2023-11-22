@@ -13,9 +13,9 @@ class DepositService
     /**
      * DepositService constructor.
      */
-    public function __construct(DepositRepository $depositRepository)
+    public function __construct(private readonly DepositRepository $depositRepository)
     {
-        $this->depositRepository = $depositRepository;
+
     }
 
     /**
