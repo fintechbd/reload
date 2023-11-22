@@ -75,10 +75,10 @@ class DepositController extends Controller
 
             $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
-                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
 
-            if (!$depositAccount) {
+            if (! $depositAccount) {
                 throw new Exception("User don't have account deposit balance");
             }
 
@@ -226,9 +226,8 @@ class DepositController extends Controller
 
             $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
-                'country_id' => $deposit->destination_country_id
+                'country_id' => $deposit->destination_country_id,
             ])->first();
-
 
             $updateData = $deposit->toArray();
             $updateData['status'] = DepositStatus::Accepted->value;
@@ -243,7 +242,7 @@ class DepositController extends Controller
             $updateData['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $updateData['amount']);
 
-            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+            if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Accepted->name,
