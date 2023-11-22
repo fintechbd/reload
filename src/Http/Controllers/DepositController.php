@@ -5,7 +5,7 @@ namespace Fintech\Reload\Http\Controllers;
 use Exception;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
-use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
@@ -77,7 +77,7 @@ class DepositController extends Controller
             $inputs['sender_receiver_id'] = 1;
             ///
             $inputs['is_refunded'] = false;
-            $inputs['status'] = OrderStatus::Processing->value;
+            $inputs['status'] = DepositStatus::Processing->value;
             $inputs['risk'] = RiskProfile::Low->value;
             $inputs['order_data']['created_by'] = $request->user()->name;
             $inputs['order_data']['created_by_mobile_number'] = $request->user()->mobile;
@@ -151,10 +151,10 @@ class DepositController extends Controller
     public function reject(CheckDepositRequest $request, string|int $id): JsonResponse
     {
         try {
-            $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Rejected);
+            $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Rejected);
 
             $updateData = $deposit->toArray();
-            $updateData['status'] = OrderStatus::Rejected->value;
+            $updateData['status'] = DepositStatus::Rejected->value;
             $updateData['order_data']['rejected_by'] = $request->user()->name;
             $updateData['order_data']['rejected_at'] = now();
             $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
@@ -164,13 +164,13 @@ class DepositController extends Controller
             if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Rejected->name,
+                    'target_status' => DepositStatus::Rejected->name,
                 ])
                 );
             }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Rejected->name,
+                'status' => DepositStatus::Rejected->name,
             ])
             );
 
@@ -197,9 +197,9 @@ class DepositController extends Controller
     {
         try {
 
-            $deposit = $this->authenticateDeposit($id, OrderStatus::Processing, OrderStatus::Accepted);
+            $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
             $updateData = $deposit->toArray();
-            $updateData['status'] = OrderStatus::Accepted->value;
+            $updateData['status'] = DepositStatus::Accepted->value;
             $updateData['order_data']['accepted_by'] = $request->user()->name;
             $updateData['order_data']['accepted_at'] = now();
             $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
@@ -213,7 +213,7 @@ class DepositController extends Controller
             if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Accepted->name,
+                    'target_status' => DepositStatus::Accepted->name,
                 ])
                 );
             }
@@ -221,7 +221,7 @@ class DepositController extends Controller
             $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Accepted->name,
+                'status' => DepositStatus::Accepted->name,
             ])
             );
 
@@ -248,10 +248,10 @@ class DepositController extends Controller
     {
         try {
 
-            $deposit = $this->authenticateDeposit($id, OrderStatus::Accepted, OrderStatus::Cancelled);
+            $deposit = $this->authenticateDeposit($id, DepositStatus::Accepted, DepositStatus::Cancelled);
 
             $updateData = $deposit->toArray();
-            $updateData['status'] = OrderStatus::Cancelled->value;
+            $updateData['status'] = DepositStatus::Cancelled->value;
             $updateData['order_data']['cancelled_by'] = $request->user()->name;
             $updateData['order_data']['cancelled_at'] = now();
             $updateData['order_data']['cancelled_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
@@ -263,7 +263,7 @@ class DepositController extends Controller
             if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
-                    'target_status' => OrderStatus::Cancelled->name,
+                    'target_status' => DepositStatus::Cancelled->name,
                 ])
                 );
             }
@@ -272,7 +272,7 @@ class DepositController extends Controller
             $get_some_data = Reload::deposit()->depositCancel($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                'status' => OrderStatus::Cancelled->name,
+                'status' => DepositStatus::Cancelled->name,
             ])
             );
 
