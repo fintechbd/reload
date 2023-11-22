@@ -143,7 +143,7 @@ class DepositService
         $converted_amount = $data->converted_amount;
         $data->amount = -$amount;
         $data->converted_amount = -$converted_amount;
-        $data->order_detail_cause_name = 'cash_deposit';
+        $data->order_detail_cause_name = 'cash_deposit_cancel';
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         //TODO receiver name
