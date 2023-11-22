@@ -74,8 +74,13 @@ class DepositController extends Controller
             $depositor = $request->user('sanctum');
 
             $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
-                'user_id' => $depositor->getKey()
+                'user_id' => $depositor->getKey(),
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)
             ])->first();
+
+            if (!$depositAccount) {
+                throw new Exception("User don't have account deposit balance");
+            }
 
             $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
                 'role_name' => SystemRole::MasterUser->value,
@@ -167,13 +172,17 @@ class DepositController extends Controller
         try {
             $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Rejected);
 
+            $approver = $request->user('sanctum');
+
             $updateData = $deposit->toArray();
             $updateData['status'] = DepositStatus::Rejected->value;
-            $updateData['order_data']['rejected_by'] = $request->user()->name;
+            $updateData['order_data']['rejected_by'] = $approver->name;
             $updateData['order_data']['rejected_at'] = now();
             $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
-            $updateData['order_data']['rejected_by_mobile_number'] = $request->user()->mobile;
+            $updateData['order_data']['rejected_by_mobile_number'] = $approver->mobile;
+            $updateData['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
+            $updateData['order_data']['current_amount'] = $updateData['order_data']['previous_amount'] - $updateData['amount'];
 
             if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
@@ -212,18 +221,28 @@ class DepositController extends Controller
         try {
 
             $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
+
+            $depositor = $deposit->user;
+
+            $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                'user_id' => $depositor->getKey(),
+                'country_id' => $deposit->destination_country_id
+            ])->first();
+
+
             $updateData = $deposit->toArray();
             $updateData['status'] = DepositStatus::Accepted->value;
-            $updateData['order_data']['accepted_by'] = $request->user()->name;
+            $updateData['order_data']['accepted_by'] = $request->user('sanctum')->name;
             $updateData['order_data']['accepted_at'] = now();
             $updateData['order_data']['accepted_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
-            $updateData['order_data']['accepted_by_mobile_number'] = $request->user()->mobile;
+            $updateData['order_data']['accepted_by_mobile_number'] = $request->user('sanctum')->mobile;
             $updateData['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData($deposit);
 
             //TODO Coming from UserAccount
-            $updateData['order_data']['previous_amount'] = 0;
-            $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $deposit->amount);
+            $updateData['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
+            $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $updateData['amount']);
+
             if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $deposit->currentStatus(),
@@ -231,6 +250,7 @@ class DepositController extends Controller
                     ])
                 );
             }
+
             $transactionOrder = Transaction::order()->find($deposit->getKey());
             $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
@@ -266,11 +286,11 @@ class DepositController extends Controller
 
             $updateData = $deposit->toArray();
             $updateData['status'] = DepositStatus::Cancelled->value;
-            $updateData['order_data']['cancelled_by'] = $request->user()->name;
+            $updateData['order_data']['cancelled_by'] = $request->user('sanctum')->name;
             $updateData['order_data']['cancelled_at'] = now();
             $updateData['order_data']['cancelled_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
-            $updateData['order_data']['cancelled_by_mobile_number'] = $request->user()->mobile;
+            $updateData['order_data']['cancelled_by_mobile_number'] = $request->user('sanctum')->mobile;
             $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
 
