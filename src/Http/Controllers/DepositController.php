@@ -84,11 +84,11 @@ class DepositController extends Controller
 
             $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
                 'role_name' => SystemRole::MasterUser->value,
-                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
 
-            if (!$masterUser) {
-                throw new Exception("Master User Account not found for " . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+            if (! $masterUser) {
+                throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
             }
 
             //set pre defined conditions of deposit
@@ -108,7 +108,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->create($inputs);
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.deposit_model'));
             }
 
@@ -142,7 +142,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->find($id);
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
             }
 
@@ -184,17 +184,17 @@ class DepositController extends Controller
             $updateData['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
             $updateData['order_data']['current_amount'] = $updateData['order_data']['previous_amount'] - $updateData['amount'];
 
-            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+            if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => DepositStatus::Rejected->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Rejected->name,
+                ])
                 );
             }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => DepositStatus::Rejected->name,
-                ])
+                'status' => DepositStatus::Rejected->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -245,9 +245,9 @@ class DepositController extends Controller
 
             if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => DepositStatus::Accepted->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Accepted->name,
+                ])
                 );
             }
 
@@ -255,8 +255,8 @@ class DepositController extends Controller
             $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => DepositStatus::Accepted->name,
-                ])
+                'status' => DepositStatus::Accepted->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -294,11 +294,11 @@ class DepositController extends Controller
             $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
 
-            if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+            if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
-                        'current_status' => $deposit->currentStatus(),
-                        'target_status' => DepositStatus::Cancelled->name,
-                    ])
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Cancelled->name,
+                ])
                 );
             }
 
@@ -306,8 +306,8 @@ class DepositController extends Controller
             $get_some_data = Reload::deposit()->depositCancel($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
-                    'status' => DepositStatus::Cancelled->name,
-                ])
+                'status' => DepositStatus::Cancelled->name,
+            ])
             );
 
         } catch (ModelNotFoundException $exception) {
@@ -327,15 +327,15 @@ class DepositController extends Controller
     {
         $deposit = Reload::deposit()->find($id);
 
-        if (!$deposit) {
+        if (! $deposit) {
             throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
         }
 
         if ($deposit->currentStatus() != $requiredStatus->value) {
             throw new Exception(__('reload::messages.deposit.invalid_status', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => $targetStatus->name,
-                ])
+                'current_status' => $deposit->currentStatus(),
+                'target_status' => $targetStatus->name,
+            ])
             );
         }
 
