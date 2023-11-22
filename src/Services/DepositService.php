@@ -137,6 +137,7 @@ class DepositService
         ];
 
     }
+
     public function depositCancel($data): array
     {
         $amount = $data->amount;
