@@ -87,13 +87,17 @@ class DepositController extends Controller
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
 
-            if (! $masterUser) {
+            /*if (! $masterUser) {
                 throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
-            }
+            }*/
 
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
             $inputs['user_id'] = $request->input('user_id', $depositor->getKey());
+            $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+            if ($delayCheck > 0) {
+                throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+            }
             $inputs['sender_receiver_id'] = $masterUser->getKey();
             $inputs['is_refunded'] = false;
             $inputs['status'] = DepositStatus::Processing->value;
