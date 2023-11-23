@@ -87,9 +87,9 @@ class DepositController extends Controller
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
 
-            /*if (! $masterUser) {
+            if (! $masterUser) {
                 throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
-            }*/
+            }
 
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
