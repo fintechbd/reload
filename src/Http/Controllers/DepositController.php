@@ -71,7 +71,7 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
-            if($request->input('user_id') > 0){
+            if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
@@ -80,7 +80,6 @@ class DepositController extends Controller
                 'user_id' => $user_id ?? $depositor->getKey(),
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
-
 
             if (! $depositAccount) {
                 throw new Exception("User don't have account deposit balance");
