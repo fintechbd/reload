@@ -71,12 +71,16 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
+            if($request->input('user_id') > 0){
+                $user_id = $request->input('user_id');
+            }
             $depositor = $request->user('sanctum');
 
             $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
-                'user_id' => $depositor->getKey(),
+                'user_id' => $user_id ?? $depositor->getKey(),
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
+
 
             if (! $depositAccount) {
                 throw new Exception("User don't have account deposit balance");
@@ -93,9 +97,9 @@ class DepositController extends Controller
 
             //set pre defined conditions of deposit
             $inputs['transaction_form_id'] = 1;
-            $inputs['user_id'] = $request->input('user_id', $depositor->getKey());
+            $inputs['user_id'] = $user_id ?? $depositor->getKey();
             $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-            if ($delayCheck > 0) {
+            if ($delayCheck['countValue'] > 0) {
                 throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
             }
             $inputs['sender_receiver_id'] = $masterUser->getKey();
@@ -109,6 +113,7 @@ class DepositController extends Controller
             $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
             $inputs['converted_amount'] = $inputs['amount'];
             $inputs['converted_currency'] = $inputs['currency'];
+            $inputs['order_data']['master_user_name'] = $masterUser['name'];
 
             $deposit = Reload::deposit()->create($inputs);
 
@@ -241,8 +246,8 @@ class DepositController extends Controller
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
             $updateData['order_data']['accepted_by_mobile_number'] = $request->user('sanctum')->mobile;
             $updateData['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData($deposit);
+            $updateData['order_data']['user_name'] = $depositor->name;
 
-            //TODO Coming from UserAccount
             $updateData['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $updateData['amount']);
 
