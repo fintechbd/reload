@@ -258,6 +258,12 @@ class DepositController extends Controller
                 );
             }
 
+            //update User Account
+            $depositedUpdatedAccount = $depositedAccount->toArray();
+            $depositedUpdatedAccount['user_account_data']['deposit_amount'] = $depositedUpdatedAccount['user_account_data']['deposit_amount'] + $deposit->amount;
+            $depositedUpdatedAccount['user_account_data']['available_amount'] = $depositedUpdatedAccount['user_account_data']['available_amount'] + $deposit->amount;
+            \Fintech\Transaction\Facades\Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount);
+
             $transactionOrder = Transaction::order()->find($deposit->getKey());
             $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
