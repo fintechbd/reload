@@ -16,7 +16,7 @@ class DepositResource extends JsonResource
     public function toArray($request)
     {
         $data = [
-            "id" => $this->getKey(), 1,
+            "id" => $this->getKey(),
             "source_country_id" => $this->source_country_id ?? null,
             "source_country_name" => null,
             "destination_country_id" => $this->destination_country_id ?? null,

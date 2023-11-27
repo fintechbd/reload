@@ -20,7 +20,7 @@ class DepositCollection extends ResourceCollection
         return $this->collection->map(function ($deposit) {
 
             $data = [
-                "id" => $deposit->getKey(), 1,
+                "id" => $deposit->getKey(),
                 "source_country_id" => $deposit->source_country_id ?? null,
                 "source_country_name" => null,
                 "destination_country_id" => $deposit->destination_country_id ?? null,
