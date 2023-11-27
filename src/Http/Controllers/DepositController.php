@@ -71,13 +71,16 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
-            if ($request->input('user_id') > 0) {
-                $user_id = $request->input('user_id');
+            $user_id = $request->input('user_id', $request->user()->getKey());
+
+            $depositor = \Fintech\Auth\Facades\Auth::user()->find($user_id);
+
+            if (!$depositor) {
+                throw new \InvalidArgumentException("Invalid User ID, or request user is not authenticated");
             }
-            $depositor = $request->user('sanctum');
 
             $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
-                'user_id' => $user_id ?? $depositor->getKey(),
+                'user_id' => $depositor->getKey(),
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
 
