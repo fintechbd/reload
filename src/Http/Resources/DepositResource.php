@@ -57,6 +57,7 @@ class DepositResource extends JsonResource
         if (Core::packageExists('Business')) {
             $data['service_name'] = $this->service?->name ?? null;
         }
+
         return $data;
     }
 }

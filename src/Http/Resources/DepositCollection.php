@@ -12,7 +12,7 @@ class DepositCollection extends ResourceCollection
     /**
      * Transform the resource collection into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)
@@ -61,6 +61,7 @@ class DepositCollection extends ResourceCollection
             if (Core::packageExists('Business')) {
                 $data['service_name'] = $deposit->service?->name ?? null;
             }
+
             return $data;
         })->toArray();
     }
