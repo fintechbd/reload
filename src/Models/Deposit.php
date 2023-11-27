@@ -39,7 +39,7 @@ class Deposit extends Model implements HasMedia
         'order_data' => 'array',
         'restored_at' => 'datetime',
         'ordered_at' => 'datetime',
-        'is_refunded' => 'bool'
+        'is_refunded' => 'bool',
     ];
 
     protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
