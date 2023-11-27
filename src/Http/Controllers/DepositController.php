@@ -75,8 +75,8 @@ class DepositController extends Controller
 
             $depositor = \Fintech\Auth\Facades\Auth::user()->find($user_id);
 
-            if (!$depositor) {
-                throw new \InvalidArgumentException("Invalid User ID, or request user is not authenticated");
+            if (! $depositor) {
+                throw new \InvalidArgumentException('Invalid User ID, or request user is not authenticated');
             }
 
             $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
