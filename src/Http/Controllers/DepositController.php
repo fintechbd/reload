@@ -47,7 +47,7 @@ class DepositController extends Controller
     {
         try {
             $inputs = $request->validated();
-
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code'=>'point_reload'])->first()->getKey();
             $depositPaginate = Reload::deposit()->list($inputs);
 
             return new DepositCollection($depositPaginate);
@@ -98,7 +98,7 @@ class DepositController extends Controller
             }
 
             //set pre defined conditions of deposit
-            $inputs['transaction_form_id'] = 1;
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code'=>'point_reload'])->first()->getKey();
             $inputs['user_id'] = $user_id ?? $depositor->getKey();
             $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
             if ($delayCheck['countValue'] > 0) {
@@ -260,6 +260,8 @@ class DepositController extends Controller
                 ])
                 );
             }
+            $transactionOrder = Transaction::order()->find($deposit->getKey());
+            $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
             //update User Account
             $depositedUpdatedAccount = $depositedAccount->toArray();
@@ -267,8 +269,6 @@ class DepositController extends Controller
             $depositedUpdatedAccount['user_account_data']['available_amount'] = $depositedUpdatedAccount['user_account_data']['available_amount'] + $deposit->amount;
             \Fintech\Transaction\Facades\Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount);
 
-            $transactionOrder = Transaction::order()->find($deposit->getKey());
-            $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => DepositStatus::Accepted->name,
