@@ -132,6 +132,7 @@ class DepositService
         return [
             'previous_amount' => 0,
             'current_amount' => 0,
+            'deposit_amount' => 0,
         ];
 
     }
