@@ -80,7 +80,7 @@ class DepositController extends Controller
             if (Transaction::orderQueue()->addToQueueUserWise($user_id) > 0) {
                 $depositor = \Fintech\Auth\Facades\Auth::user()->find($user_id);
 
-                if (!$depositor) {
+                if (! $depositor) {
                     throw new \InvalidArgumentException('Invalid User ID, or request user is not authenticated');
                 }
 
@@ -89,7 +89,7 @@ class DepositController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (!$depositAccount) {
+                if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
 
@@ -98,8 +98,8 @@ class DepositController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (!$masterUser) {
-                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
                 //set pre defined conditions of deposit
@@ -124,7 +124,7 @@ class DepositController extends Controller
 
                 $deposit = Reload::deposit()->create($inputs);
 
-                if (!$deposit) {
+                if (! $deposit) {
                     throw (new StoreOperationException)->setModel(config('fintech.reload.deposit_model'));
                 }
 
@@ -146,6 +146,7 @@ class DepositController extends Controller
 
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+
             return $this->failed($exception->getMessage());
         }
     }
@@ -164,7 +165,7 @@ class DepositController extends Controller
 
             $deposit = Reload::deposit()->find($id);
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
             }
 
@@ -207,18 +208,19 @@ class DepositController extends Controller
                 $updateData['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
                 $updateData['order_data']['current_amount'] = $updateData['order_data']['previous_amount'] - $updateData['amount'];
 
-                if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+                if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
-                            'current_status' => $deposit->currentStatus(),
-                            'target_status' => DepositStatus::Rejected->name,
-                        ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => DepositStatus::Rejected->name,
+                    ])
                     );
                 }
 
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
                 return $this->success(__('reload::messages.deposit.status_change_success', [
-                        'status' => DepositStatus::Rejected->name,
-                    ])
+                    'status' => DepositStatus::Rejected->name,
+                ])
                 );
             } else {
                 throw new Exception('Your another order is in process...!');
@@ -226,10 +228,12 @@ class DepositController extends Controller
 
         } catch (ModelNotFoundException $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->failed($exception->getMessage());
         }
     }
@@ -269,11 +273,11 @@ class DepositController extends Controller
                 $updateData['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
                 $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $updateData['amount']);
 
-                if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+                if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
-                            'current_status' => $deposit->currentStatus(),
-                            'target_status' => DepositStatus::Accepted->name,
-                        ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => DepositStatus::Accepted->name,
+                    ])
                     );
                 }
 
@@ -286,19 +290,22 @@ class DepositController extends Controller
                 $transactionOrder = Transaction::order()->find($deposit->getKey());
                 $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
                 return $this->success(__('reload::messages.deposit.status_change_success', [
-                        'status' => DepositStatus::Accepted->name,
-                    ])
+                    'status' => DepositStatus::Accepted->name,
+                ])
                 );
             } else {
                 throw new Exception('Your another order is in process...!');
             }
         } catch (ModelNotFoundException $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->failed($exception->getMessage());
         }
     }
@@ -328,11 +335,11 @@ class DepositController extends Controller
                 $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
                 $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
 
-                if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
+                if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
-                            'current_status' => $deposit->currentStatus(),
-                            'target_status' => DepositStatus::Cancelled->name,
-                        ])
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => DepositStatus::Cancelled->name,
+                    ])
                     );
                 }
 
@@ -341,42 +348,40 @@ class DepositController extends Controller
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
-                        'status' => DepositStatus::Cancelled->name,
-                    ])
+                    'status' => DepositStatus::Cancelled->name,
+                ])
                 );
             } else {
                 throw new Exception('Your another order is in process...!');
             }
         } catch (ModelNotFoundException $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
             return $this->failed($exception->getMessage());
         }
     }
 
     /**
-     * @param string|int $id
-     * @param \BackedEnum $requiredStatus
-     * @param \BackedEnum $targetStatus
-     * @return Model|\MongoDB\Laravel\Eloquent\Model
      * @throws Exception
      */
     private function authenticateDeposit(string|int $id, \BackedEnum $requiredStatus, \BackedEnum $targetStatus): Model|\MongoDB\Laravel\Eloquent\Model
     {
         $deposit = Reload::deposit()->find($id);
 
-        if (!$deposit) {
+        if (! $deposit) {
             throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
         }
 
         if ($deposit->currentStatus() != $requiredStatus->value) {
             throw new Exception(__('reload::messages.deposit.invalid_status', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => $targetStatus->name,
-                ])
+                'current_status' => $deposit->currentStatus(),
+                'target_status' => $targetStatus->name,
+            ])
             );
         }
 
