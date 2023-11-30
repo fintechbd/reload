@@ -79,7 +79,7 @@ class DepositController extends Controller
                 throw new \InvalidArgumentException('Invalid User ID, or request user is not authenticated');
             }
 
-            $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+            $depositAccount = Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
                 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
             ])->first();
@@ -199,14 +199,12 @@ class DepositController extends Controller
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Rejected->name,
-                ])
-                );
+                ]));
             }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => DepositStatus::Rejected->name,
-            ])
-            );
+            ]));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -235,7 +233,7 @@ class DepositController extends Controller
 
             $depositor = $deposit->user;
 
-            $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+            $depositedAccount = Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
                 'country_id' => $deposit->destination_country_id,
             ])->first();
@@ -257,23 +255,28 @@ class DepositController extends Controller
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Accepted->name,
-                ])
-                );
+                ]));
             }
+
+            $transactionOrder = Reload::deposit()->find($deposit->getKey());
+
+            $userUpdatedBalance = Reload::deposit()->accept($transactionOrder);
 
             //update User Account
             $depositedUpdatedAccount = $depositedAccount->toArray();
-            $depositedUpdatedAccount['user_account_data']['deposit_amount'] = $depositedUpdatedAccount['user_account_data']['deposit_amount'] + $deposit->amount;
-            $depositedUpdatedAccount['user_account_data']['available_amount'] = $depositedUpdatedAccount['user_account_data']['available_amount'] + $deposit->amount;
-            \Fintech\Transaction\Facades\Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount);
+            $depositedUpdatedAccount['user_account_data']['deposit_amount'] = $depositedUpdatedAccount['user_account_data']['deposit_amount'] + $userUpdatedBalance['deposit_amount'];
+            $depositedUpdatedAccount['user_account_data']['available_amount'] = $userUpdatedBalance['current_amount'];
 
-            $transactionOrder = Transaction::order()->find($deposit->getKey());
-            $get_some_data = Reload::deposit()->depositAccept($transactionOrder);
+            if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)){
+                throw new Exception(__('reload::messages.status_change_failed', [
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Accepted->name,
+                ]));
+            }
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => DepositStatus::Accepted->name,
-            ])
-            );
+            ]));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -300,6 +303,13 @@ class DepositController extends Controller
 
             $deposit = $this->authenticateDeposit($id, DepositStatus::Accepted, DepositStatus::Cancelled);
 
+            $depositor = $deposit->user;
+
+            $depositedAccount = Transaction::userAccount()->list([
+                'user_id' => $depositor->getKey(),
+                'country_id' => $deposit->destination_country_id,
+            ])->first();
+
             $updateData = $deposit->toArray();
             $updateData['status'] = DepositStatus::Cancelled->value;
             $updateData['order_data']['cancelled_by'] = $request->user('sanctum')->name;
@@ -307,6 +317,7 @@ class DepositController extends Controller
             $updateData['order_data']['cancelled_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Cancelled->value);
             $updateData['order_data']['cancelled_by_mobile_number'] = $request->user('sanctum')->mobile;
+
             $updateData['order_data']['previous_amount'] = $updateData['order_data']['current_amount'];
             $updateData['order_data']['current_amount'] = ($updateData['order_data']['current_amount'] - $deposit->amount);
 
@@ -314,17 +325,28 @@ class DepositController extends Controller
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Cancelled->name,
-                ])
-                );
+                ]));
             }
 
-            $transactionOrder = Transaction::order()->find($deposit->getKey());
-            $get_some_data = Reload::deposit()->depositCancel($transactionOrder);
+            $transactionOrder = Reload::deposit()->find($deposit->getKey());
+            $updatedUserBalance = Reload::deposit()->cancel($transactionOrder);
+
+            //update User Account
+            $depositedUpdatedAccount = $depositedAccount->toArray();
+            $depositedUpdatedAccount['user_account_data']['deposit_amount'] = $depositedUpdatedAccount['user_account_data']['deposit_amount'] + $updatedUserBalance['deposit_amount'];
+            $depositedUpdatedAccount['user_account_data']['available_amount'] = $updatedUserBalance['current_amount'];
+
+            if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)){
+                throw new Exception(__('reload::messages.status_change_failed', [
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Accepted->name,
+                ]));
+            }
+
 
             return $this->success(__('reload::messages.deposit.status_change_success', [
                 'status' => DepositStatus::Cancelled->name,
-            ])
-            );
+            ]));
 
         } catch (ModelNotFoundException $exception) {
 
