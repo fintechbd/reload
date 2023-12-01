@@ -128,7 +128,7 @@ class DepositService
         $deposit->notes = 'Discount form '.$master_user_name;
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        $updateData['order_data']['previous_amount'] = 0;
+        //$updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
@@ -159,6 +159,19 @@ class DepositService
 
     public function cancel($data): array
     {
+        $userAccountData = [
+            'previous_amount' => null,
+            'current_amount' => null,
+            'deposit_amount' => null,
+        ];
+
+        //Collect Current Balance as Previous Balance
+        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
         $serviceStatData = $data->order_data['service_stat_data'];
         $master_user_name = $data->order_data['master_user_name'];
         $user_name = $data->order_data['user_name'];
@@ -222,12 +235,20 @@ class DepositService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
+        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
+        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'order_id' => $data->user_id,
+        ]);
+
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
-        return [
-            'previous_amount' => 0,
-            'current_amount' => 0,
-        ];
+        return $userAccountData;
 
     }
 }
