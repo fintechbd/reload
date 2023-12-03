@@ -47,7 +47,7 @@ class DepositController extends Controller
     {
         try {
             $inputs = $request->validated();
-
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
             $depositPaginate = Reload::deposit()->list($inputs);
 
             return new DepositCollection($depositPaginate);
@@ -99,7 +99,7 @@ class DepositController extends Controller
                 }
 
                 //set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = 1;
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
                 if ($delayCheck['countValue'] > 0) {
