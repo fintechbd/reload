@@ -77,7 +77,7 @@ class DepositService
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
-            'order_detail_currency' => $deposit->currency,
+            'converted_currency' => $deposit->converted_currency,
         ]);
 
         $serviceStatData = $deposit->order_data['service_stat_data'];
@@ -143,12 +143,14 @@ class DepositService
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
-            'order_detail_currency' => $deposit->currency,
+            'converted_currency' => $deposit->converted_currency,
         ]);
 
         $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
-            'order_id' => $deposit->user_id,
+            'user_id' => $deposit->user_id,
+            'order_id' => $deposit->getKey(),
+            'converted_currency' => $deposit->converted_currency,
         ]);
 
         //'Point Transfer Commission Send to ' . $masterUser->name;
@@ -169,7 +171,7 @@ class DepositService
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $serviceStatData = $data->order_data['service_stat_data'];
@@ -238,12 +240,14 @@ class DepositService
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
-            'order_id' => $data->user_id,
+            'user_id' => $data->user_id,
+            'order_id' => $data->getKey(),
+            'converted_currency' => $data->converted_currency,
         ]);
 
         //'Point Transfer Commission Send to ' . $masterUser->name;
