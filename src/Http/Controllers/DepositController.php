@@ -117,6 +117,7 @@ class DepositController extends Controller
                 $inputs['converted_amount'] = $inputs['amount'];
                 $inputs['converted_currency'] = $inputs['currency'];
                 $inputs['order_data']['master_user_name'] = $masterUser['name'];
+                unset($inputs['pin'], $inputs['password']);
 
                 $deposit = Reload::deposit()->create($inputs);
 
