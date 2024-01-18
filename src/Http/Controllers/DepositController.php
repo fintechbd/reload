@@ -75,7 +75,7 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
-            if ($request->input('user_id') > 0) {
+            if (isset($inputs['user_id']) && $request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
