@@ -47,8 +47,12 @@ class DepositController extends Controller
     {
         try {
             $inputs = $request->validated();
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
-            $depositPaginate = Reload::deposit()->list($inputs);
+            //$inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
+            $inputs['transaction_form_code'] = 'point_reload';
+            //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'bangladesh_top_up']);
+            $inputs['service_type_slug'] = 'fund_deposit';
+            //$depositPaginate = Reload::deposit()->list($inputs);
+            $depositPaginate = Transaction::order()->list($inputs);;
 
             return new DepositCollection($depositPaginate);
 
@@ -71,17 +75,15 @@ class DepositController extends Controller
         try {
             $inputs = $request->validated();
 
-            $user_id = $request->input('user_id', $request->user()->getKey());
+            if ($request->input('user_id') > 0) {
+                $user_id = $request->input('user_id');
+            }
+            $depositor = $request->user('sanctum');
 
-            if (Transaction::orderQueue()->addToQueueUserWise($user_id) > 0) {
-                $depositor = \Fintech\Auth\Facades\Auth::user()->find($user_id);
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
-                if (! $depositor) {
-                    throw new \InvalidArgumentException('Invalid User ID, or request user is not authenticated');
-                }
-
-                $depositAccount = Transaction::userAccount()->list([
-                    'user_id' => $depositor->getKey(),
+                $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                    'user_id' => $user_id ?? $depositor->getKey(),
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
