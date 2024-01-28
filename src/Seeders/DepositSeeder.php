@@ -142,7 +142,7 @@ class DepositSeeder extends Seeder
         foreach ($serviceLists as $serviceList) {
             $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
             $serviceStats[] = [
-                'role_id' => [2, 3, 4, 5, 6],
+                'role_id' => [2, 3, 4, 5, 6, 7],
                 'service_id' => $service->getKey(),
                 'service_slug' => $service->service_slug,
                 'source_country_id' => [39, 133, 192, 231],
