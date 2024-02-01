@@ -21,6 +21,8 @@ if (Config::get('fintech.reload.enabled')) {
             Route::post('deposits/{deposit}/reject', [\Fintech\Reload\Http\Controllers\DepositController::class, 'reject'])->name('deposits.reject');
             Route::post('deposits/{deposit}/accept', [\Fintech\Reload\Http\Controllers\DepositController::class, 'accept'])->name('deposits.accept');
             Route::post('deposits/{deposit}/cancel', [\Fintech\Reload\Http\Controllers\DepositController::class, 'cancel'])->name('deposits.cancel');
+            Route::apiResource('currency-swaps', \Fintech\Reload\Http\Controllers\CurrencySwapController::class);
+            Route::apiResource('wallet-transfers', \Fintech\Reload\Http\Controllers\WalletTransferController::class);
 
             //DO NOT REMOVE THIS LINE//
         });

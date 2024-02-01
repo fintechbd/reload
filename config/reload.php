@@ -33,6 +33,26 @@ return [
     */
     'deposit_model' => \Fintech\Reload\Models\Deposit::class,
 
+    
+    /*
+    |--------------------------------------------------------------------------
+    | CurrencySwap Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'currency_swap_model' => \Fintech\Reload\Models\CurrencySwap::class,
+
+    
+    /*
+    |--------------------------------------------------------------------------
+    | WalletTransfer Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'wallet_transfer_model' => \Fintech\Reload\Models\WalletTransfer::class,
+
     //** Model Config Point Do not Remove **//
 
     /*
@@ -45,6 +65,10 @@ return [
 
     'repositories' => [
         \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
+
+        \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
+
+        \Fintech\Reload\Interfaces\WalletTransferRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletTransferRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],
