@@ -1,34 +1,33 @@
 <?php
 
 namespace Fintech\Reload\Http\Controllers;
+
 use Exception;
-use Fintech\Core\Exceptions\StoreOperationException;
-use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
+use Fintech\Core\Exceptions\StoreOperationException;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
-use Fintech\Reload\Http\Resources\CurrencySwapResource;
-use Fintech\Reload\Http\Resources\CurrencySwapCollection;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
+use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\StoreCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\UpdateCurrencySwapRequest;
-use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
+use Fintech\Reload\Http\Resources\CurrencySwapCollection;
+use Fintech\Reload\Http\Resources\CurrencySwapResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
 /**
  * Class CurrencySwapController
- * @package Fintech\Reload\Http\Controllers
  *
  * @lrd:start
  * This class handle create, display, update, delete & restore
  * operation related to CurrencySwap
- * @lrd:end
  *
+ * @lrd:end
  */
-
 class CurrencySwapController extends Controller
 {
     use ApiResponseTrait;
@@ -38,10 +37,8 @@ class CurrencySwapController extends Controller
      * Return a listing of the *CurrencySwap* resource as collection.
      *
      * *```paginate=false``` returns all resource as list not pagination*
-     * @lrd:end
      *
-     * @param IndexCurrencySwapRequest $request
-     * @return CurrencySwapCollection|JsonResponse
+     * @lrd:end
      */
     public function index(IndexCurrencySwapRequest $request): CurrencySwapCollection|JsonResponse
     {
@@ -61,10 +58,9 @@ class CurrencySwapController extends Controller
     /**
      * @lrd:start
      * Create a new *CurrencySwap* resource in storage.
+     *
      * @lrd:end
      *
-     * @param StoreCurrencySwapRequest $request
-     * @return JsonResponse
      * @throws StoreOperationException
      */
     public function store(StoreCurrencySwapRequest $request): JsonResponse
@@ -74,14 +70,14 @@ class CurrencySwapController extends Controller
 
             $currencySwap = Reload::currencySwap()->create($inputs);
 
-            if (!$currencySwap) {
+            if (! $currencySwap) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
             }
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
-                'id' => $currencySwap->id
-             ]);
+                'id' => $currencySwap->id,
+            ]);
 
         } catch (Exception $exception) {
 
@@ -92,10 +88,9 @@ class CurrencySwapController extends Controller
     /**
      * @lrd:start
      * Return a specified *CurrencySwap* resource found by id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
-     * @return CurrencySwapResource|JsonResponse
      * @throws ModelNotFoundException
      */
     public function show(string|int $id): CurrencySwapResource|JsonResponse
@@ -104,7 +99,7 @@ class CurrencySwapController extends Controller
 
             $currencySwap = Reload::currencySwap()->find($id);
 
-            if (!$currencySwap) {
+            if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
@@ -123,11 +118,9 @@ class CurrencySwapController extends Controller
     /**
      * @lrd:start
      * Update a specified *CurrencySwap* resource using id.
+     *
      * @lrd:end
      *
-     * @param UpdateCurrencySwapRequest $request
-     * @param string|int $id
-     * @return JsonResponse
      * @throws ModelNotFoundException
      * @throws UpdateOperationException
      */
@@ -137,13 +130,13 @@ class CurrencySwapController extends Controller
 
             $currencySwap = Reload::currencySwap()->find($id);
 
-            if (!$currencySwap) {
+            if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Reload::currencySwap()->update($id, $inputs)) {
+            if (! Reload::currencySwap()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -163,10 +156,11 @@ class CurrencySwapController extends Controller
     /**
      * @lrd:start
      * Soft delete a specified *CurrencySwap* resource using id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
+     *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
@@ -176,11 +170,11 @@ class CurrencySwapController extends Controller
 
             $currencySwap = Reload::currencySwap()->find($id);
 
-            if (!$currencySwap) {
+            if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (!Reload::currencySwap()->destroy($id)) {
+            if (! Reload::currencySwap()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -201,9 +195,9 @@ class CurrencySwapController extends Controller
      * @lrd:start
      * Restore the specified *CurrencySwap* resource from trash.
      * ** ```Soft Delete``` needs to enabled to use this feature**
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
      */
     public function restore(string|int $id)
@@ -212,11 +206,11 @@ class CurrencySwapController extends Controller
 
             $currencySwap = Reload::currencySwap()->find($id, true);
 
-            if (!$currencySwap) {
+            if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (!Reload::currencySwap()->restore($id)) {
+            if (! Reload::currencySwap()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -239,9 +233,6 @@ class CurrencySwapController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param IndexCurrencySwapRequest $request
-     * @return JsonResponse
      */
     public function export(IndexCurrencySwapRequest $request): JsonResponse
     {
@@ -265,7 +256,6 @@ class CurrencySwapController extends Controller
      *
      * @lrd:end
      *
-     * @param ImportCurrencySwapRequest $request
      * @return CurrencySwapCollection|JsonResponse
      */
     public function import(ImportCurrencySwapRequest $request): JsonResponse

@@ -33,7 +33,6 @@ return [
     */
     'deposit_model' => \Fintech\Reload\Models\Deposit::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | CurrencySwap Model
@@ -43,7 +42,6 @@ return [
     */
     'currency_swap_model' => \Fintech\Reload\Models\CurrencySwap::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | WalletTransfer Model

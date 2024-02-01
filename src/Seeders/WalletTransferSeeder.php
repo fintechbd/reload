@@ -2,8 +2,8 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Illuminate\Database\Seeder;
 use Fintech\Reload\Facades\Reload;
+use Illuminate\Database\Seeder;
 
 class WalletTransferSeeder extends Seeder
 {
@@ -24,6 +24,6 @@ class WalletTransferSeeder extends Seeder
 
     private function data()
     {
-        return array();
+        return [];
     }
 }

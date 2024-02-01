@@ -2,26 +2,22 @@
 
 namespace Fintech\Reload\Services;
 
-
 use Fintech\Reload\Interfaces\CurrencySwapRepository;
 
 /**
  * Class CurrencySwapService
- * @package Fintech\Reload\Services
- *
  */
 class CurrencySwapService
 {
     /**
      * CurrencySwapService constructor.
-     * @param CurrencySwapRepository $currencySwapRepository
      */
-    public function __construct(CurrencySwapRepository $currencySwapRepository) {
+    public function __construct(CurrencySwapRepository $currencySwapRepository)
+    {
         $this->currencySwapRepository = $currencySwapRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

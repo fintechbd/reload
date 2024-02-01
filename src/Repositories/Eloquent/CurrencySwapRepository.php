@@ -11,19 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Class CurrencySwapRepository
- * @package Fintech\Reload\Repositories\Eloquent
  */
 class CurrencySwapRepository extends EloquentRepository implements InterfacesCurrencySwapRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.reload.currency_swap_model', \Fintech\Reload\Models\CurrencySwap::class));
+        $model = app(config('fintech.reload.currency_swap_model', \Fintech\Reload\Models\CurrencySwap::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**
