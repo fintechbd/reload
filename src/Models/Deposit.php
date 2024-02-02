@@ -62,6 +62,7 @@ class Deposit extends Model implements HasMedia
     {
         return $this->status;
     }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
