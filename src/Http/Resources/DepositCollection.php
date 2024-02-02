@@ -18,7 +18,6 @@ class DepositCollection extends ResourceCollection
     public function toArray($request)
     {
         return $this->collection->map(function ($deposit) {
-
             $data = [
                 'id' => $deposit->getKey(),
                 'source_country_id' => $deposit->source_country_id ?? null,
@@ -33,6 +32,7 @@ class DepositCollection extends ResourceCollection
                 'service_id' => $deposit->service_id ?? null,
                 'service_name' => null,
                 'transaction_form_id' => $deposit->transaction_form_id ?? null,
+                'transaction_form_name' => $deposit->transaction_form_name ?? null,
                 'ordered_at' => $deposit->ordered_at ?? null,
                 'amount' => $deposit->amount ?? null,
                 'slip' => $deposit->getFirstMediaUrl('slip') ?? null,
@@ -60,6 +60,12 @@ class DepositCollection extends ResourceCollection
             }
             if (Core::packageExists('Business')) {
                 $data['service_name'] = $deposit->service?->name ?? null;
+            }
+            if (Core::packageExists('Business')) {
+                $data['service_name'] = $deposit->service?->name ?? null;
+            }
+            if (Core::packageExists('Transaction')) {
+                $data['transaction_form_name'] = $deposit->transactionForm?->name ?? null;
             }
 
             return $data;

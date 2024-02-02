@@ -7,6 +7,7 @@ use Fintech\Reload\Interfaces\DepositRepository as InterfacesDepositRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
@@ -34,7 +35,12 @@ class DepositRepository extends EloquentRepository implements InterfacesDepositR
     public function list(array $filters = [])
     {
         $query = $this->model->newQuery();
+        $modelTable = $this->model->getTable();
 
+        $query->leftJoin(
+            get_table('transaction.transaction_form'),
+            get_table('transaction.transaction_form').'.id', '=',
+            $modelTable.'.transaction_form_id');
         //Searching
         if (! empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
@@ -49,6 +55,10 @@ class DepositRepository extends EloquentRepository implements InterfacesDepositR
             $query->where('transaction_form_id', $filters['transaction_form_id']);
         }
 
+        if (isset($filters['transaction_form_code']) && $filters['transaction_form_code']) {
+            $query->where(get_table('transaction.transaction_form').'.code', '=', $filters['transaction_form_code']);
+        }
+
         //Display Trashed
         if (isset($filters['trashed']) && $filters['trashed'] === true) {
             $query->onlyTrashed();
@@ -56,6 +66,8 @@ class DepositRepository extends EloquentRepository implements InterfacesDepositR
 
         //Handle Sorting
         $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
+
+        $query->select($modelTable.'.*', DB::raw(get_table('transaction.transaction_form').'.name AS transaction_form_name'));
 
         //Execute Output
         return $this->executeQuery($query, $filters);

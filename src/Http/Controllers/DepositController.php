@@ -51,8 +51,8 @@ class DepositController extends Controller
             $inputs['transaction_form_code'] = 'point_reload';
             //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'bangladesh_top_up']);
             //$inputs['service_type_slug'] = 'fund_deposit';
-            //$depositPaginate = Reload::deposit()->list($inputs);
-            $depositPaginate = Transaction::order()->list($inputs);
+            $depositPaginate = Reload::deposit()->list($inputs);
+//            $depositPaginate = Transaction::order()->list($inputs);
 
             return new DepositCollection($depositPaginate);
 

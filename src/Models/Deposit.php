@@ -8,6 +8,7 @@ use Fintech\Reload\Traits\AuthRelations;
 use Fintech\Reload\Traits\BusinessRelations;
 use Fintech\Reload\Traits\MetaDataRelations;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -66,7 +67,10 @@ class Deposit extends Model implements HasMedia
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
+    public function transactionForm(): BelongsTo
+    {
+        return $this->belongsTo(config('fintech.transaction.transaction_form_model', \Fintech\Transaction\Models\TransactionForm::class));
+    }
     /*
     |--------------------------------------------------------------------------
     | SCOPES
