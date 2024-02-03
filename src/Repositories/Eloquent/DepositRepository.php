@@ -31,6 +31,7 @@ class DepositRepository extends OrderRepository implements InterfacesDepositRepo
      * filtered options
      *
      * @return Paginator|Collection
+     *
      * @throws BindingResolutionException
      */
     public function list(array $filters = [])
