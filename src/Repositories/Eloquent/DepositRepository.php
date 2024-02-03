@@ -4,6 +4,8 @@ namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\DepositRepository as InterfacesDepositRepository;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +15,7 @@ use InvalidArgumentException;
 /**
  * Class DepositRepository
  */
-class DepositRepository extends EloquentRepository implements InterfacesDepositRepository
+class DepositRepository extends OrderRepository implements InterfacesDepositRepository
 {
     public function __construct()
     {
@@ -31,46 +33,11 @@ class DepositRepository extends EloquentRepository implements InterfacesDepositR
      * filtered options
      *
      * @return Paginator|Collection
+     * @throws BindingResolutionException
      */
     public function list(array $filters = [])
     {
-        $query = $this->model->newQuery();
-        $modelTable = $this->model->getTable();
-
-        $query->leftJoin(
-            get_table('transaction.transaction_form'),
-            get_table('transaction.transaction_form').'.id', '=',
-            $modelTable.'.transaction_form_id');
-        //Searching
-        if (! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('deposit_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        if (! empty($filters['transaction_form_id'])) {
-            $query->where('transaction_form_id', $filters['transaction_form_id']);
-        }
-
-        if (isset($filters['transaction_form_code']) && $filters['transaction_form_code']) {
-            $query->where(get_table('transaction.transaction_form').'.code', '=', $filters['transaction_form_code']);
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && $filters['trashed'] === true) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        $query->select($modelTable.'.*', DB::raw(get_table('transaction.transaction_form').'.name AS transaction_form_name'));
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
+        return parent::list($filters);
 
     }
 }
