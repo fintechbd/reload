@@ -7,43 +7,22 @@ use Fintech\Core\Traits\AuditableTrait;
 use Fintech\Reload\Traits\AuthRelations;
 use Fintech\Reload\Traits\BusinessRelations;
 use Fintech\Reload\Traits\MetaDataRelations;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Deposit extends Model implements HasMedia
+class Deposit extends Order implements HasMedia
 {
-    use AuditableTrait;
-    use AuthRelations;
-    use BusinessRelations;
     use InteractsWithMedia;
-    use MetaDataRelations;
-    use SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
     |--------------------------------------------------------------------------
     */
-
-    protected $table = 'orders';
-
-    protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
-
-    protected $appends = ['links'];
-
-    protected $casts = [
-        'order_data' => 'array',
-        'restored_at' => 'datetime',
-        'ordered_at' => 'datetime',
-        'is_refunded' => 'bool',
-    ];
-
-    protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
 
     /*
     |--------------------------------------------------------------------------
@@ -68,10 +47,7 @@ class Deposit extends Model implements HasMedia
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-    public function transactionForm(): BelongsTo
-    {
-        return $this->belongsTo(config('fintech.transaction.transaction_form_model', \Fintech\Transaction\Models\TransactionForm::class));
-    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES
