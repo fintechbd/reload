@@ -3,14 +3,7 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Traits\AuditableTrait;
-use Fintech\Reload\Traits\AuthRelations;
-use Fintech\Reload\Traits\BusinessRelations;
-use Fintech\Reload\Traits\MetaDataRelations;
 use Fintech\Transaction\Models\Order;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
