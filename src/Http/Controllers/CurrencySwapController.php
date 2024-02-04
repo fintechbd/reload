@@ -13,8 +13,6 @@ use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Events\CurrencySwapped;
-use Fintech\Reload\Events\DepositReceived;
-use Fintech\Reload\Events\WalletTransferred;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;

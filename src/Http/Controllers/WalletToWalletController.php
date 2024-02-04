@@ -12,7 +12,6 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Reload\Events\DepositReceived;
 use Fintech\Reload\Events\WalletTransferred;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportWalletToWalletRequest;
