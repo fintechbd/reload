@@ -14,6 +14,7 @@ use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Events\CurrencySwapped;
 use Fintech\Reload\Events\DepositReceived;
+use Fintech\Reload\Events\WalletTransferred;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
@@ -88,7 +89,7 @@ class CurrencySwapController extends Controller
                 ])->first();
 
                 if (! $depositAccount) {
-                    throw new Exception("User don't have account deposit balance");
+                    throw new Exception("User don't have account to transfer balance");
                 }
 
                 $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
@@ -134,10 +135,10 @@ class CurrencySwapController extends Controller
 
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
-                event(new DepositReceived($deposit));
+                event(new CurrencySwapped($deposit));
 
                 return $this->created([
-                    'message' => __('core::messages.resource.created', ['model' => 'Deposit']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
                     'id' => $deposit->id,
                 ]);
 

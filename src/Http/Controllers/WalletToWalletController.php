@@ -3,11 +3,17 @@
 namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
+use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Auth\SystemRole;
+use Fintech\Core\Enums\Reload\DepositStatus;
+use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Reload\Events\DepositReceived;
+use Fintech\Reload\Events\WalletTransferred;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportWalletToWalletRequest;
 use Fintech\Reload\Http\Requests\IndexWalletToWalletRequest;
@@ -15,6 +21,7 @@ use Fintech\Reload\Http\Requests\StoreWalletToWalletRequest;
 use Fintech\Reload\Http\Requests\UpdateWalletToWalletRequest;
 use Fintech\Reload\Http\Resources\WalletToWalletCollection;
 use Fintech\Reload\Http\Resources\WalletToWalletResource;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -68,18 +75,78 @@ class WalletToWalletController extends Controller
         try {
             $inputs = $request->validated();
 
-            $walletToWallet = Reload::walletToWallet()->create($inputs);
+            if (isset($inputs['user_id']) && $request->input('user_id') > 0) {
+                $user_id = $request->input('user_id');
+            }
+            $depositor = $request->user('sanctum');
 
-            if (! $walletToWallet) {
-                throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
+
+                $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                    'user_id' => $user_id ?? $depositor->getKey(),
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
+
+                if (! $depositAccount) {
+                    throw new Exception("User don't have account to transfer balance");
+                }
+
+                $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                    'role_name' => SystemRole::MasterUser->value,
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
+
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+                }
+
+                //set pre defined conditions of deposit
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
+                $inputs['user_id'] = $user_id ?? $depositor->getKey();
+                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                if ($delayCheck['countValue'] > 0) {
+                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+                }
+                $inputs['sender_receiver_id'] = $masterUser->getKey();
+                $inputs['is_refunded'] = false;
+                $inputs['status'] = DepositStatus::Processing->value;
+                $inputs['risk'] = RiskProfile::Low->value;
+                $inputs['order_data']['created_by'] = $depositor->name;
+                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
+                $inputs['order_data']['created_at'] = now();
+                $inputs['order_data']['current_amount'] = ($depositAccount->user_account_data['available_amount'] ?? 0) + $inputs['amount'];
+                $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
+                $inputs['converted_amount'] = $inputs['amount'];
+                $inputs['converted_currency'] = $inputs['currency'];
+                $inputs['order_data']['master_user_name'] = $masterUser['name'];
+                unset($inputs['pin'], $inputs['password']);
+
+                $deposit = Reload::deposit()->create($inputs);
+
+                if (! $deposit) {
+                    throw (new StoreOperationException)->setModel(config('fintech.reload.deposit_model'));
+                }
+
+                $order_data = $deposit->order_data;
+                $order_data['purchase_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Purchased->value);
+
+                Reload::deposit()->update($deposit->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+
+                Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+
+                event(new WalletTransferred($deposit));
+
+                return $this->created([
+                    'message' => __('core::messages.resource.created', ['model' => 'Wallet To Wallet']),
+                    'id' => $deposit->id,
+                ]);
+
+            } else {
+                throw new Exception('Your another order is in process...!');
             }
 
-            return $this->created([
-                'message' => __('core::messages.resource.created', ['model' => 'Wallet To Wallet']),
-                'id' => $walletToWallet->id,
-            ]);
-
         } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
             return $this->failed($exception->getMessage());
         }
