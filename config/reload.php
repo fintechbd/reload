@@ -51,7 +51,7 @@ return [
     */
     'wallet_transfer_model' => \Fintech\Reload\Models\WalletTransfer::class,
 
-    
+
     /*
     |--------------------------------------------------------------------------
     | WalletToWallet Model
@@ -73,11 +73,7 @@ return [
 
     'repositories' => [
         \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
-
         \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
-
-        \Fintech\Reload\Interfaces\WalletTransferRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletTransferRepository::class,
-
         \Fintech\Reload\Interfaces\WalletToWalletRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//

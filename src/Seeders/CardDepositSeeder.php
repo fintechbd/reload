@@ -18,7 +18,7 @@ class CardDepositSeeder extends Seeder
 
             if (!empty($serviceTypes)) {
 
-                foreach ($this->serviceTypes() as $entry) {
+                foreach ($serviceTypes as $entry) {
                     $serviceTypeChild = $entry['serviceTypeChild'] ?? [];
 
                     if (isset($entry['serviceTypeChild'])) {
@@ -66,41 +66,43 @@ class CardDepositSeeder extends Seeder
         $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
         return [
-            'service_type_parent_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
-            'service_type_name' => 'Card Deposit',
-            'service_type_slug' => 'card_deposit',
-            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'card_deposit.svg')),
-            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'card_deposit.png')),
-            'service_type_is_parent' => 'yes',
-            'service_type_is_description' => 'no',
-            'service_type_step' => '2',
-            'enabled' => true,
-            'serviceTypeChild' => [
-                [
-                    'service_type_name' => 'VISA CARD',
-                    'service_type_slug' => 'visa_card',
-                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'visa_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'visa_card.png')), 'service_type_is_parent' => 'no',
-                    'service_type_is_description' => 'no',
-                    'service_type_step' => '3',
-                    'enabled' => true
+            [
+                'service_type_parent_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                'service_type_name' => 'Card Deposit',
+                'service_type_slug' => 'card_deposit',
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'card_deposit.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'card_deposit.png')),
+                'service_type_is_parent' => 'yes',
+                'service_type_is_description' => 'no',
+                'service_type_step' => '2',
+                'enabled' => true,
+                'serviceTypeChild' => [
+                    [
+                        'service_type_name' => 'VISA CARD',
+                        'service_type_slug' => 'visa_card',
+                        'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'visa_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'visa_card.png')), 'service_type_is_parent' => 'no',
+                        'service_type_is_description' => 'no',
+                        'service_type_step' => '3',
+                        'enabled' => true
+                    ],
+                    [
+                        'service_type_name' => 'MASTER CARD',
+                        'service_type_slug' => 'master_card',
+                        'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'master_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'master_card.png')), 'service_type_is_parent' => 'no',
+                        'service_type_is_description' => 'no',
+                        'service_type_step' => '3',
+                        'enabled' => true
+                    ],
+                    [
+                        'service_type_name' => 'DISCOVER CARD',
+                        'service_type_slug' => 'discover_card',
+                        'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'discover_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'discover_card.png')), 'service_type_is_parent' => 'no',
+                        'service_type_is_description' => 'no',
+                        'service_type_step' => '3',
+                        'enabled' => true
+                    ],
                 ],
-                [
-                    'service_type_name' => 'MASTER CARD',
-                    'service_type_slug' => 'master_card',
-                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'master_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'master_card.png')), 'service_type_is_parent' => 'no',
-                    'service_type_is_description' => 'no',
-                    'service_type_step' => '3',
-                    'enabled' => true
-                ],
-                [
-                    'service_type_name' => 'DISCOVER CARD',
-                    'service_type_slug' => 'discover_card',
-                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'discover_card.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'discover_card.png')), 'service_type_is_parent' => 'no',
-                    'service_type_is_description' => 'no',
-                    'service_type_step' => '3',
-                    'enabled' => true
-                ],
-            ],
+            ]
         ];
     }
 

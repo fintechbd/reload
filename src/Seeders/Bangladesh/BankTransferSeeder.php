@@ -60,8 +60,8 @@ class BankTransferSeeder extends Seeder
 
     private function serviceTypes()
     {
-        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service_type/logo_png/';
 
         return [
             [
@@ -157,8 +157,8 @@ class BankTransferSeeder extends Seeder
 
     private function service(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service/logo_png/';
 
         return [
             ['service_type_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'brac_bank_limited'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'BRAC BANK LIMITED', 'service_slug' => 'brac_bank_limited', 'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'brac_bank_limited.svg')), 'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'brac_bank_limited.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => 'Lebupay ', 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null], 'enabled' => true],
