@@ -6,7 +6,7 @@ use Fintech\Core\Facades\Core;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Database\Seeder;
 
-class DepositSeeder extends Seeder
+class ReloadSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -54,20 +54,6 @@ class DepositSeeder extends Seeder
                 }
             }
         }
-
-        $data = $this->data();
-
-        foreach (array_chunk($data, 200) as $block) {
-            set_time_limit(2100);
-            foreach ($block as $entry) {
-                Reload::deposit()->create($entry);
-            }
-        }
-    }
-
-    private function data()
-    {
-        return [];
     }
 
     private function rootLevelServiceTypeData(): array
@@ -139,33 +125,36 @@ class DepositSeeder extends Seeder
     {
         $serviceLists = $this->service();
         $serviceStats = [];
-        foreach ($serviceLists as $serviceList) {
-            $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
-            $serviceStats[] = [
-                'role_id' => [2, 3, 4, 5, 6, 7],
-                'service_id' => $service->getKey(),
-                'service_slug' => $service->service_slug,
-                'source_country_id' => [39, 133, 192, 231],
-                'destination_country_id' => [19, 39, 101, 132, 133, 167, 192, 231],
-                'service_vendor_id' => 1,
-                'service_stat_data' => [
-                    [
-                        'lower_limit' => '10.00',
-                        'higher_limit' => '5000.00',
-                        'local_currency_higher_limit' => '25000.00',
-                        'charge' => '5%',
-                        'discount' => '5%',
-                        'commission' => '5%',
-                        'cost' => '0.00',
-                        'charge_refund' => 'yes',
-                        'discount_refund' => 'yes',
-                        'commission_refund' => 'yes',
+        $roles = \Fintech\Auth\Facades\Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
+        $source_countries = \Fintech\MetaData\Facades\MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+        if (!empty($roles) && !empty($source_countries)) {
+            foreach ($serviceLists as $serviceList) {
+                $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
+                $serviceStats[] = [
+                    'role_id' => $roles,
+                    'service_id' => $service->getKey(),
+                    'service_slug' => $service->service_slug,
+                    'source_country_id' => $source_countries,
+                    'destination_country_id' => $source_countries,
+                    'service_vendor_id' => 1,
+                    'service_stat_data' => [
+                        [
+                            'lower_limit' => '10.00',
+                            'higher_limit' => '5000.00',
+                            'local_currency_higher_limit' => '25000.00',
+                            'charge' => mt_rand(1, 7) . '%',
+                            'discount' => mt_rand(1, 7) . '%',
+                            'commission' => mt_rand(1, 7) . '%',
+                            'cost' => '0.00',
+                            'charge_refund' => 'yes',
+                            'discount_refund' => 'yes',
+                            'commission_refund' => 'yes',
+                        ],
                     ],
-                ],
-                'enabled' => true,
-            ];
+                    'enabled' => true,
+                ];
+            }
         }
-
         return $serviceStats;
 
     }

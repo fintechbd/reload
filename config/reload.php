@@ -51,6 +51,16 @@ return [
     */
     'wallet_transfer_model' => \Fintech\Reload\Models\WalletTransfer::class,
 
+    
+    /*
+    |--------------------------------------------------------------------------
+    | WalletToWallet Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'wallet_to_wallet_model' => \Fintech\Reload\Models\WalletToWallet::class,
+
     //** Model Config Point Do not Remove **//
 
     /*
@@ -67,6 +77,8 @@ return [
         \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
 
         \Fintech\Reload\Interfaces\WalletTransferRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletTransferRepository::class,
+
+        \Fintech\Reload\Interfaces\WalletToWalletRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],

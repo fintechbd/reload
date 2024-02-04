@@ -28,6 +28,15 @@ class Reload
         return app(\Fintech\Reload\Services\WalletTransferService::class);
     }
 
+    /**
+     * @return \Fintech\Reload\Services\WalletToWalletService
+     */
+    public function walletToWallet()
+    {
+        return app(\Fintech\Reload\Services\WalletToWalletService::class);
+    }
+
     //** Crud Service Method Point Do not Remove **//
+
 
 }
