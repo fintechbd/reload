@@ -15,7 +15,8 @@ class CurrencySwapped
 
     /**
      * Create a new event instance.
-     * @param \Fintech\Reload\Models\CurrencySwap $currencySwap
+     *
+     * @param  \Fintech\Reload\Models\CurrencySwap  $currencySwap
      */
     public function __construct($currencySwap)
     {

@@ -15,7 +15,8 @@ class DepositRejected
 
     /**
      * Create a new event instance.
-     * @param \Fintech\Reload\Models\Deposit $deposit
+     *
+     * @param  \Fintech\Reload\Models\Deposit  $deposit
      */
     public function __construct($deposit)
     {

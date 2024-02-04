@@ -67,23 +67,23 @@ class PaymentGatewaySeeder extends Seeder
                 'service_type_parent_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                 'service_type_name' => 'PAYNOW',
                 'service_type_slug' => 'pay_now',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'pay_now.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'pay_now.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'pay_now.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'pay_now.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '2',
-                'enabled' => true
+                'enabled' => true,
             ],
             [
                 'service_type_parent_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                 'service_type_name' => 'E-NETS',
                 'service_type_slug' => 'e_nets',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'e_nets.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'e_nets.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'e_nets.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'e_nets.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '2',
-                'enabled' => true
+                'enabled' => true,
             ],
         ];
     }
@@ -106,7 +106,7 @@ class PaymentGatewaySeeder extends Seeder
         $serviceStats = [];
         $roles = \Fintech\Auth\Facades\Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
         $source_countries = \Fintech\MetaData\Facades\MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (!empty($roles) && !empty($source_countries)) {
+        if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [
@@ -121,9 +121,9 @@ class PaymentGatewaySeeder extends Seeder
                             'lower_limit' => '10.00',
                             'higher_limit' => '5000.00',
                             'local_currency_higher_limit' => '25000.00',
-                            'charge' => mt_rand(1, 7) . '%',
-                            'discount' => mt_rand(1, 7) . '%',
-                            'commission' => mt_rand(1, 7) . '%',
+                            'charge' => mt_rand(1, 7).'%',
+                            'discount' => mt_rand(1, 7).'%',
+                            'commission' => mt_rand(1, 7).'%',
                             'cost' => '0.00',
                             'charge_refund' => 'yes',
                             'discount_refund' => 'yes',
@@ -134,6 +134,7 @@ class PaymentGatewaySeeder extends Seeder
                 ];
             }
         }
+
         return $serviceStats;
 
     }

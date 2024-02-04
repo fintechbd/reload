@@ -3,7 +3,6 @@
 namespace Fintech\Reload\Seeders;
 
 use Fintech\Core\Facades\Core;
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Database\Seeder;
 
 class CurrencySwapSeeder extends Seeder
@@ -54,7 +53,7 @@ class CurrencySwapSeeder extends Seeder
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
-                'enabled' => true
+                'enabled' => true,
             ],
         ];
     }
@@ -77,7 +76,7 @@ class CurrencySwapSeeder extends Seeder
                 'service_stat_policy' => 'yes',
                 'service_serial' => 1,
                 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => 'Lebupay ', 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null],
-                'enabled' => true
+                'enabled' => true,
             ],
         ];
     }
@@ -88,7 +87,7 @@ class CurrencySwapSeeder extends Seeder
         $serviceStats = [];
         $roles = \Fintech\Auth\Facades\Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
         $source_countries = \Fintech\MetaData\Facades\MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (!empty($roles) && !empty($source_countries)) {
+        if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [
@@ -116,6 +115,7 @@ class CurrencySwapSeeder extends Seeder
                 ];
             }
         }
+
         return $serviceStats;
 
     }

@@ -51,7 +51,6 @@ return [
     */
     'wallet_transfer_model' => \Fintech\Reload\Models\WalletTransfer::class,
 
-
     /*
     |--------------------------------------------------------------------------
     | WalletToWallet Model

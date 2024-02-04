@@ -11,19 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Class WalletToWalletRepository
- * @package Fintech\Reload\Repositories\Eloquent
  */
 class WalletToWalletRepository extends EloquentRepository implements InterfacesWalletToWalletRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.reload.wallet_to_wallet_model', \Fintech\Reload\Models\WalletToWallet::class));
+        $model = app(config('fintech.reload.wallet_to_wallet_model', \Fintech\Reload\Models\WalletToWallet::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**

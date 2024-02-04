@@ -6,24 +6,23 @@ use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\WalletToWalletRepository as InterfacesWalletToWalletRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 use InvalidArgumentException;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class WalletToWalletRepository
- * @package Fintech\Reload\Repositories\Mongodb
  */
 class WalletToWalletRepository extends MongodbRepository implements InterfacesWalletToWalletRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.reload.wallet_to_wallet_model', \Fintech\Reload\Models\WalletToWallet::class));
+        $model = app(config('fintech.reload.wallet_to_wallet_model', \Fintech\Reload\Models\WalletToWallet::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**

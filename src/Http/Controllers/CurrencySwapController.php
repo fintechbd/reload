@@ -75,7 +75,6 @@ class CurrencySwapController extends Controller
                 throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
             }
 
-
             event(new CurrencySwapped($currencySwap));
 
             return $this->created([
