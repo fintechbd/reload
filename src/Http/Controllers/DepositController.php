@@ -10,6 +10,10 @@ use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Reload\Events\DepositAccepted;
+use Fintech\Reload\Events\DepositCancelled;
+use Fintech\Reload\Events\DepositReceived;
+use Fintech\Reload\Events\DepositRejected;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Requests\ImportDepositRequest;
@@ -134,6 +138,8 @@ class DepositController extends Controller
 
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
+                event(new DepositReceived($deposit));
+
                 return $this->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Deposit']),
                     'id' => $deposit->id,
@@ -216,6 +222,8 @@ class DepositController extends Controller
 
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
+                event(new DepositRejected($deposit));
+
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Rejected->name,
                 ]));
@@ -295,6 +303,8 @@ class DepositController extends Controller
 
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
+                event(new DepositAccepted($deposit));
+
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
                 ]));
@@ -370,6 +380,8 @@ class DepositController extends Controller
                 }
 
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+                event(new DepositCancelled($deposit));
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Cancelled->name,

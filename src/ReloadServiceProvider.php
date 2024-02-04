@@ -21,6 +21,7 @@ class ReloadServiceProvider extends ServiceProvider
 
         $this->app->register(RouteServiceProvider::class);
         $this->app->register(RepositoryServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
     }
 
     /**

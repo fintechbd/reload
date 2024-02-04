@@ -8,6 +8,7 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Reload\Events\CurrencySwapped;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
@@ -73,6 +74,9 @@ class CurrencySwapController extends Controller
             if (! $currencySwap) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
             }
+
+
+            event(new CurrencySwapped($currencySwap));
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
