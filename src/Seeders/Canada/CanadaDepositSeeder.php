@@ -83,9 +83,9 @@ class CanadaDepositSeeder extends Seeder
                         'service_type_is_description' => 'no',
                         'service_type_step' => '3',
                         'enabled' => true,
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 
