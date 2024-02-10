@@ -26,7 +26,7 @@ class StoreDepositRequest extends FormRequest
             'source_country_id' => ['required', 'integer', 'min:1'],
             'destination_country_id' => ['required', 'integer', 'min:1', 'same:source_country_id'],
             'service_id' => ['required', 'integer', 'min:1'],
-            'ordered_at' => ['required', 'date', 'date_format:Y-m-d', 'before_or_equal:'.date('Y-m-d')],
+            'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s')],
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
             'order_data' => ['nullable', 'array'],
