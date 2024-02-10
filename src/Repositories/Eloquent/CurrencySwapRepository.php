@@ -4,6 +4,8 @@ namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\CurrencySwapRepository as InterfacesCurrencySwapRepository;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +14,7 @@ use InvalidArgumentException;
 /**
  * Class CurrencySwapRepository
  */
-class CurrencySwapRepository extends EloquentRepository implements InterfacesCurrencySwapRepository
+class CurrencySwapRepository extends OrderRepository implements InterfacesCurrencySwapRepository
 {
     public function __construct()
     {
@@ -30,31 +32,12 @@ class CurrencySwapRepository extends EloquentRepository implements InterfacesCur
      * filtered options
      *
      * @return Paginator|Collection
+     *
+     * @throws BindingResolutionException
      */
     public function list(array $filters = [])
     {
-        $query = $this->model->newQuery();
-
-        //Searching
-        if (! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('currency_swap_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && $filters['trashed'] === true) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
+        return parent::list($filters);
 
     }
 }

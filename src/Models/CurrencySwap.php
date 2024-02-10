@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CurrencySwap extends Order
 {
-    use SoftDeletes;
-
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES

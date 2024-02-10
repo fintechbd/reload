@@ -3,29 +3,17 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Core\Traits\AuditableTrait;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class WalletToWallet extends Model
+class WalletToWallet extends Order
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
     |--------------------------------------------------------------------------
     */
-
-    protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
-
-    protected $appends = ['links'];
-
-    protected $casts = ['wallet_to_wallet_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
-
-    protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
 
     /*
     |--------------------------------------------------------------------------
@@ -58,20 +46,9 @@ class WalletToWallet extends Model
     {
         $primaryKey = $this->getKey();
 
-        $links = [
+        return [
             'show' => action_link(route('reload.wallet-to-wallets.show', $primaryKey), __('core::messages.action.show'), 'get'),
-            'update' => action_link(route('reload.wallet-to-wallets.update', $primaryKey), __('core::messages.action.update'), 'put'),
-            'destroy' => action_link(route('reload.wallet-to-wallets.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-            'restore' => action_link(route('reload.wallet-to-wallets.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
         ];
-
-        if ($this->getAttribute('deleted_at') == null) {
-            unset($links['restore']);
-        } else {
-            unset($links['destroy']);
-        }
-
-        return $links;
     }
 
     /*
