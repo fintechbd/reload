@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Repositories\Eloquent;
 
-use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\CurrencySwapRepository as InterfacesCurrencySwapRepository;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;

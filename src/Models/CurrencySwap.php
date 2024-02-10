@@ -3,7 +3,6 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Transaction\Models\Order;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CurrencySwap extends Order
 {
