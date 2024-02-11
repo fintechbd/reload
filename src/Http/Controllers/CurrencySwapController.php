@@ -13,7 +13,6 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Reload\Events\CurrencySwapped;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
@@ -386,8 +385,6 @@ class CurrencySwapController extends Controller
     }
 
     /**
-     * @param $id
-     * @return bool
      * @throws StoreOperationException
      */
     private function __receiverStore($id): bool
@@ -447,6 +444,7 @@ class CurrencySwapController extends Controller
             ]));
         }
         Reload::currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+
         return true;
     }
 }
