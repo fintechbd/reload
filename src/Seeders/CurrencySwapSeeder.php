@@ -3,6 +3,7 @@
 namespace Fintech\Reload\Seeders;
 
 use Fintech\Core\Facades\Core;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
 class CurrencySwapSeeder extends Seeder
@@ -36,6 +37,8 @@ class CurrencySwapSeeder extends Seeder
                 }
             }
         }
+
+        $this->setupTransactionForm();
     }
 
     private function serviceTypes(): array
@@ -118,5 +121,15 @@ class CurrencySwapSeeder extends Seeder
 
         return $serviceStats;
 
+    }
+
+    private function setupTransactionForm(): void
+    {
+        Transaction::transactionForm()->create([
+            'name' => 'Currency Swap',
+            'code' => 'currency_swap',
+            'enabled' => true,
+            'transaction_form_data' => [],
+        ]);
     }
 }
