@@ -385,7 +385,12 @@ class CurrencySwapController extends Controller
         }
     }
 
-    private function __receiverStore($id)
+    /**
+     * @param $id
+     * @return bool
+     * @throws StoreOperationException
+     */
+    private function __receiverStore($id): bool
     {
         $deposit = Reload::deposit()->find($id);
         $receiverInputs = $deposit->toArray();
