@@ -116,7 +116,7 @@ class CurrencySwapController extends Controller
                 $inputs['is_refunded'] = false;
                 $inputs['status'] = OrderStatus::Successful->value;
                 $inputs['risk'] = RiskProfile::Low->value;
-                $inputs['reverse'] = true;
+                //$inputs['reverse'] = true;
 
                 $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
                 unset($inputs['reverse']);
