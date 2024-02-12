@@ -4,6 +4,9 @@ namespace Fintech\Reload\Services;
 
 use Fintech\Reload\Interfaces\WalletToWalletRepository;
 use Fintech\Transaction\Facades\Transaction;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * Class WalletToWalletService
@@ -19,25 +22,26 @@ class WalletToWalletService
     }
 
     /**
-     * @return mixed
+     * @param array $filters
+     * @return Paginator|Collection
      */
-    public function list(array $filters = [])
+    public function list(array $filters = []): Paginator|Collection
     {
         return $this->walletToWalletRepository->list($filters);
 
     }
 
-    public function create(array $inputs = [])
+    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->walletToWalletRepository->create($inputs);
     }
 
-    public function find($id, $onlyTrashed = false)
+    public function find($id, $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->walletToWalletRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = [])
+    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->walletToWalletRepository->update($id, $inputs);
     }
@@ -52,12 +56,12 @@ class WalletToWalletService
         return $this->walletToWalletRepository->restore($id);
     }
 
-    public function export(array $filters)
+    public function export(array $filters): Paginator|Collection
     {
         return $this->walletToWalletRepository->list($filters);
     }
 
-    public function import(array $filters)
+    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->walletToWalletRepository->create($filters);
     }
@@ -133,7 +137,7 @@ class WalletToWalletService
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
@@ -232,7 +236,7 @@ class WalletToWalletService
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
