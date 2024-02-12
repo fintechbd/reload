@@ -29,9 +29,11 @@ class StoreWalletToWalletRequest extends FormRequest
             'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s')],
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
-            'sender_receiver_id' => ['required', 'integer', 'min:1'],
+            //'sender_receiver_id' => ['required', 'integer', 'min:1'],
             'order_data' => ['nullable', 'array'],
             'order_data.request_from' => ['string', 'required'],
+            'order_data.serving_country_id' => ['required', 'integer', 'min:1'],
+            'order_data.sender_receiver_id' => ['required', 'integer', 'min:1'],
         ];
     }
 

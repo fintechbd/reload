@@ -81,8 +81,10 @@ class CurrencySwapController extends Controller
             $inputs = $request->validated();
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
+                $depositor = Auth::user()->find($request->input('user_id'));
+            } else {
+                $depositor = $request->user('sanctum');
             }
-            $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
                 $depositAccount = Transaction::userAccount()->list([
@@ -120,7 +122,7 @@ class CurrencySwapController extends Controller
                 unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                 $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-                $inputs['notes'] = 'Currency Swap for '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
+                $inputs['notes'] = 'Currency Swap transfer '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
                 $inputs['order_data']['created_by'] = $depositor->name;
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
@@ -233,7 +235,6 @@ class CurrencySwapController extends Controller
      * @lrd:end
      *
      * @throws ModelNotFoundException
-     * @throws UpdateOperationException
      */
     public function update(UpdateCurrencySwapRequest $request, string|int $id): JsonResponse
     {
@@ -269,13 +270,8 @@ class CurrencySwapController extends Controller
      * Soft delete a specified *CurrencySwap* resource using id.
      *
      * @lrd:end
-     *
-     * @return JsonResponse
-     *
-     * @throws ModelNotFoundException
-     * @throws DeleteOperationException
      */
-    public function destroy(string|int $id)
+    public function destroy(string|int $id): JsonResponse
     {
         try {
 
@@ -308,10 +304,8 @@ class CurrencySwapController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @return JsonResponse
      */
-    public function restore(string|int $id)
+    public function restore(string|int $id): JsonResponse
     {
         try {
 
@@ -340,7 +334,7 @@ class CurrencySwapController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *CurrencySwap* resource as document.
+     * Create an exportable list of the *CurrencySwap* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
@@ -362,14 +356,12 @@ class CurrencySwapController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *CurrencySwap* resource as document.
+     * Create an exportable list of the *CurrencySwap* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @return CurrencySwapCollection|JsonResponse
      */
-    public function import(ImportCurrencySwapRequest $request): JsonResponse
+    public function import(ImportCurrencySwapRequest $request): JsonResponse|CurrencySwapCollection
     {
         try {
             $inputs = $request->validated();
@@ -386,6 +378,7 @@ class CurrencySwapController extends Controller
 
     /**
      * @throws StoreOperationException
+     * @throws Exception
      */
     private function __receiverStore($id): bool
     {
@@ -408,7 +401,7 @@ class CurrencySwapController extends Controller
 
         //set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
-        $receiverInputs['notes'] = 'Currency Swap for '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
+        $receiverInputs['notes'] = 'Currency Swap receive from '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
         $receiverInputs['parent_id'] = $id;
 
         $currencySwap = Reload::currencySwap()->create($receiverInputs);
