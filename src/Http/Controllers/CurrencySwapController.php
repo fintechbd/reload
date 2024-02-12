@@ -120,7 +120,7 @@ class CurrencySwapController extends Controller
                 unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                 $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-                $inputs['notes'] = 'Currency Swap for '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
+                $inputs['notes'] = 'Currency Swap transfer '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
                 $inputs['order_data']['created_by'] = $depositor->name;
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
@@ -408,7 +408,7 @@ class CurrencySwapController extends Controller
 
         //set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
-        $receiverInputs['notes'] = 'Currency Swap for '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
+        $receiverInputs['notes'] = 'Currency Swap receive from '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
         $receiverInputs['parent_id'] = $id;
 
         $currencySwap = Reload::currencySwap()->create($receiverInputs);
