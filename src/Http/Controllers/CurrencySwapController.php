@@ -141,7 +141,7 @@ class CurrencySwapController extends Controller
                 $currencySwap = Reload::currencySwap()->create($inputs);
 
                 if (! $currencySwap) {
-                    throw (new StoreOperationException)->setModel(config('fintech.airtime.currency_swap_model'));
+                    throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
                 }
 
                 $order_data = $currencySwap->order_data;

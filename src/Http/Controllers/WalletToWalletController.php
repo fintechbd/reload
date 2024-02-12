@@ -154,7 +154,7 @@ class WalletToWalletController extends Controller
                 $walletToWallet = Reload::walletToWallet()->create($inputs);
 
                 if (! $walletToWallet) {
-                    throw (new StoreOperationException)->setModel(config('fintech.airtime.currency_swap_model'));
+                    throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
                 }
 
                 $order_data = $walletToWallet->order_data;
@@ -418,7 +418,7 @@ class WalletToWalletController extends Controller
         $walletToWallet = Reload::walletToWallet()->create($receiverInputs);
 
         if (! $walletToWallet) {
-            throw (new StoreOperationException)->setModel(config('fintech.airtime.currency_swap_model'));
+            throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
         }
 
         $order_data = $walletToWallet->order_data;
