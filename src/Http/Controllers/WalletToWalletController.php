@@ -7,15 +7,12 @@ use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
-use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Reload\Events\WalletTransferred;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportWalletToWalletRequest;
 use Fintech\Reload\Http\Requests\IndexWalletToWalletRequest;
@@ -251,7 +248,6 @@ class WalletToWalletController extends Controller
      * @lrd:end
      *
      * @throws ModelNotFoundException
-     * @throws UpdateOperationException
      */
     public function update(UpdateWalletToWalletRequest $request, string|int $id): JsonResponse
     {
@@ -288,12 +284,11 @@ class WalletToWalletController extends Controller
      *
      * @lrd:end
      *
+     * @param string|int $id
      * @return JsonResponse
      *
-     * @throws ModelNotFoundException
-     * @throws DeleteOperationException
      */
-    public function destroy(string|int $id)
+    public function destroy(string|int $id): JsonResponse
     {
         try {
 
@@ -327,9 +322,10 @@ class WalletToWalletController extends Controller
      *
      * @lrd:end
      *
+     * @param string|int $id
      * @return JsonResponse
      */
-    public function restore(string|int $id)
+    public function restore(string|int $id): JsonResponse
     {
         try {
 
@@ -358,7 +354,7 @@ class WalletToWalletController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *WalletToWallet* resource as document.
+     * Create an exportable list of the *WalletToWallet* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
@@ -380,14 +376,15 @@ class WalletToWalletController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *WalletToWallet* resource as document.
+     * Create an exportable list of the *WalletToWallet* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
      *
+     * @param ImportWalletToWalletRequest $request
      * @return WalletToWalletCollection|JsonResponse
      */
-    public function import(ImportWalletToWalletRequest $request): JsonResponse
+    public function import(ImportWalletToWalletRequest $request): JsonResponse|WalletToWalletCollection
     {
         try {
             $inputs = $request->validated();
@@ -404,6 +401,7 @@ class WalletToWalletController extends Controller
 
     /**
      * @throws StoreOperationException
+     * @throws Exception
      */
     private function __receiverStore($id): bool
     {
