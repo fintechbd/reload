@@ -82,7 +82,7 @@ class CurrencySwapController extends Controller
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
                 $depositor = Auth::user()->find($request->input('user_id'));
-            }else{
+            } else {
                 $depositor = $request->user('sanctum');
             }
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
@@ -270,10 +270,6 @@ class CurrencySwapController extends Controller
      * Soft delete a specified *CurrencySwap* resource using id.
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
-     *
      */
     public function destroy(string|int $id): JsonResponse
     {
@@ -308,9 +304,6 @@ class CurrencySwapController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function restore(string|int $id): JsonResponse
     {
@@ -367,9 +360,6 @@ class CurrencySwapController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param ImportCurrencySwapRequest $request
-     * @return CurrencySwapCollection|JsonResponse
      */
     public function import(ImportCurrencySwapRequest $request): JsonResponse|CurrencySwapCollection
     {

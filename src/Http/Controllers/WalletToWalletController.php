@@ -81,7 +81,7 @@ class WalletToWalletController extends Controller
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
                 $depositor = Auth::user()->find($request->input('user_id'));
-            }else{
+            } else {
                 $depositor = $request->user('sanctum');
             }
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
@@ -283,10 +283,6 @@ class WalletToWalletController extends Controller
      * Soft delete a specified *WalletToWallet* resource using id.
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
-     *
      */
     public function destroy(string|int $id): JsonResponse
     {
@@ -321,9 +317,6 @@ class WalletToWalletController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function restore(string|int $id): JsonResponse
     {
@@ -380,9 +373,6 @@ class WalletToWalletController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param ImportWalletToWalletRequest $request
-     * @return WalletToWalletCollection|JsonResponse
      */
     public function import(ImportWalletToWalletRequest $request): JsonResponse|WalletToWalletCollection
     {

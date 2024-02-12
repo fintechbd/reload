@@ -21,10 +21,6 @@ class WalletToWalletService
         $this->walletToWalletRepository = $walletToWalletRepository;
     }
 
-    /**
-     * @param array $filters
-     * @return Paginator|Collection
-     */
     public function list(array $filters = []): Paginator|Collection
     {
         return $this->walletToWalletRepository->list($filters);
@@ -363,7 +359,6 @@ class WalletToWalletService
         $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to '.$user_name;
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
-
 
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,

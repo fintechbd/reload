@@ -23,10 +23,6 @@ class CurrencySwapService
         $this->currencySwapRepository = $currencySwapRepository;
     }
 
-    /**
-     * @param array $filters
-     * @return Paginator|Collection
-     */
     public function list(array $filters = []): Paginator|Collection
     {
         return $this->currencySwapRepository->list($filters);
