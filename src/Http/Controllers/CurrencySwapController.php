@@ -81,8 +81,10 @@ class CurrencySwapController extends Controller
             $inputs = $request->validated();
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
+                $depositor = Auth::user()->find($request->input('user_id'));
+            }else{
+                $depositor = $request->user('sanctum');
             }
-            $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
                 $depositAccount = Transaction::userAccount()->list([
@@ -233,7 +235,6 @@ class CurrencySwapController extends Controller
      * @lrd:end
      *
      * @throws ModelNotFoundException
-     * @throws UpdateOperationException
      */
     public function update(UpdateCurrencySwapRequest $request, string|int $id): JsonResponse
     {
@@ -270,12 +271,11 @@ class CurrencySwapController extends Controller
      *
      * @lrd:end
      *
+     * @param string|int $id
      * @return JsonResponse
      *
-     * @throws ModelNotFoundException
-     * @throws DeleteOperationException
      */
-    public function destroy(string|int $id)
+    public function destroy(string|int $id): JsonResponse
     {
         try {
 
@@ -309,9 +309,10 @@ class CurrencySwapController extends Controller
      *
      * @lrd:end
      *
+     * @param string|int $id
      * @return JsonResponse
      */
-    public function restore(string|int $id)
+    public function restore(string|int $id): JsonResponse
     {
         try {
 
@@ -340,7 +341,7 @@ class CurrencySwapController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *CurrencySwap* resource as document.
+     * Create an exportable list of the *CurrencySwap* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
@@ -362,14 +363,15 @@ class CurrencySwapController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *CurrencySwap* resource as document.
+     * Create an exportable list of the *CurrencySwap* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
      *
+     * @param ImportCurrencySwapRequest $request
      * @return CurrencySwapCollection|JsonResponse
      */
-    public function import(ImportCurrencySwapRequest $request): JsonResponse
+    public function import(ImportCurrencySwapRequest $request): JsonResponse|CurrencySwapCollection
     {
         try {
             $inputs = $request->validated();
@@ -386,6 +388,7 @@ class CurrencySwapController extends Controller
 
     /**
      * @throws StoreOperationException
+     * @throws Exception
      */
     private function __receiverStore($id): bool
     {

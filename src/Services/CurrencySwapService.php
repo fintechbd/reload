@@ -4,12 +4,17 @@ namespace Fintech\Reload\Services;
 
 use Fintech\Reload\Interfaces\CurrencySwapRepository;
 use Fintech\Transaction\Facades\Transaction;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * Class CurrencySwapService
  */
 class CurrencySwapService
 {
+    private CurrencySwapRepository $currencySwapRepository;
+
     /**
      * CurrencySwapService constructor.
      */
@@ -19,25 +24,26 @@ class CurrencySwapService
     }
 
     /**
-     * @return mixed
+     * @param array $filters
+     * @return Paginator|Collection
      */
-    public function list(array $filters = [])
+    public function list(array $filters = []): Paginator|Collection
     {
         return $this->currencySwapRepository->list($filters);
 
     }
 
-    public function create(array $inputs = [])
+    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->currencySwapRepository->create($inputs);
     }
 
-    public function find($id, $onlyTrashed = false)
+    public function find($id, $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->currencySwapRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = [])
+    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->currencySwapRepository->update($id, $inputs);
     }
@@ -52,12 +58,12 @@ class CurrencySwapService
         return $this->currencySwapRepository->restore($id);
     }
 
-    public function export(array $filters)
+    public function export(array $filters): Paginator|Collection
     {
         return $this->currencySwapRepository->list($filters);
     }
 
-    public function import(array $filters)
+    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->currencySwapRepository->create($filters);
     }
@@ -133,7 +139,7 @@ class CurrencySwapService
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
@@ -232,7 +238,7 @@ class CurrencySwapService
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
