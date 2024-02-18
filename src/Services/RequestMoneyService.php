@@ -2,26 +2,22 @@
 
 namespace Fintech\Reload\Services;
 
-
 use Fintech\Reload\Interfaces\RequestMoneyRepository;
 
 /**
  * Class RequestMoneyService
- * @package Fintech\Reload\Services
- *
  */
 class RequestMoneyService
 {
     /**
      * RequestMoneyService constructor.
-     * @param RequestMoneyRepository $requestMoneyRepository
      */
-    public function __construct(RequestMoneyRepository $requestMoneyRepository) {
+    public function __construct(RequestMoneyRepository $requestMoneyRepository)
+    {
         $this->requestMoneyRepository = $requestMoneyRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

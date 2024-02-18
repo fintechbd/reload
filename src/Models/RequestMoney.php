@@ -2,14 +2,10 @@
 
 namespace Fintech\Reload\Models;
 
-use Fintech\Core\Traits\AuditableTrait;
 use Fintech\Transaction\Models\Order;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RequestMoney extends Order
 {
-
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES

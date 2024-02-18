@@ -51,7 +51,6 @@ return [
     */
     'wallet_to_wallet_model' => \Fintech\Reload\Models\WalletToWallet::class,
 
-
     /*
     |--------------------------------------------------------------------------
     | RequestMoney Model

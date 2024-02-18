@@ -1,34 +1,33 @@
 <?php
 
 namespace Fintech\Reload\Http\Controllers;
+
 use Exception;
-use Fintech\Core\Exceptions\StoreOperationException;
-use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
+use Fintech\Core\Exceptions\StoreOperationException;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
-use Fintech\Reload\Http\Resources\RequestMoneyResource;
-use Fintech\Reload\Http\Resources\RequestMoneyCollection;
 use Fintech\Reload\Http\Requests\ImportRequestMoneyRequest;
+use Fintech\Reload\Http\Requests\IndexRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\StoreRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\UpdateRequestMoneyRequest;
-use Fintech\Reload\Http\Requests\IndexRequestMoneyRequest;
+use Fintech\Reload\Http\Resources\RequestMoneyCollection;
+use Fintech\Reload\Http\Resources\RequestMoneyResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
 /**
  * Class RequestMoneyController
- * @package Fintech\Reload\Http\Controllers
  *
  * @lrd:start
  * This class handle create, display, update, delete & restore
  * operation related to RequestMoney
- * @lrd:end
  *
+ * @lrd:end
  */
-
 class RequestMoneyController extends Controller
 {
     use ApiResponseTrait;
@@ -38,10 +37,8 @@ class RequestMoneyController extends Controller
      * Return a listing of the *RequestMoney* resource as collection.
      *
      * *```paginate=false``` returns all resource as list not pagination*
-     * @lrd:end
      *
-     * @param IndexRequestMoneyRequest $request
-     * @return RequestMoneyCollection|JsonResponse
+     * @lrd:end
      */
     public function index(IndexRequestMoneyRequest $request): RequestMoneyCollection|JsonResponse
     {
@@ -61,10 +58,9 @@ class RequestMoneyController extends Controller
     /**
      * @lrd:start
      * Create a new *RequestMoney* resource in storage.
+     *
      * @lrd:end
      *
-     * @param StoreRequestMoneyRequest $request
-     * @return JsonResponse
      * @throws StoreOperationException
      */
     public function store(StoreRequestMoneyRequest $request): JsonResponse
@@ -74,14 +70,14 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->create($inputs);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
             }
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Request Money']),
-                'id' => $requestMoney->id
-             ]);
+                'id' => $requestMoney->id,
+            ]);
 
         } catch (Exception $exception) {
 
@@ -92,10 +88,9 @@ class RequestMoneyController extends Controller
     /**
      * @lrd:start
      * Return a specified *RequestMoney* resource found by id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
-     * @return RequestMoneyResource|JsonResponse
      * @throws ModelNotFoundException
      */
     public function show(string|int $id): RequestMoneyResource|JsonResponse
@@ -104,7 +99,7 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
@@ -123,11 +118,9 @@ class RequestMoneyController extends Controller
     /**
      * @lrd:start
      * Update a specified *RequestMoney* resource using id.
+     *
      * @lrd:end
      *
-     * @param UpdateRequestMoneyRequest $request
-     * @param string|int $id
-     * @return JsonResponse
      * @throws ModelNotFoundException
      * @throws UpdateOperationException
      */
@@ -137,13 +130,13 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Reload::requestMoney()->update($id, $inputs)) {
+            if (! Reload::requestMoney()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -163,10 +156,11 @@ class RequestMoneyController extends Controller
     /**
      * @lrd:start
      * Soft delete a specified *RequestMoney* resource using id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
+     *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
@@ -176,11 +170,11 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!Reload::requestMoney()->destroy($id)) {
+            if (! Reload::requestMoney()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -201,9 +195,9 @@ class RequestMoneyController extends Controller
      * @lrd:start
      * Restore the specified *RequestMoney* resource from trash.
      * ** ```Soft Delete``` needs to enabled to use this feature**
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
      */
     public function restore(string|int $id)
@@ -212,11 +206,11 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id, true);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!Reload::requestMoney()->restore($id)) {
+            if (! Reload::requestMoney()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -239,9 +233,6 @@ class RequestMoneyController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param IndexRequestMoneyRequest $request
-     * @return JsonResponse
      */
     public function export(IndexRequestMoneyRequest $request): JsonResponse
     {
@@ -265,7 +256,6 @@ class RequestMoneyController extends Controller
      *
      * @lrd:end
      *
-     * @param ImportRequestMoneyRequest $request
      * @return RequestMoneyCollection|JsonResponse
      */
     public function import(ImportRequestMoneyRequest $request): JsonResponse
