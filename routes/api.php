@@ -24,6 +24,9 @@ if (Config::get('fintech.reload.enabled')) {
             Route::apiResource('currency-swaps', \Fintech\Reload\Http\Controllers\CurrencySwapController::class)->only(['index', 'store', 'show']);
             Route::apiResource('wallet-to-wallets', \Fintech\Reload\Http\Controllers\WalletToWalletController::class)->only(['index', 'store', 'show']);
 
-            //DO NOT REMOVE THIS LINE//
+            Route::apiResource('request-moneys', \Fintech\Reload\Http\Controllers\RequestMoneyController::class);
+    Route::post('request-moneys/{request_money}/restore', [\Fintech\Reload\Http\Controllers\RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
+
+    //DO NOT REMOVE THIS LINE//
         });
 }

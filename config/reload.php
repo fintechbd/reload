@@ -44,21 +44,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | WalletTransfer Model
-    |--------------------------------------------------------------------------
-    |
-    | This value will be used to across system where model is needed
-    */
-    'wallet_transfer_model' => \Fintech\Reload\Models\WalletTransfer::class,
-
-    /*
-    |--------------------------------------------------------------------------
     | WalletToWallet Model
     |--------------------------------------------------------------------------
     |
     | This value will be used to across system where model is needed
     */
     'wallet_to_wallet_model' => \Fintech\Reload\Models\WalletToWallet::class,
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RequestMoney Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'request_money_model' => \Fintech\Reload\Models\RequestMoney::class,
 
     //** Model Config Point Do not Remove **//
 
@@ -74,6 +75,7 @@ return [
         \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
         \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
         \Fintech\Reload\Interfaces\WalletToWalletRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository::class,
+        \Fintech\Reload\Interfaces\RequestMoneyRepository::class => \Fintech\Reload\Repositories\Eloquent\RequestMoneyRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],
