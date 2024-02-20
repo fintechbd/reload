@@ -59,10 +59,10 @@ class DepositCollection extends ResourceCollection
                 $data['sender_receiver_name'] = $deposit->senderReceiver?->name ?? null;
             }
             if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->name ?? null;
+                $data['service_name'] = $deposit->service?->service_name ?? null;
             }
             if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->name ?? null;
+                $data['service_name'] = $deposit->service?->service_name ?? null;
             }
             if (Core::packageExists('Transaction')) {
                 $data['transaction_form_name'] = $deposit->transactionForm?->name ?? null;

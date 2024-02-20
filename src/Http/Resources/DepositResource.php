@@ -55,7 +55,7 @@ class DepositResource extends JsonResource
             $data['sender_receiver_name'] = $this->senderReceiver?->name ?? null;
         }
         if (Core::packageExists('Business')) {
-            $data['service_name'] = $this->service?->name ?? null;
+            $data['service_name'] = $this->service?->service_name ?? null;
         }
 
         return $data;
