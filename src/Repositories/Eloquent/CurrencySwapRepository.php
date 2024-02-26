@@ -3,11 +3,11 @@
 namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Reload\Interfaces\CurrencySwapRepository as InterfacesCurrencySwapRepository;
+use Fintech\Reload\Models\CurrencySwap;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -17,9 +17,9 @@ class CurrencySwapRepository extends OrderRepository implements InterfacesCurren
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.currency_swap_model', \Fintech\Reload\Models\CurrencySwap::class));
+        $model = app(config('fintech.reload.currency_swap_model', CurrencySwap::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 

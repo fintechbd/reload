@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreWalletToWalletRequest extends FormRequest
@@ -17,7 +18,7 @@ class StoreWalletToWalletRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -26,7 +27,7 @@ class StoreWalletToWalletRequest extends FormRequest
             'source_country_id' => ['required', 'integer', 'min:1'],
             'destination_country_id' => ['required', 'integer', 'min:1', 'same:source_country_id'],
             'service_id' => ['required', 'integer', 'min:1'],
-            'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s')],
+            'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:' . date('Y-m-d H:i:s')],
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
             //'sender_receiver_id' => ['required', 'integer', 'min:1'],

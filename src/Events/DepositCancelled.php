@@ -2,6 +2,8 @@
 
 namespace Fintech\Reload\Events;
 
+use Fintech\Reload\Models\Deposit;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -16,7 +18,7 @@ class DepositCancelled
     /**
      * Create a new event instance.
      *
-     * @param  \Fintech\Reload\Models\Deposit  $deposit
+     * @param Deposit $deposit
      */
     public function __construct($deposit)
     {
@@ -26,7 +28,7 @@ class DepositCancelled
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {

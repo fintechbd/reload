@@ -3,11 +3,11 @@
 namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Reload\Interfaces\WalletToWalletRepository as InterfacesWalletToWalletRepository;
+use Fintech\Reload\Models\WalletToWallet;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -17,9 +17,9 @@ class WalletToWalletRepository extends OrderRepository implements InterfacesWall
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.wallet_to_wallet_model', \Fintech\Reload\Models\WalletToWallet::class));
+        $model = app(config('fintech.reload.wallet_to_wallet_model', WalletToWallet::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 

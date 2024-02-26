@@ -4,6 +4,7 @@ namespace Fintech\Reload\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\RequestMoneyRepository as InterfacesRequestMoneyRepository;
+use Fintech\Reload\Models\RequestMoney;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
@@ -16,9 +17,9 @@ class RequestMoneyRepository extends MongodbRepository implements InterfacesRequ
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.request_money_model', \Fintech\Reload\Models\RequestMoney::class));
+        $model = app(config('fintech.reload.request_money_model', RequestMoney::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
         }
 
@@ -36,7 +37,7 @@ class RequestMoneyRepository extends MongodbRepository implements InterfacesRequ
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

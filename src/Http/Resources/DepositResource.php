@@ -3,14 +3,16 @@
 namespace Fintech\Reload\Http\Resources;
 
 use Fintech\Core\Facades\Core;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use stdClass;
 
 class DepositResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request
+     * @param Request
      * @return array
      */
     public function toArray($request)
@@ -39,7 +41,7 @@ class DepositResource extends JsonResource
             'risk_profile' => $this->risk_profile ?? null,
             'notes' => $this->notes ?? null,
             'is_refunded' => $this->is_refunded ?? null,
-            'order_data' => $this->order_data ?? new \stdClass(),
+            'order_data' => $this->order_data ?? new stdClass(),
             'status' => $this->status ?? null,
             'created_at' => $this->created_at ?? null,
             'updated_at' => $this->updated_at ?? null,

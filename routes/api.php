@@ -1,5 +1,9 @@
 <?php
 
+use Fintech\Reload\Http\Controllers\CurrencySwapController;
+use Fintech\Reload\Http\Controllers\DepositController;
+use Fintech\Reload\Http\Controllers\RequestMoneyController;
+use Fintech\Reload\Http\Controllers\WalletToWalletController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -17,15 +21,15 @@ if (Config::get('fintech.reload.enabled')) {
     Route::prefix('reload')->name('reload.')
         ->middleware(config('fintech.auth.middleware'))
         ->group(function () {
-            Route::apiResource('deposits', \Fintech\Reload\Http\Controllers\DepositController::class)->only(['index', 'store', 'show']);
-            Route::post('deposits/{deposit}/reject', [\Fintech\Reload\Http\Controllers\DepositController::class, 'reject'])->name('deposits.reject');
-            Route::post('deposits/{deposit}/accept', [\Fintech\Reload\Http\Controllers\DepositController::class, 'accept'])->name('deposits.accept');
-            Route::post('deposits/{deposit}/cancel', [\Fintech\Reload\Http\Controllers\DepositController::class, 'cancel'])->name('deposits.cancel');
-            Route::apiResource('currency-swaps', \Fintech\Reload\Http\Controllers\CurrencySwapController::class)->only(['index', 'store', 'show']);
-            Route::apiResource('wallet-to-wallets', \Fintech\Reload\Http\Controllers\WalletToWalletController::class)->only(['index', 'store', 'show']);
+            Route::apiResource('deposits', DepositController::class)->only(['index', 'store', 'show']);
+            Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('deposits.reject');
+            Route::post('deposits/{deposit}/accept', [DepositController::class, 'accept'])->name('deposits.accept');
+            Route::post('deposits/{deposit}/cancel', [DepositController::class, 'cancel'])->name('deposits.cancel');
+            Route::apiResource('currency-swaps', CurrencySwapController::class)->only(['index', 'store', 'show']);
+            Route::apiResource('wallet-to-wallets', WalletToWalletController::class)->only(['index', 'store', 'show']);
 
-            Route::apiResource('request-moneys', \Fintech\Reload\Http\Controllers\RequestMoneyController::class);
-            Route::post('request-moneys/{request_money}/restore', [\Fintech\Reload\Http\Controllers\RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
+            Route::apiResource('request-moneys', RequestMoneyController::class);
+            Route::post('request-moneys/{request_money}/restore', [RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
 
             //DO NOT REMOVE THIS LINE//
         });

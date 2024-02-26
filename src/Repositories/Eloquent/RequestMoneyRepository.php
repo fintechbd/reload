@@ -3,10 +3,10 @@
 namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Reload\Interfaces\RequestMoneyRepository as InterfacesRequestMoneyRepository;
+use Fintech\Reload\Models\RequestMoney;
 use Fintech\Transaction\Repositories\Mongodb\OrderRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -16,9 +16,9 @@ class RequestMoneyRepository extends OrderRepository implements InterfacesReques
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.request_money_model', \Fintech\Reload\Models\RequestMoney::class));
+        $model = app(config('fintech.reload.request_money_model', RequestMoney::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 

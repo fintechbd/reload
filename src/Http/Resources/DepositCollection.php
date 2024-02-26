@@ -6,13 +6,14 @@ use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use stdClass;
 
 class DepositCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)
@@ -43,7 +44,7 @@ class DepositCollection extends ResourceCollection
                 'risk_profile' => $deposit->risk_profile ?? null,
                 'notes' => $deposit->notes ?? null,
                 'is_refunded' => $deposit->is_refunded ?? null,
-                'order_data' => $deposit->order_data ?? new \stdClass(),
+                'order_data' => $deposit->order_data ?? new stdClass(),
                 'status' => $deposit->status ?? null,
                 'created_at' => $deposit->created_at ?? null,
                 'updated_at' => $deposit->updated_at ?? null,

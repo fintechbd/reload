@@ -2,38 +2,43 @@
 
 namespace Fintech\Reload;
 
+use Fintech\Reload\Services\CurrencySwapService;
+use Fintech\Reload\Services\DepositService;
+use Fintech\Reload\Services\RequestMoneyService;
+use Fintech\Reload\Services\WalletToWalletService;
+
 class Reload
 {
     /**
-     * @return \Fintech\Reload\Services\DepositService
+     * @return DepositService
      */
     public function deposit()
     {
-        return app(\Fintech\Reload\Services\DepositService::class);
+        return app(DepositService::class);
     }
 
     /**
-     * @return \Fintech\Reload\Services\CurrencySwapService
+     * @return CurrencySwapService
      */
     public function currencySwap()
     {
-        return app(\Fintech\Reload\Services\CurrencySwapService::class);
+        return app(CurrencySwapService::class);
     }
 
     /**
-     * @return \Fintech\Reload\Services\WalletToWalletService
+     * @return WalletToWalletService
      */
     public function walletToWallet()
     {
-        return app(\Fintech\Reload\Services\WalletToWalletService::class);
+        return app(WalletToWalletService::class);
     }
 
     /**
-     * @return \Fintech\Reload\Services\RequestMoneyService
+     * @return RequestMoneyService
      */
     public function requestMoney()
     {
-        return app(\Fintech\Reload\Services\RequestMoneyService::class);
+        return app(RequestMoneyService::class);
     }
 
     //** Crud Service Method Point Do not Remove **//

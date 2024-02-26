@@ -17,20 +17,6 @@ class RequestMoneyService
         $this->requestMoneyRepository = $requestMoneyRepository;
     }
 
-    /**
-     * @return mixed
-     */
-    public function list(array $filters = [])
-    {
-        return $this->requestMoneyRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = [])
-    {
-        return $this->requestMoneyRepository->create($inputs);
-    }
-
     public function find($id, $onlyTrashed = false)
     {
         return $this->requestMoneyRepository->find($id, $onlyTrashed);
@@ -56,8 +42,22 @@ class RequestMoneyService
         return $this->requestMoneyRepository->list($filters);
     }
 
+    /**
+     * @return mixed
+     */
+    public function list(array $filters = [])
+    {
+        return $this->requestMoneyRepository->list($filters);
+
+    }
+
     public function import(array $filters)
     {
         return $this->requestMoneyRepository->create($filters);
+    }
+
+    public function create(array $inputs = [])
+    {
+        return $this->requestMoneyRepository->create($inputs);
     }
 }

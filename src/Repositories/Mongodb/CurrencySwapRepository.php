@@ -4,6 +4,7 @@ namespace Fintech\Reload\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\CurrencySwapRepository as InterfacesCurrencySwapRepository;
+use Fintech\Reload\Models\CurrencySwap;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
@@ -16,9 +17,9 @@ class CurrencySwapRepository extends MongodbRepository implements InterfacesCurr
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.currency_swap_model', \Fintech\Reload\Models\CurrencySwap::class));
+        $model = app(config('fintech.reload.currency_swap_model', CurrencySwap::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
         }
 
@@ -36,7 +37,7 @@ class CurrencySwapRepository extends MongodbRepository implements InterfacesCurr
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

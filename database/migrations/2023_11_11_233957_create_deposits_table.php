@@ -1,17 +1,17 @@
 <?php
 
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        if (! Schema::hasTable('orders')) {
+        if (!Schema::hasTable('orders')) {
             Schema::create('orders', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('source_country_id')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->longText('notes')->nullable();
                 $table->boolean('is_refunded')->nullable()->default(false)->comment('if money has refunded');
                 $table->json('order_data')->nullable();
-                $table->string('status')->default(\Fintech\Core\Enums\Transaction\OrderStatus::Processing->value);
+                $table->string('status')->default(OrderStatus::Processing->value);
                 $table->foreignId('creator_id')->nullable();
                 $table->foreignId('editor_id')->nullable();
                 $table->foreignId('destroyer_id')->nullable();

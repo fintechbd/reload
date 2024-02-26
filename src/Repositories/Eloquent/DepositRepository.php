@@ -3,11 +3,11 @@
 namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Reload\Interfaces\DepositRepository as InterfacesDepositRepository;
+use Fintech\Reload\Models\Deposit;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -17,9 +17,9 @@ class DepositRepository extends OrderRepository implements InterfacesDepositRepo
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.deposit_model', \Fintech\Reload\Models\Deposit::class));
+        $model = app(config('fintech.reload.deposit_model', Deposit::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 

@@ -18,20 +18,6 @@ class DepositService
 
     }
 
-    /**
-     * @return mixed
-     */
-    public function list(array $filters = [])
-    {
-        return $this->depositRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = [])
-    {
-        return $this->depositRepository->create($inputs);
-    }
-
     public function find($id, $onlyTrashed = false)
     {
         return $this->depositRepository->find($id, $onlyTrashed);
@@ -57,9 +43,23 @@ class DepositService
         return $this->depositRepository->list($filters);
     }
 
+    /**
+     * @return mixed
+     */
+    public function list(array $filters = [])
+    {
+        return $this->depositRepository->list($filters);
+
+    }
+
     public function import(array $filters)
     {
         return $this->depositRepository->create($filters);
+    }
+
+    public function create(array $inputs = [])
+    {
+        return $this->depositRepository->create($inputs);
     }
 
     /**
@@ -87,7 +87,7 @@ class DepositService
         $deposit->order_detail_cause_name = 'cash_deposit';
         $deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
-        $deposit->notes = 'Point purchases by '.$master_user_name;
+        $deposit->notes = 'Point purchases by ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -100,7 +100,7 @@ class DepositService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Point Sold to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Point Sold to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -108,7 +108,7 @@ class DepositService
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $deposit->order_detail_cause_name = 'charge';
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $deposit->notes = 'Deposit Charge Receive from '.$master_user_name;
+        $deposit->notes = 'Deposit Charge Receive from ' . $master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
@@ -118,14 +118,14 @@ class DepositService
         $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Send to '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Send to ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
         $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
-        $deposit->notes = 'Discount form '.$master_user_name;
+        $deposit->notes = 'Discount form ' . $master_user_name;
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -136,7 +136,7 @@ class DepositService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -185,7 +185,7 @@ class DepositService
         $data->order_detail_cause_name = 'cash_deposit';
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Point Refund form '.$master_user_name;
+        $data->notes = 'Point Refund form ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -196,7 +196,7 @@ class DepositService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Point Refund to'.$user_name;
+        $orderDetailStoreForMaster->notes = 'Point Refund to' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -204,7 +204,7 @@ class DepositService
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Deposit Charge Send to '.$master_user_name;
+        $data->notes = 'Deposit Charge Send to ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -214,14 +214,14 @@ class DepositService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Receive from '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Receive from ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Deposit Discount form '.$master_user_name;
+        $data->notes = 'Deposit Discount form ' . $master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
@@ -233,7 +233,7 @@ class DepositService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 

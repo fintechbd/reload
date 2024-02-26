@@ -2,13 +2,17 @@
 
 namespace Fintech\Reload\Facades;
 
+use Fintech\Reload\Services\CurrencySwapService;
+use Fintech\Reload\Services\DepositService;
+use Fintech\Reload\Services\RequestMoneyService;
+use Fintech\Reload\Services\WalletToWalletService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \Fintech\Reload\Services\DepositService deposit()
- * @method static \Fintech\Reload\Services\CurrencySwapService currencySwap()
- * @method static \Fintech\Reload\Services\WalletToWalletService walletToWallet()
- * @method static \Fintech\Reload\Services\RequestMoneyService requestMoney()
+ * @method static DepositService deposit()
+ * @method static CurrencySwapService currencySwap()
+ * @method static WalletToWalletService walletToWallet()
+ * @method static RequestMoneyService requestMoney()
  *                                                                            // Crud Service Method Point Do not Remove //
  *
  * @see \Fintech\Reload\Reload

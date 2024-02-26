@@ -5,8 +5,8 @@ namespace Fintech\Reload\Services;
 use Fintech\Reload\Interfaces\CurrencySwapRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class CurrencySwapService
@@ -23,23 +23,12 @@ class CurrencySwapService
         $this->currencySwapRepository = $currencySwapRepository;
     }
 
-    public function list(array $filters = []): Paginator|Collection
-    {
-        return $this->currencySwapRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
-    {
-        return $this->currencySwapRepository->create($inputs);
-    }
-
-    public function find($id, $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function find($id, $onlyTrashed = false): Model|Model|null
     {
         return $this->currencySwapRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function update($id, array $inputs = []): Model|Model|null
     {
         return $this->currencySwapRepository->update($id, $inputs);
     }
@@ -59,9 +48,20 @@ class CurrencySwapService
         return $this->currencySwapRepository->list($filters);
     }
 
-    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function list(array $filters = []): Paginator|Collection
+    {
+        return $this->currencySwapRepository->list($filters);
+
+    }
+
+    public function import(array $filters): Model|Model|null
     {
         return $this->currencySwapRepository->create($filters);
+    }
+
+    public function create(array $inputs = []): Model|Model|null
+    {
+        return $this->currencySwapRepository->create($inputs);
     }
 
     /**
@@ -93,7 +93,7 @@ class CurrencySwapService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Send to '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Payment Send to ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -104,7 +104,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Receive From'.$user_name;
+        $orderDetailStoreForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Payment Receive From' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -112,7 +112,7 @@ class CurrencySwapService
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Send to '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Send to ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -122,7 +122,7 @@ class CurrencySwapService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Receive from '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Receive from ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -130,7 +130,7 @@ class CurrencySwapService
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount form ' . $master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -141,7 +141,7 @@ class CurrencySwapService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -190,7 +190,7 @@ class CurrencySwapService
         $data->order_detail_cause_name = 'cash_withdraw';
         //$data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Refund From '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Refund From ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -203,7 +203,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -211,7 +211,7 @@ class CurrencySwapService
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Receive from '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Receive from ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -221,7 +221,7 @@ class CurrencySwapService
         $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Send to '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Send to ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -229,7 +229,7 @@ class CurrencySwapService
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
+        $data->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount form ' . $master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
@@ -240,7 +240,7 @@ class CurrencySwapService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Currency Swap ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -289,7 +289,7 @@ class CurrencySwapService
         $deposit->order_detail_cause_name = 'cash_deposit';
         //$deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
-        $deposit->notes = 'Currency Swap receive from '.$master_user_name;
+        $deposit->notes = 'Currency Swap receive from ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -302,7 +302,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Currency Swap send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Currency Swap send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
