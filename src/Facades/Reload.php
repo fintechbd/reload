@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static CurrencySwapService currencySwap()
  * @method static WalletToWalletService walletToWallet()
  * @method static RequestMoneyService requestMoney()
- *                                                                            // Crud Service Method Point Do not Remove //
+ *                                                   // Crud Service Method Point Do not Remove //
  *
  * @see \Fintech\Reload\Reload
  */

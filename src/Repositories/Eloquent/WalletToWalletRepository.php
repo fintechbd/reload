@@ -8,7 +8,6 @@ use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use InvalidArgumentException;
 
 /**
  * Class WalletToWalletRepository

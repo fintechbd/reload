@@ -91,7 +91,7 @@ class WalletToWalletController extends Controller
                     'currency' => $request->input('currency', $depositor->profile?->presentCountry?->currency),
                 ])->first();
 
-                if (!$depositAccount) {
+                if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
 
@@ -101,7 +101,7 @@ class WalletToWalletController extends Controller
                     'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency),
                 ])->first();
 
-                if (!$receiverDepositAccount) {
+                if (! $receiverDepositAccount) {
                     throw new Exception("Receiver don't have account deposit balance");
                 }
 
@@ -110,8 +110,8 @@ class WalletToWalletController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->present_country_id),
                 ])->first();
 
-                if (!$masterUser) {
-                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
                 //set pre defined conditions of deposit
@@ -133,7 +133,7 @@ class WalletToWalletController extends Controller
                 unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                 $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-                $inputs['notes'] = 'Wallet to wallet transfer to ' . $receiver->name;
+                $inputs['notes'] = 'Wallet to wallet transfer to '.$receiver->name;
                 $inputs['order_data']['sender_id'] = $depositor->getKey();
                 $inputs['order_data']['sender_name'] = $depositor->name;
                 $inputs['order_data']['created_by'] = $depositor->name;
@@ -153,7 +153,7 @@ class WalletToWalletController extends Controller
                 unset($inputs['pin'], $inputs['password']);
                 $walletToWallet = Reload::walletToWallet()->create($inputs);
 
-                if (!$walletToWallet) {
+                if (! $walletToWallet) {
                     throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
                 }
 
@@ -172,21 +172,21 @@ class WalletToWalletController extends Controller
 
                 //update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float)$depositedUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-                if (((float)$depositedUpdatedAccount['user_account_data']['available_amount']) < ((float)config('fintech.transaction.minimum_balance'))) {
+                if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
                     throw new Exception(__('Insufficient balance!', [
-                        'previous_amount' => ((float)$depositedUpdatedAccount['user_account_data']['available_amount']),
-                        'current_amount' => ((float)$userUpdatedBalance['spent_amount']),
+                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                     ]));
                 }
-                $order_data['order_data']['previous_amount'] = (float)$depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = (float)$userUpdatedBalance['current_amount'];
-                if (!Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
+                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
-                        'previous_amount' => ((float)$depositedUpdatedAccount['user_account_data']['available_amount']),
-                        'current_amount' => ((float)$userUpdatedBalance['spent_amount']),
+                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                     ]));
                 }
 
@@ -225,13 +225,13 @@ class WalletToWalletController extends Controller
 
             $walletToWallet = Reload::walletToWallet()->find($id);
 
-            if (!$walletToWallet) {
+            if (! $walletToWallet) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Reload::walletToWallet()->update($id, $inputs)) {
+            if (! Reload::walletToWallet()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
@@ -265,18 +265,18 @@ class WalletToWalletController extends Controller
             'currency' => $receiverInputs['converted_currency'],
         ])->first();
 
-        if (!$depositAccount) {
+        if (! $depositAccount) {
             throw new Exception("User don't have account deposit balance");
         }
 
         //set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
-        $receiverInputs['notes'] = 'Wallet to Wallet receive from ' . $deposit['order_data']['sender_name'];
+        $receiverInputs['notes'] = 'Wallet to Wallet receive from '.$deposit['order_data']['sender_name'];
         $receiverInputs['parent_id'] = $id;
 
         $walletToWallet = Reload::walletToWallet()->create($receiverInputs);
 
-        if (!$walletToWallet) {
+        if (! $walletToWallet) {
             throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
         }
 
@@ -295,15 +295,15 @@ class WalletToWalletController extends Controller
 
         //update User Account
         $depositedUpdatedAccount = $depositedAccount->toArray();
-        $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float)$depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float)$userUpdatedBalance['deposit_amount'];
-        $depositedUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
+        $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $userUpdatedBalance['deposit_amount'];
+        $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-        $order_data['order_data']['previous_amount'] = (float)$depositedAccount->user_account_data['available_amount'];
-        $order_data['order_data']['current_amount'] = (float)$userUpdatedBalance['current_amount'];
-        if (!Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+        $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+        $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
+        if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
             throw new Exception(__('User Account Balance does not update', [
-                'previous_amount' => ((float)$depositedUpdatedAccount['user_account_data']['available_amount']),
-                'current_amount' => ((float)$userUpdatedBalance['spent_amount']),
+                'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
             ]));
         }
         Reload::walletToWallet()->update($walletToWallet->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
@@ -325,7 +325,7 @@ class WalletToWalletController extends Controller
 
             $walletToWallet = Reload::walletToWallet()->find($id);
 
-            if (!$walletToWallet) {
+            if (! $walletToWallet) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
@@ -353,11 +353,11 @@ class WalletToWalletController extends Controller
 
             $walletToWallet = Reload::walletToWallet()->find($id);
 
-            if (!$walletToWallet) {
+            if (! $walletToWallet) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
-            if (!Reload::walletToWallet()->destroy($id)) {
+            if (! Reload::walletToWallet()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
@@ -387,11 +387,11 @@ class WalletToWalletController extends Controller
 
             $walletToWallet = Reload::walletToWallet()->find($id, true);
 
-            if (!$walletToWallet) {
+            if (! $walletToWallet) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
-            if (!Reload::walletToWallet()->restore($id)) {
+            if (! Reload::walletToWallet()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }

@@ -70,7 +70,7 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->create($inputs);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
             }
 
@@ -99,7 +99,7 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
@@ -130,13 +130,13 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Reload::requestMoney()->update($id, $inputs)) {
+            if (! Reload::requestMoney()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -170,11 +170,11 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!Reload::requestMoney()->destroy($id)) {
+            if (! Reload::requestMoney()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -206,11 +206,11 @@ class RequestMoneyController extends Controller
 
             $requestMoney = Reload::requestMoney()->find($id, true);
 
-            if (!$requestMoney) {
+            if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!Reload::requestMoney()->restore($id)) {
+            if (! Reload::requestMoney()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.reload.request_money_model'), $id);
             }

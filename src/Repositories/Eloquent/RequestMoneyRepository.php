@@ -24,6 +24,7 @@ class RequestMoneyRepository extends OrderRepository implements InterfacesReques
      * filtered options
      *
      * @return Paginator|Collection
+     *
      * @throws BindingResolutionException
      */
     public function list(array $filters = [])
