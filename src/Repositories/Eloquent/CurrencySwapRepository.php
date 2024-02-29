@@ -17,13 +17,7 @@ class CurrencySwapRepository extends OrderRepository implements InterfacesCurren
 {
     public function __construct()
     {
-        $model = app(config('fintech.reload.currency_swap_model', CurrencySwap::class));
-
-        if (!$model instanceof Model) {
-            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-        }
-
-        $this->model = $model;
+        parent::__construct(config('fintech.reload.currency_swap_model', CurrencySwap::class));
     }
 
     /**
