@@ -61,6 +61,9 @@
     "extra": {
         "laravel": {
             "providers": [
+                "Fintech\\Reload\\EventServiceProvider",
+                "Fintech\\Reload\\RouteServiceProvider",
+                "Fintech\\Reload\\RepositoryServiceProvider",
                 "Fintech\\Reload\\ReloadServiceProvider"
             ],
             "aliases": {
