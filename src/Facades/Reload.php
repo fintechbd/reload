@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static CurrencySwapService currencySwap()
  * @method static WalletToWalletService walletToWallet()
  * @method static RequestMoneyService requestMoney()
- *                                                   // Crud Service Method Point Do not Remove //
+ *                                                   @method static \Fintech\Reload\Services\WalletToBankService walletToBank()
+ * @method static \Fintech\Reload\Services\WalletToAtmService walletToAtm()
+ * @method static \Fintech\Reload\Services\WalletToPrepaidCardService walletToPrepaidCard()
+ * // Crud Service Method Point Do not Remove //
  *
  * @see \Fintech\Reload\Reload
  */

@@ -69,6 +69,36 @@ return [
     */
     'request_money_model' => RequestMoney::class,
 
+    
+    /*
+    |--------------------------------------------------------------------------
+    | WalletToBank Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'wallet_to_bank_model' => \Fintech\Reload\Models\WalletToBank::class,
+
+    
+    /*
+    |--------------------------------------------------------------------------
+    | WalletToAtm Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'wallet_to_atm_model' => \Fintech\Reload\Models\WalletToAtm::class,
+
+    
+    /*
+    |--------------------------------------------------------------------------
+    | WalletToPrepaidCard Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'wallet_to_prepaid_card_model' => \Fintech\Reload\Models\WalletToPrepaidCard::class,
+
     //** Model Config Point Do not Remove **//
 
     /*
@@ -84,6 +114,12 @@ return [
         \Fintech\Reload\Interfaces\CurrencySwapRepository::class => CurrencySwapRepository::class,
         \Fintech\Reload\Interfaces\WalletToWalletRepository::class => WalletToWalletRepository::class,
         \Fintech\Reload\Interfaces\RequestMoneyRepository::class => RequestMoneyRepository::class,
+
+        \Fintech\Reload\Interfaces\WalletToBankRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToBankRepository::class,
+
+        \Fintech\Reload\Interfaces\WalletToAtmRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToAtmRepository::class,
+
+        \Fintech\Reload\Interfaces\WalletToPrepaidCardRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToPrepaidCardRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],

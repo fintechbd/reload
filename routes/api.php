@@ -31,6 +31,15 @@ if (Config::get('fintech.reload.enabled')) {
             Route::apiResource('request-moneys', RequestMoneyController::class);
             Route::post('request-moneys/{request_money}/restore', [RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
 
-            //DO NOT REMOVE THIS LINE//
+            Route::apiResource('wallet-to-banks', \Fintech\Reload\Http\Controllers\WalletToBankController::class);
+    Route::post('wallet-to-banks/{wallet_to_bank}/restore', [\Fintech\Reload\Http\Controllers\WalletToBankController::class, 'restore'])->name('wallet-to-banks.restore');
+
+    Route::apiResource('wallet-to-atms', \Fintech\Reload\Http\Controllers\WalletToAtmController::class);
+    Route::post('wallet-to-atms/{wallet_to_atm}/restore', [\Fintech\Reload\Http\Controllers\WalletToAtmController::class, 'restore'])->name('wallet-to-atms.restore');
+
+    Route::apiResource('wallet-to-prepaid-cards', \Fintech\Reload\Http\Controllers\WalletToPrepaidCardController::class);
+    Route::post('wallet-to-prepaid-cards/{wallet_to_prepaid_card}/restore', [\Fintech\Reload\Http\Controllers\WalletToPrepaidCardController::class, 'restore'])->name('wallet-to-prepaid-cards.restore');
+
+    //DO NOT REMOVE THIS LINE//
         });
 }
