@@ -1,34 +1,33 @@
 <?php
 
 namespace Fintech\Reload\Http\Controllers;
+
 use Exception;
-use Fintech\Core\Exceptions\StoreOperationException;
-use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
+use Fintech\Core\Exceptions\StoreOperationException;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
-use Fintech\Reload\Http\Resources\WalletToBankResource;
-use Fintech\Reload\Http\Resources\WalletToBankCollection;
 use Fintech\Reload\Http\Requests\ImportWalletToBankRequest;
+use Fintech\Reload\Http\Requests\IndexWalletToBankRequest;
 use Fintech\Reload\Http\Requests\StoreWalletToBankRequest;
 use Fintech\Reload\Http\Requests\UpdateWalletToBankRequest;
-use Fintech\Reload\Http\Requests\IndexWalletToBankRequest;
+use Fintech\Reload\Http\Resources\WalletToBankCollection;
+use Fintech\Reload\Http\Resources\WalletToBankResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
 /**
  * Class WalletToBankController
- * @package Fintech\Reload\Http\Controllers
  *
  * @lrd:start
  * This class handle create, display, update, delete & restore
  * operation related to WalletToBank
- * @lrd:end
  *
+ * @lrd:end
  */
-
 class WalletToBankController extends Controller
 {
     use ApiResponseTrait;
@@ -38,10 +37,8 @@ class WalletToBankController extends Controller
      * Return a listing of the *WalletToBank* resource as collection.
      *
      * *```paginate=false``` returns all resource as list not pagination*
-     * @lrd:end
      *
-     * @param IndexWalletToBankRequest $request
-     * @return WalletToBankCollection|JsonResponse
+     * @lrd:end
      */
     public function index(IndexWalletToBankRequest $request): WalletToBankCollection|JsonResponse
     {
@@ -61,10 +58,9 @@ class WalletToBankController extends Controller
     /**
      * @lrd:start
      * Create a new *WalletToBank* resource in storage.
+     *
      * @lrd:end
      *
-     * @param StoreWalletToBankRequest $request
-     * @return JsonResponse
      * @throws StoreOperationException
      */
     public function store(StoreWalletToBankRequest $request): JsonResponse
@@ -74,14 +70,14 @@ class WalletToBankController extends Controller
 
             $walletToBank = Reload::walletToBank()->create($inputs);
 
-            if (!$walletToBank) {
+            if (! $walletToBank) {
                 throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_bank_model'));
             }
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Wallet To Bank']),
-                'id' => $walletToBank->id
-             ]);
+                'id' => $walletToBank->id,
+            ]);
 
         } catch (Exception $exception) {
 
@@ -92,10 +88,9 @@ class WalletToBankController extends Controller
     /**
      * @lrd:start
      * Return a specified *WalletToBank* resource found by id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
-     * @return WalletToBankResource|JsonResponse
      * @throws ModelNotFoundException
      */
     public function show(string|int $id): WalletToBankResource|JsonResponse
@@ -104,7 +99,7 @@ class WalletToBankController extends Controller
 
             $walletToBank = Reload::walletToBank()->find($id);
 
-            if (!$walletToBank) {
+            if (! $walletToBank) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
@@ -123,11 +118,9 @@ class WalletToBankController extends Controller
     /**
      * @lrd:start
      * Update a specified *WalletToBank* resource using id.
+     *
      * @lrd:end
      *
-     * @param UpdateWalletToBankRequest $request
-     * @param string|int $id
-     * @return JsonResponse
      * @throws ModelNotFoundException
      * @throws UpdateOperationException
      */
@@ -137,13 +130,13 @@ class WalletToBankController extends Controller
 
             $walletToBank = Reload::walletToBank()->find($id);
 
-            if (!$walletToBank) {
+            if (! $walletToBank) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Reload::walletToBank()->update($id, $inputs)) {
+            if (! Reload::walletToBank()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
@@ -163,10 +156,11 @@ class WalletToBankController extends Controller
     /**
      * @lrd:start
      * Soft delete a specified *WalletToBank* resource using id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
+     *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
@@ -176,11 +170,11 @@ class WalletToBankController extends Controller
 
             $walletToBank = Reload::walletToBank()->find($id);
 
-            if (!$walletToBank) {
+            if (! $walletToBank) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
-            if (!Reload::walletToBank()->destroy($id)) {
+            if (! Reload::walletToBank()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
@@ -201,9 +195,9 @@ class WalletToBankController extends Controller
      * @lrd:start
      * Restore the specified *WalletToBank* resource from trash.
      * ** ```Soft Delete``` needs to enabled to use this feature**
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
      */
     public function restore(string|int $id)
@@ -212,11 +206,11 @@ class WalletToBankController extends Controller
 
             $walletToBank = Reload::walletToBank()->find($id, true);
 
-            if (!$walletToBank) {
+            if (! $walletToBank) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
-            if (!Reload::walletToBank()->restore($id)) {
+            if (! Reload::walletToBank()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
@@ -239,9 +233,6 @@ class WalletToBankController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param IndexWalletToBankRequest $request
-     * @return JsonResponse
      */
     public function export(IndexWalletToBankRequest $request): JsonResponse
     {
@@ -265,7 +256,6 @@ class WalletToBankController extends Controller
      *
      * @lrd:end
      *
-     * @param ImportWalletToBankRequest $request
      * @return WalletToBankCollection|JsonResponse
      */
     public function import(ImportWalletToBankRequest $request): JsonResponse

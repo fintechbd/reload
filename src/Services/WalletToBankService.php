@@ -2,26 +2,22 @@
 
 namespace Fintech\Reload\Services;
 
-
 use Fintech\Reload\Interfaces\WalletToBankRepository;
 
 /**
  * Class WalletToBankService
- * @package Fintech\Reload\Services
- *
  */
 class WalletToBankService
 {
     /**
      * WalletToBankService constructor.
-     * @param WalletToBankRepository $walletToBankRepository
      */
-    public function __construct(WalletToBankRepository $walletToBankRepository) {
+    public function __construct(WalletToBankRepository $walletToBankRepository)
+    {
         $this->walletToBankRepository = $walletToBankRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

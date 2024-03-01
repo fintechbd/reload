@@ -6,18 +6,15 @@ use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository as InterfacesWalletToPrepaidCardRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use MongoDB\Laravel\Eloquent\Model;
-use InvalidArgumentException;
 
 /**
  * Class WalletToPrepaidCardRepository
- * @package Fintech\Reload\Repositories\Mongodb
  */
 class WalletToPrepaidCardRepository extends MongodbRepository implements InterfacesWalletToPrepaidCardRepository
 {
     public function __construct()
     {
-       parent::__construct(config('fintech.reload.wallet_to_prepaid_card_model', \Fintech\Reload\Models\WalletToPrepaidCard::class));
+        parent::__construct(config('fintech.reload.wallet_to_prepaid_card_model', \Fintech\Reload\Models\WalletToPrepaidCard::class));
     }
 
     /**

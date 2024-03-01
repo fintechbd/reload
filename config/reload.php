@@ -69,7 +69,6 @@ return [
     */
     'request_money_model' => RequestMoney::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | WalletToBank Model
@@ -79,7 +78,6 @@ return [
     */
     'wallet_to_bank_model' => \Fintech\Reload\Models\WalletToBank::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | WalletToAtm Model
@@ -89,7 +87,6 @@ return [
     */
     'wallet_to_atm_model' => \Fintech\Reload\Models\WalletToAtm::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | WalletToPrepaidCard Model
