@@ -21,12 +21,12 @@ class WalletToWalletService
         $this->walletToWalletRepository = $walletToWalletRepository;
     }
 
-    public function find($id, $onlyTrashed = false): Model|null
+    public function find($id, $onlyTrashed = false): ?Model
     {
         return $this->walletToWalletRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|null
+    public function update($id, array $inputs = []): ?Model
     {
         return $this->walletToWalletRepository->update($id, $inputs);
     }
@@ -52,12 +52,12 @@ class WalletToWalletService
 
     }
 
-    public function import(array $filters): Model|null
+    public function import(array $filters): ?Model
     {
         return $this->walletToWalletRepository->create($filters);
     }
 
-    public function create(array $inputs = []): Model|null
+    public function create(array $inputs = []): ?Model
     {
         return $this->walletToWalletRepository->create($inputs);
     }

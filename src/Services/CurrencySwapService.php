@@ -23,12 +23,12 @@ class CurrencySwapService
         $this->currencySwapRepository = $currencySwapRepository;
     }
 
-    public function find($id, $onlyTrashed = false): Model|null
+    public function find($id, $onlyTrashed = false): ?Model
     {
         return $this->currencySwapRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|null
+    public function update($id, array $inputs = []): ?Model
     {
         return $this->currencySwapRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class CurrencySwapService
 
     }
 
-    public function import(array $filters): Model|null
+    public function import(array $filters): ?Model
     {
         return $this->currencySwapRepository->create($filters);
     }
 
-    public function create(array $inputs = []): Model|null
+    public function create(array $inputs = []): ?Model
     {
         return $this->currencySwapRepository->create($inputs);
     }
