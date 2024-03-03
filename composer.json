@@ -62,9 +62,7 @@
         "laravel": {
             "providers": [
                 "Fintech\\Reload\\EventServiceProvider",
-                "Fintech\\Reload\\RouteServiceProvider",
-                "Fintech\\Reload\\RepositoryServiceProvider",
-                "Fintech\\Reload\\ReloadServiceProvider"
+                "Fintech\\Reload\\RouteServiceProvider"
             ],
             "aliases": {
                 "Reload": "Fintech\\Reload\\Facades\\Reload"
