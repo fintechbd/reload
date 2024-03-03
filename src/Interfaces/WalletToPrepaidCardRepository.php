@@ -4,8 +4,8 @@ namespace Fintech\Reload\Interfaces;
 
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
-use MongoDB\Laravel\Eloquent\Model as MongodbModel;
+use Fintech\Core\Abstracts\BaseModel;
+
 
 /**
  * Interface WalletToPrepaidCardRepository
@@ -26,7 +26,7 @@ interface WalletToPrepaidCardRepository
      * Create a new entry resource
      *
      * @param array $attributes
-     * @return EloquentModel|MongodbModel|null
+     * @return BaseModel
      */
     public function create(array $attributes = []);
 
@@ -35,7 +35,7 @@ interface WalletToPrepaidCardRepository
      *
      * @param int|string $id
      * @param array $attributes
-     * @return EloquentModel|MongodbModel|null
+     * @return BaseModel
      */
     public function update(int|string $id, array $attributes = []);
 
@@ -44,7 +44,7 @@ interface WalletToPrepaidCardRepository
      *
      * @param int|string $id
      * @param bool $onlyTrashed
-     * @return EloquentModel|MongodbModel|null
+     * @return BaseModel
      */
     public function find(int|string $id, $onlyTrashed = false);
 
