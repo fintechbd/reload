@@ -2,14 +2,14 @@
 
 namespace Fintech\Reload\Models;
 
-use Fintech\Core\Traits\AuditableTrait;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Traits\AuditableTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WalletToAtm extends BaseModel
 {
-   use AuditableTrait;
-   use SoftDeletes;
+    use AuditableTrait;
+    use SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------

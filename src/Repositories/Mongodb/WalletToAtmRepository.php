@@ -6,18 +6,15 @@ use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\WalletToAtmRepository as InterfacesWalletToAtmRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use MongoDB\Laravel\Eloquent\Model;
-use InvalidArgumentException;
 
 /**
  * Class WalletToAtmRepository
- * @package Fintech\Reload\Repositories\Mongodb
  */
 class WalletToAtmRepository extends MongodbRepository implements InterfacesWalletToAtmRepository
 {
     public function __construct()
     {
-       parent::__construct(config('fintech.reload.wallet_to_atm_model', \Fintech\Reload\Models\WalletToAtm::class));
+        parent::__construct(config('fintech.reload.wallet_to_atm_model', \Fintech\Reload\Models\WalletToAtm::class));
     }
 
     /**

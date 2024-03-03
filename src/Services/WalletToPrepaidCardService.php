@@ -2,26 +2,22 @@
 
 namespace Fintech\Reload\Services;
 
-
 use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository;
 
 /**
  * Class WalletToPrepaidCardService
- * @package Fintech\Reload\Services
- *
  */
 class WalletToPrepaidCardService
 {
     /**
      * WalletToPrepaidCardService constructor.
-     * @param WalletToPrepaidCardRepository $walletToPrepaidCardRepository
      */
-    public function __construct(WalletToPrepaidCardRepository $walletToPrepaidCardRepository) {
+    public function __construct(WalletToPrepaidCardRepository $walletToPrepaidCardRepository)
+    {
         $this->walletToPrepaidCardRepository = $walletToPrepaidCardRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

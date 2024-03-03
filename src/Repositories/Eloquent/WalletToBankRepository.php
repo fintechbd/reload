@@ -6,18 +6,15 @@ use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\WalletToBankRepository as InterfacesWalletToBankRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
 
 /**
  * Class WalletToBankRepository
- * @package Fintech\Reload\Repositories\Eloquent
  */
 class WalletToBankRepository extends EloquentRepository implements InterfacesWalletToBankRepository
 {
     public function __construct()
     {
-       parent::__construct(config('fintech.reload.wallet_to_bank_model', \Fintech\Reload\Models\WalletToBank::class));
+        parent::__construct(config('fintech.reload.wallet_to_bank_model', \Fintech\Reload\Models\WalletToBank::class));
     }
 
     /**
