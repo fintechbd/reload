@@ -2,11 +2,11 @@
 
 namespace Fintech\Reload\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Reload\Interfaces\CurrencySwapRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class CurrencySwapService
@@ -23,12 +23,12 @@ class CurrencySwapService
         $this->currencySwapRepository = $currencySwapRepository;
     }
 
-    public function find($id, $onlyTrashed = false): ?Model
+    public function find($id, $onlyTrashed = false): ?BaseModel
     {
         return $this->currencySwapRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): ?Model
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->currencySwapRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class CurrencySwapService
 
     }
 
-    public function import(array $filters): ?Model
+    public function import(array $filters): ?BaseModel
     {
         return $this->currencySwapRepository->create($filters);
     }
 
-    public function create(array $inputs = []): ?Model
+    public function create(array $inputs = []): ?BaseModel
     {
         return $this->currencySwapRepository->create($inputs);
     }

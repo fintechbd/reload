@@ -2,11 +2,11 @@
 
 namespace Fintech\Reload\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Reload\Interfaces\WalletToWalletRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class WalletToWalletService
@@ -16,17 +16,16 @@ class WalletToWalletService
     /**
      * WalletToWalletService constructor.
      */
-    public function __construct(WalletToWalletRepository $walletToWalletRepository)
+    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository)
     {
-        $this->walletToWalletRepository = $walletToWalletRepository;
     }
 
-    public function find($id, $onlyTrashed = false): ?Model
+    public function find($id, $onlyTrashed = false): ?BaseModel
     {
         return $this->walletToWalletRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): ?Model
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->walletToWalletRepository->update($id, $inputs);
     }
@@ -52,12 +51,12 @@ class WalletToWalletService
 
     }
 
-    public function import(array $filters): ?Model
+    public function import(array $filters): ?BaseModel
     {
         return $this->walletToWalletRepository->create($filters);
     }
 
-    public function create(array $inputs = []): ?Model
+    public function create(array $inputs = []): ?BaseModel
     {
         return $this->walletToWalletRepository->create($inputs);
     }
