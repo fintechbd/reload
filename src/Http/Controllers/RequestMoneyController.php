@@ -9,12 +9,14 @@ use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Reload\Facades\Reload;
+use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Requests\ImportRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\IndexRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\StoreRequestMoneyRequest;
@@ -352,6 +354,59 @@ class RequestMoneyController extends Controller
             return new RequestMoneyCollection($requestMoneyPaginate);
 
         } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Reject a  specified *Deposit* resource found by id.
+     * if and only if deposit status is processing
+     *
+     * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     */
+    public function reject(CheckDepositRequest $request, string|int $id): JsonResponse
+    {
+        try {
+            if (Transaction::orderQueue()->addToQueueOrderWise($id) > 0) {
+                $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Rejected);
+
+                $approver = $request->user('sanctum');
+
+                $updateData = $deposit->toArray();
+                $updateData['status'] = DepositStatus::Rejected->value;
+                $updateData['order_data']['rejected_by'] = $approver->name;
+                $updateData['order_data']['rejected_at'] = now();
+                $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+                $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+                $updateData['order_data']['rejected_by_mobile_number'] = $approver->mobile;
+
+                if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
+                    throw new Exception(__('reload::messages.status_change_failed', [
+                        'current_status' => $deposit->currentStatus(),
+                        'target_status' => DepositStatus::Rejected->name,
+                    ]));
+                }
+
+                Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+                return $this->success(__('reload::messages.deposit.status_change_success', [
+                    'status' => DepositStatus::Rejected->name,
+                ]));
+            } else {
+                throw new Exception('Your another order is in process...!');
+            }
+
+        } catch (ModelNotFoundException $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
             return $this->failed($exception->getMessage());
         }
