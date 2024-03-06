@@ -122,7 +122,6 @@ class RequestMoneyController extends Controller
      * @lrd:end
      *
      * @throws ModelNotFoundException
-     * @throws UpdateOperationException
      */
     public function update(UpdateRequestMoneyRequest $request, string|int $id): JsonResponse
     {
