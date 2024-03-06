@@ -44,6 +44,10 @@ class RequestMoneyController extends Controller
     {
         try {
             $inputs = $request->validated();
+            //$inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'request_money'])->first()->getKey();
+            $inputs['transaction_form_code'] = 'request_money';
+            //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'request_money']);
+            //$inputs['service_type_slug'] = 'request_money';
 
             $requestMoneyPaginate = Reload::requestMoney()->list($inputs);
 
