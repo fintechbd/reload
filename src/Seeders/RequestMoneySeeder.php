@@ -53,10 +53,10 @@ class RequestMoneySeeder extends Seeder
         return [
             [
                 'service_type_parent_id' => null,
-                'service_type_name' => 'Currency Swap',
-                'service_type_slug' => 'currency_swap',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'currency_swap.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'currency_swap.png')),
+                'service_type_name' => 'Request Money',
+                'service_type_slug' => 'request_money',
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'request_money.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'request_money.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
