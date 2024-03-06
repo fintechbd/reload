@@ -3,6 +3,7 @@
 namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
+use Fintech\Auth\Facades\Auth;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
@@ -70,6 +71,12 @@ class RequestMoneyController extends Controller
     {
         try {
             $inputs = $request->validated();
+            if ($request->input('user_id') > 0) {
+                $user_id = $request->input('user_id');
+                $depositor = Auth::user()->find($request->input('user_id'));
+            } else {
+                $depositor = $request->user('sanctum');
+            }
 
             $requestMoney = Reload::requestMoney()->create($inputs);
 
