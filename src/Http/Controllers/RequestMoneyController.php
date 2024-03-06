@@ -89,6 +89,16 @@ class RequestMoneyController extends Controller
                     throw new Exception("User don't have account deposit balance");
                 }
 
+                $receiver = Auth::user()->find($inputs['order_data']['sender_receiver_id']);
+                $receiverDepositAccount = Transaction::userAccount()->list([
+                    'user_id' => $inputs['order_data']['sender_receiver_id'],
+                    'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency),
+                ])->first();
+
+                if (! $receiverDepositAccount) {
+                    throw new Exception("Receiver don't have account deposit balance");
+                }
+
                 $requestMoney = Reload::requestMoney()->create($inputs);
 
                 if (!$requestMoney) {
