@@ -79,6 +79,7 @@ class RequestMoneyController extends Controller
             } else {
                 $depositor = $request->user('sanctum');
             }
+
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
                 $depositAccount = Transaction::userAccount()->list([
@@ -89,7 +90,6 @@ class RequestMoneyController extends Controller
                 if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
-
 
                 $masterUser = Auth::user()->list([
                     'role_name' => SystemRole::MasterUser->value,
@@ -108,6 +108,14 @@ class RequestMoneyController extends Controller
 
                 if (! $receiverDepositAccount) {
                     throw new Exception("Receiver don't have account deposit balance");
+                }
+
+                //set pre defined conditions of deposit
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'request_money'])->first()->getKey();
+                $inputs['user_id'] = $user_id ?? $depositor->getKey();
+                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                if ($delayCheck['countValue'] > 0) {
+                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
                 }
 
                 $requestMoney = Reload::requestMoney()->create($inputs);
