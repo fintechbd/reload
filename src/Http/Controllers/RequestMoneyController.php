@@ -80,6 +80,15 @@ class RequestMoneyController extends Controller
             }
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
+                $depositAccount = Transaction::userAccount()->list([
+                    'user_id' => $user_id ?? $depositor->getKey(),
+                    'currency' => $request->input('currency', $depositor->profile?->presentCountry?->currency),
+                ])->first();
+
+                if (! $depositAccount) {
+                    throw new Exception("User don't have account deposit balance");
+                }
+
                 $requestMoney = Reload::requestMoney()->create($inputs);
 
                 if (!$requestMoney) {
