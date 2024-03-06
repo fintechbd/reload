@@ -87,7 +87,7 @@ class RequestMoneySeeder extends Seeder
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
                 'service_serial' => 1,
-                'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => 'Lebupay ', 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null],
+                'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => null, 'account_number' => null, 'transactional_currency' => null, 'beneficiary_type_id' => null, 'operator_short_code' => null],
                 'enabled' => true,
             ],
         ];
