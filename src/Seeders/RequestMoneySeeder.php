@@ -45,6 +45,9 @@ class RequestMoneySeeder extends Seeder
         $this->setupTransactionForm();
     }
 
+    /**
+     * @return array[]
+     */
     private function serviceTypes(): array
     {
         $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
