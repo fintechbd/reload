@@ -68,6 +68,9 @@ class RequestMoneySeeder extends Seeder
         ];
     }
 
+    /**
+     * @return array[]
+     */
     private function services(): array
     {
         $image_svg = __DIR__.'/../../resources/img/service/logo_svg/';
