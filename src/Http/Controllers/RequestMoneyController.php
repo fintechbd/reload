@@ -258,7 +258,7 @@ class RequestMoneyController extends Controller
      * @param ImportRequestMoneyRequest $request
      * @return RequestMoneyCollection|JsonResponse
      */
-    public function import(ImportRequestMoneyRequest $request)
+    public function import(ImportRequestMoneyRequest $request): RequestMoneyCollection|JsonResponse
     {
         try {
             $inputs = $request->validated();
