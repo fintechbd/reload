@@ -4,6 +4,7 @@ namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
 use Fintech\Auth\Facades\Auth;
+use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
@@ -87,6 +88,16 @@ class RequestMoneyController extends Controller
 
                 if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
+                }
+
+
+                $masterUser = Auth::user()->list([
+                    'role_name' => SystemRole::MasterUser->value,
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->present_country_id),
+                ])->first();
+
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
                 $receiver = Auth::user()->find($inputs['order_data']['sender_receiver_id']);
