@@ -16,6 +16,7 @@ use Fintech\Reload\Http\Requests\StoreRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\UpdateRequestMoneyRequest;
 use Fintech\Reload\Http\Resources\RequestMoneyCollection;
 use Fintech\Reload\Http\Resources\RequestMoneyResource;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -77,18 +78,21 @@ class RequestMoneyController extends Controller
             } else {
                 $depositor = $request->user('sanctum');
             }
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
-            $requestMoney = Reload::requestMoney()->create($inputs);
+                $requestMoney = Reload::requestMoney()->create($inputs);
 
-            if (! $requestMoney) {
-                throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
+                if (!$requestMoney) {
+                    throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
+                }
+
+                return $this->created([
+                    'message' => __('core::messages.resource.created', ['model' => 'Request Money']),
+                    'id' => $requestMoney->id,
+                ]);
+            }else {
+                throw new Exception('Your another order is in process...!');
             }
-
-            return $this->created([
-                'message' => __('core::messages.resource.created', ['model' => 'Request Money']),
-                'id' => $requestMoney->id,
-            ]);
-
         } catch (Exception $exception) {
 
             return $this->failed($exception->getMessage());
