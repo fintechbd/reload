@@ -229,7 +229,7 @@ class RequestMoneyController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *RequestMoney* resource as document.
+     * Create an exportable list of the *RequestMoney* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
