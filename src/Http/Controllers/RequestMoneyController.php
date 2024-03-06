@@ -164,7 +164,7 @@ class RequestMoneyController extends Controller
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
-    public function destroy(string|int $id)
+    public function destroy(string|int $id): JsonResponse
     {
         try {
 
