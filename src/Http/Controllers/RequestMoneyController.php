@@ -239,7 +239,8 @@ class RequestMoneyController extends Controller
         try {
             $inputs = $request->validated();
 
-            $requestMoneyPaginate = Reload::requestMoney()->export($inputs);
+            //$requestMoneyPaginate = Reload::requestMoney()->export($inputs);
+            Reload::requestMoney()->export($inputs);
 
             return $this->exported(__('core::messages.resource.exported', ['model' => 'Request Money']));
 
