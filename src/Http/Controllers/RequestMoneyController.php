@@ -61,7 +61,6 @@ class RequestMoneyController extends Controller
      *
      * @lrd:end
      *
-     * @throws StoreOperationException
      */
     public function store(StoreRequestMoneyRequest $request): JsonResponse
     {
@@ -257,9 +256,9 @@ class RequestMoneyController extends Controller
      * @lrd:end
      *
      * @param ImportRequestMoneyRequest $request
-     * @return JsonResponse
+     * @return RequestMoneyCollection|JsonResponse
      */
-    public function import(ImportRequestMoneyRequest $request): JsonResponse
+    public function import(ImportRequestMoneyRequest $request)
     {
         try {
             $inputs = $request->validated();
