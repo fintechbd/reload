@@ -256,7 +256,8 @@ class RequestMoneyController extends Controller
      *
      * @lrd:end
      *
-     * @return RequestMoneyCollection|JsonResponse
+     * @param ImportRequestMoneyRequest $request
+     * @return JsonResponse
      */
     public function import(ImportRequestMoneyRequest $request): JsonResponse
     {
