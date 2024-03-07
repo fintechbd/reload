@@ -132,9 +132,6 @@ class RequestMoneySeeder extends Seeder
 
     }
 
-    /**
-     * @return void
-     */
     private function setupTransactionForm(): void
     {
         Transaction::transactionForm()->create([

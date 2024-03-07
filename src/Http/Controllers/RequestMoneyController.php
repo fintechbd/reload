@@ -29,7 +29,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class RequestMoneyController
@@ -76,7 +75,6 @@ class RequestMoneyController extends Controller
      * Create a new *RequestMoney* resource in storage.
      *
      * @lrd:end
-     *
      */
     public function store(StoreRequestMoneyRequest $request): JsonResponse
     {
@@ -128,7 +126,7 @@ class RequestMoneyController extends Controller
                 }
 
                 $inputs['user_id'] = $receiver->getKey();
-                $inputs['sender_receiver_id'] = $user_id ?? $depositor->getKey();//$masterUser->getKey();
+                $inputs['sender_receiver_id'] = $user_id ?? $depositor->getKey(); //$masterUser->getKey();
                 $inputs['order_data']['sender_receiver_id'] = $user_id ?? $depositor->getKey();
                 $inputs['is_refunded'] = false;
                 $inputs['status'] = DepositStatus::Processing->value;
@@ -147,7 +145,7 @@ class RequestMoneyController extends Controller
                 unset($inputs['pin'], $inputs['password']);
                 $requestMoney = Reload::requestMoney()->create($inputs);
 
-                if (!$requestMoney) {
+                if (! $requestMoney) {
                     throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
                 }
                 $order_data = $requestMoney->order_data;
@@ -162,12 +160,13 @@ class RequestMoneyController extends Controller
                     'message' => __('core::messages.resource.created', ['model' => 'Request Money']),
                     'id' => $requestMoney->id,
                 ]);
-            }else {
+            } else {
                 throw new Exception('Your another order is in process...!');
             }
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
+
             return $this->failed($exception->getMessage());
         }
     }
@@ -244,10 +243,6 @@ class RequestMoneyController extends Controller
      * Soft delete a specified *RequestMoney* resource using id.
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
-     *
      */
     public function destroy(string|int $id): JsonResponse
     {
@@ -282,9 +277,6 @@ class RequestMoneyController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function restore(string|int $id): JsonResponse
     {
@@ -349,9 +341,9 @@ class RequestMoneyController extends Controller
 
         if ($deposit->currentStatus() != $requiredStatus->value) {
             throw new Exception(__('reload::messages.deposit.invalid_status', [
-                    'current_status' => $deposit->currentStatus(),
-                    'target_status' => $targetStatus->name,
-                ])
+                'current_status' => $deposit->currentStatus(),
+                'target_status' => $targetStatus->name,
+            ])
             );
         }
 
@@ -364,9 +356,6 @@ class RequestMoneyController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param ImportRequestMoneyRequest $request
-     * @return RequestMoneyCollection|JsonResponse
      */
     public function import(ImportRequestMoneyRequest $request): RequestMoneyCollection|JsonResponse
     {
@@ -450,7 +439,6 @@ class RequestMoneyController extends Controller
         try {
             if (Transaction::orderQueue()->addToQueueOrderWise($id) > 0) {
                 $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
-
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
