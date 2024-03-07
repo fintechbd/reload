@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Http\Controllers;
 
+use BackedEnum;
 use Exception;
 use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class RequestMoneyController
@@ -335,6 +337,28 @@ class RequestMoneyController extends Controller
     }
 
     /**
+     * @throws Exception
+     */
+    private function authenticateDeposit(string|int $id, BackedEnum $requiredStatus, BackedEnum $targetStatus): \Fintech\Core\Abstracts\BaseModel
+    {
+        $deposit = Reload::deposit()->find($id);
+
+        if (! $deposit) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
+        }
+
+        if ($deposit->currentStatus() != $requiredStatus->value) {
+            throw new Exception(__('reload::messages.deposit.invalid_status', [
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => $targetStatus->name,
+                ])
+            );
+        }
+
+        return $deposit;
+    }
+
+    /**
      * @lrd:start
      * Create an exportable list of the *RequestMoney* resource as document.
      * After export job is done system will fire  export completed event
@@ -395,6 +419,41 @@ class RequestMoneyController extends Controller
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Rejected->name,
+                ]));
+            } else {
+                throw new Exception('Your another order is in process...!');
+            }
+
+        } catch (ModelNotFoundException $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Accept a  specified *Deposit* resource found by id.
+     * if and only if deposit status is processing
+     *
+     * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     */
+    public function accept(CheckDepositRequest $request, string|int $id): JsonResponse
+    {
+        try {
+            if (Transaction::orderQueue()->addToQueueOrderWise($id) > 0) {
+                $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
+
+
+                return $this->success(__('reload::messages.deposit.status_change_success', [
+                    'status' => DepositStatus::Accepted->name,
                 ]));
             } else {
                 throw new Exception('Your another order is in process...!');
