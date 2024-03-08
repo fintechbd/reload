@@ -472,15 +472,11 @@ class RequestMoneyController extends Controller
         }
     }
 
-    /**
-     * @param $id
-     * @return JsonResponse
-     */
     private function __receiverReject($id): JsonResponse
     {
         try {
             $requestMoneyActual = Reload::requestMoney()->find($id);
-            $requestMoneyChild = Reload::requestMoney()->list(['parent_id'=>$id])->first();
+            $requestMoneyChild = Reload::requestMoney()->list(['parent_id' => $id])->first();
             $requestMoney = Reload::requestMoney()->find($requestMoneyChild->id);
             $receiverInputs = $requestMoney->toArray();
             $deposit = $this->authenticateDeposit($requestMoneyChild->id, DepositStatus::Processing, DepositStatus::Rejected);
@@ -515,6 +511,7 @@ class RequestMoneyController extends Controller
             return $this->failed($exception->getMessage());
         }
     }
+
     /**
      * @lrd:start
      * Accept a  specified *Deposit* resource found by id.
