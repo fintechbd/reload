@@ -142,6 +142,8 @@ class RequestMoneyController extends Controller
                 $inputs['order_data']['system_notification_variable_failed'] = 'request_money_failed';
                 $inputs['order_data']['source_country_id'] = $inputs['source_country_id'];
                 $inputs['order_data']['destination_country_id'] = $inputs['destination_country_id'];
+                $inputs['converted_amount'] = $inputs['amount'];
+                $inputs['converted_currency'] = $inputs['currency'];
                 unset($inputs['pin'], $inputs['password']);
                 $requestMoney = Reload::requestMoney()->create($inputs);
 
@@ -151,8 +153,9 @@ class RequestMoneyController extends Controller
                 $order_data = $requestMoney->order_data;
                 $order_data['purchase_number'] = entry_number($requestMoney->getKey(), $requestMoney->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($requestMoney);
+                $order_data['user_name'] = $requestMoney->user->name;
                 Reload::requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-
+                $this->__receiverStore($requestMoney->getKey());
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                 DB::commit();
 
@@ -269,6 +272,49 @@ class RequestMoneyController extends Controller
 
             return $this->failed($exception->getMessage());
         }
+    }
+
+    /**
+     * @throws StoreOperationException
+     * @throws Exception
+     */
+    private function __receiverStore($id): bool
+    {
+        $requestMoney = Reload::requestMoney()->find($id);
+        $receiverInputs = $requestMoney->toArray();
+
+        $receiverInputs['user_id'] = $requestMoney['sender_receiver_id'];
+        $receiverInputs['sender_receiver_id'] = $requestMoney['user_id'];
+
+        $requestMoneyAccount = Transaction::userAccount()->list([
+            'user_id' => $receiverInputs['user_id'],
+            'currency' => $receiverInputs['converted_currency'],
+        ])->first();
+
+        if (! $requestMoneyAccount) {
+            throw new Exception("User don't have account deposit balance");
+        }
+
+        //set pre defined conditions of deposit
+        $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'request_money'])->first()->getKey();
+        $receiverInputs['notes'] = 'Wallet to Wallet receive request from '.$requestMoney['order_data']['user_name'];
+        $receiverInputs['parent_id'] = $id;
+
+        $requestMoney = Reload::requestMoney()->create($receiverInputs);
+
+        if (! $requestMoney) {
+            throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
+        }
+
+        $order_data = $requestMoney->order_data;
+        $order_data['purchase_number'] = entry_number($requestMoney->getKey(), $requestMoney->sourceCountry->iso3, OrderStatus::Successful->value);
+
+        $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($requestMoney);
+        $order_data['user_name'] = $requestMoney->user->name;
+        $requestMoney->order_data = $order_data;
+        Reload::requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+
+        return true;
     }
 
     /**
@@ -397,13 +443,14 @@ class RequestMoneyController extends Controller
                 $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
                 $updateData['order_data']['rejected_by_mobile_number'] = $approver->mobile;
 
-                if (! Reload::deposit()->update($deposit->getKey(), $updateData)) {
+                if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $deposit->currentStatus(),
                         'target_status' => DepositStatus::Rejected->name,
                     ]));
                 }
 
+                $this->__receiverReject($id);
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
@@ -425,6 +472,49 @@ class RequestMoneyController extends Controller
         }
     }
 
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    private function __receiverReject($id): JsonResponse
+    {
+        try {
+            $requestMoneyActual = Reload::requestMoney()->find($id);
+            $requestMoneyChild = Reload::requestMoney()->list(['parent_id'=>$id])->first();
+            $requestMoney = Reload::requestMoney()->find($requestMoneyChild->id);
+            $receiverInputs = $requestMoney->toArray();
+            $deposit = $this->authenticateDeposit($requestMoneyChild->id, DepositStatus::Processing, DepositStatus::Rejected);
+
+            $updateData = $deposit->toArray();
+            $updateData['status'] = DepositStatus::Rejected->value;
+            $updateData['order_data']['rejected_by'] = $requestMoneyActual['order_data']['rejected_by'];
+            $updateData['order_data']['rejected_at'] = now();
+            $updateData['order_data']['rejected_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+            $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
+            $updateData['order_data']['rejected_by_mobile_number'] = $requestMoneyActual['order_data']['rejected_by_mobile_number'];
+
+            if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
+                throw new Exception(__('reload::messages.status_change_failed', [
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Rejected->name,
+                ]));
+            }
+
+            return $this->success(__('reload::messages.deposit.status_change_success', [
+                'status' => DepositStatus::Rejected->name,
+            ]));
+
+        } catch (ModelNotFoundException $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->failed($exception->getMessage());
+        }
+    }
     /**
      * @lrd:start
      * Accept a  specified *Deposit* resource found by id.
