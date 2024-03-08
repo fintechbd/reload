@@ -27,7 +27,6 @@ use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class DepositController
