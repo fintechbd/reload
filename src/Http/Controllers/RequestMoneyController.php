@@ -606,14 +606,10 @@ class RequestMoneyController extends Controller
         }
     }
 
-    /**
-     * @param string|int $id
-     * @return JsonResponse
-     */
     public function __receiverAccept(string|int $id): JsonResponse
     {
         try {
-            $requestMoney = Reload::requestMoney()->list(['parent_id'=>$id])->first();
+            $requestMoney = Reload::requestMoney()->list(['parent_id' => $id])->first();
 
             $deposit = $this->authenticateDeposit($requestMoney->id, DepositStatus::Processing, DepositStatus::Accepted);
 
