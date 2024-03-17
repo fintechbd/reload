@@ -525,7 +525,67 @@ class RequestMoneyController extends Controller
     {
         try {
             if (Transaction::orderQueue()->addToQueueOrderWise($id) > 0) {
-                $deposit = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
+                $withdraw = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
+
+                $depositAccount = Transaction::userAccount()->list([
+                    'user_id' => $withdraw->user_id,
+                    'currency' => $request->input('currency', $withdraw->profile?->presentCountry?->currency),
+                ])->first();
+
+                if (! $depositAccount) {
+                    throw new Exception("User don't have account deposit balance");
+                }
+
+                $receiver = Auth::user()->find($withdraw->sender_receiver_id);
+                $receiverDepositAccount = Transaction::userAccount()->list([
+                    'user_id' => $withdraw->sender_receiver_id,
+                    'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency),
+                ])->first();
+
+                if (! $receiverDepositAccount) {
+                    throw new Exception("Receiver don't have account deposit balance");
+                }
+
+                $masterUser = Auth::user()->list([
+                    'role_name' => SystemRole::MasterUser->value,
+                    'country_id' => $request->input('source_country_id', $withdraw->profile?->present_country_id),
+                ])->first();
+
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $withdraw->profile?->country_id).' country');
+                }
+
+                $updateData['status'] = DepositStatus::Accepted->value;
+                if (! Reload::requestMoney()->update($withdraw->getKey(), $updateData)) {
+                    throw new Exception(__('reload::messages.status_change_failed', [
+                        'current_status' => $withdraw->currentStatus(),
+                        'target_status' => DepositStatus::Accepted->name,
+                    ]));
+                }
+
+                $userUpdatedBalance = Reload::requestMoney()->creditTransaction($withdraw);
+                //source country or destination country change to currency name
+                $depositedAccount = Transaction::userAccount()->list([
+                    'user_id' => $withdraw->user_id,
+                    'currency' => $withdraw->converted_currency,
+                ])->first();
+
+                //update User Account
+                $depositedUpdatedAccount = $depositedAccount->toArray();
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+                $order_data = $withdraw->order_data;
+                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
+                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                    throw new Exception(__('User Account Balance does not update', [
+                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
+                    ]));
+                }
+                Reload::requestMoney()->update($withdraw->getKey(), ['order_data' => $order_data]);
+                $this->__receiverAccept($withdraw->getKey());
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
@@ -533,6 +593,92 @@ class RequestMoneyController extends Controller
             } else {
                 throw new Exception('Your another order is in process...!');
             }
+
+        } catch (ModelNotFoundException $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param string|int $id
+     * @return JsonResponse
+     */
+    public function __receiverAccept(string|int $id): JsonResponse
+    {
+        try {
+            $requestMoney = Reload::requestMoney()->list(['parent_id'=>$id])->first();
+
+            $deposit = $this->authenticateDeposit($requestMoney->id, DepositStatus::Processing, DepositStatus::Accepted);
+
+            $depositAccount = Transaction::userAccount()->list([
+                'user_id' => $deposit->user_id,
+                'currency' => $deposit->profile?->presentCountry?->currency,
+            ])->first();
+
+            if (! $depositAccount) {
+                throw new Exception("User don't have account deposit balance");
+            }
+
+            $receiver = Auth::user()->find($deposit->sender_receiver_id);
+            $receiverDepositAccount = Transaction::userAccount()->list([
+                'user_id' => $deposit->sender_receiver_id,
+                'currency' => $receiver->profile?->presentCountry?->currency,
+            ])->first();
+            //print_r($receiverDepositAccount);exit();
+            if (! $receiverDepositAccount) {
+                throw new Exception("Receiver don't have account deposit balance");
+            }
+
+            $masterUser = Auth::user()->list([
+                'role_name' => SystemRole::MasterUser->value,
+                'country_id' => $deposit->profile?->present_country_id,
+            ])->first();
+
+            if (! $masterUser) {
+                throw new Exception('Master User Account not found for '.$deposit->profile?->country_id.' country');
+            }
+
+            $updateData['status'] = DepositStatus::Accepted->value;
+            if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
+                throw new Exception(__('reload::messages.status_change_failed', [
+                    'current_status' => $deposit->currentStatus(),
+                    'target_status' => DepositStatus::Accepted->name,
+                ]));
+            }
+
+            $userUpdatedBalance = Reload::requestMoney()->debitTransaction($deposit);
+            //source country or destination country change to currency name
+            $depositedAccount = Transaction::userAccount()->list([
+                'user_id' => $deposit->user_id,
+                'currency' => $deposit->converted_currency,
+            ])->first();
+
+            //update User Account
+            $depositedUpdatedAccount = $depositedAccount->toArray();
+            $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $userUpdatedBalance['deposit_amount'];
+            $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+            $order_data = $deposit->order_data;
+            $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+            $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
+            if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                throw new Exception(__('User Account Balance does not update', [
+                    'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                    'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
+                ]));
+            }
+            Reload::requestMoney()->update($deposit->getKey(), ['order_data' => $order_data]);
+
+            return $this->success(__('reload::messages.deposit.status_change_success', [
+                'status' => DepositStatus::Accepted->name,
+            ]));
 
         } catch (ModelNotFoundException $exception) {
             Transaction::orderQueue()->removeFromQueueOrderWise($id);
