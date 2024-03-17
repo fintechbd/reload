@@ -28,8 +28,10 @@ if (Config::get('fintech.reload.enabled')) {
             Route::apiResource('currency-swaps', CurrencySwapController::class)->only(['index', 'store', 'show']);
             Route::apiResource('wallet-to-wallets', WalletToWalletController::class)->only(['index', 'store', 'show']);
 
-            Route::apiResource('request-moneys', RequestMoneyController::class);
+            Route::post('request-moneys/{request_money}/accept', [RequestMoneyController::class, 'accept'])->name('request-moneys.accept');
+            Route::post('request-moneys/{request_money}/reject', [RequestMoneyController::class, 'reject'])->name('request-moneys.reject');
             Route::post('request-moneys/{request_money}/restore', [RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
+            Route::apiResource('request-moneys', RequestMoneyController::class);
 
             Route::apiResource('wallet-to-banks', \Fintech\Reload\Http\Controllers\WalletToBankController::class);
             Route::post('wallet-to-banks/{wallet_to_bank}/restore', [\Fintech\Reload\Http\Controllers\WalletToBankController::class, 'restore'])->name('wallet-to-banks.restore');

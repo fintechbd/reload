@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Models;
 
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Transaction\Models\Order;
 
 class RequestMoney extends Order
@@ -36,6 +37,11 @@ class RequestMoney extends Order
     |--------------------------------------------------------------------------
     */
 
+    public function currentStatus()
+    {
+        return $this->status;
+    }
+
     /**
      * @return array
      */
@@ -45,10 +51,18 @@ class RequestMoney extends Order
 
         $links = [
             'show' => action_link(route('reload.request-moneys.show', $primaryKey), __('core::messages.action.show'), 'get'),
-            'update' => action_link(route('reload.request-moneys.update', $primaryKey), __('core::messages.action.update'), 'put'),
-            'destroy' => action_link(route('reload.request-moneys.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-            'restore' => action_link(route('reload.request-moneys.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
+            'reject' => action_link(route('reload.request-moneys.reject', $primaryKey), __('core::messages.action.reject'), 'post'),
+            'accept' => action_link(route('reload.request-moneys.accept', $primaryKey), __('core::messages.action.accept'), 'post'),
         ];
+
+        if (! empty($this->parent_id)) {
+            unset($links['accept']);
+        }
+
+        if ($this->currentStatus() == OrderStatus::Rejected->value) {
+            unset($links['accept']);
+            unset($links['reject']);
+        }
 
         if ($this->getAttribute('deleted_at') == null) {
             unset($links['restore']);

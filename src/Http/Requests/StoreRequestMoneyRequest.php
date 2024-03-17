@@ -33,8 +33,6 @@ class StoreRequestMoneyRequest extends FormRequest
             'sender_receiver_id' => ['required', 'integer', 'min:1'],
             'order_data' => ['nullable', 'array'],
             'order_data.request_from' => ['string', 'required'],
-            'order_data.serving_country_id' => ['required', 'integer', 'min:1'],
-            'order_data.sender_receiver_id' => ['required', 'integer', 'min:1'],
         ];
     }
 
