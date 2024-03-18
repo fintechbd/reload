@@ -589,6 +589,7 @@ class RequestMoneyController extends Controller
                 $this->__receiverAccept($withdraw->getKey());
 
                 Transaction::orderQueue()->removeFromQueueOrderWise($id);
+
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
                 ]));
