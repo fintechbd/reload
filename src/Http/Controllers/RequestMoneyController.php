@@ -562,8 +562,9 @@ class RequestMoneyController extends Controller
                         'target_status' => DepositStatus::Accepted->name,
                     ]));
                 }
+                $withdraw['sender_receiver_id'] = $masterUser->getKey();
 
-                $userUpdatedBalance = Reload::requestMoney()->creditTransaction($withdraw);
+                $userUpdatedBalance = Reload::requestMoney()->debitTransaction($withdraw);
                 //source country or destination country change to currency name
                 $depositedAccount = Transaction::userAccount()->list([
                     'user_id' => $withdraw->user_id,
@@ -586,6 +587,8 @@ class RequestMoneyController extends Controller
                 }
                 Reload::requestMoney()->update($withdraw->getKey(), ['order_data' => $order_data]);
                 $this->__receiverAccept($withdraw->getKey());
+
+                Transaction::orderQueue()->removeFromQueueOrderWise($id);
 
                 return $this->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
@@ -648,8 +651,8 @@ class RequestMoneyController extends Controller
                     'target_status' => DepositStatus::Accepted->name,
                 ]));
             }
-
-            $userUpdatedBalance = Reload::requestMoney()->debitTransaction($deposit);
+            $deposit['sender_receiver_id'] = $masterUser->getKey();
+            $userUpdatedBalance = Reload::requestMoney()->creditTransaction($deposit);
             //source country or destination country change to currency name
             $depositedAccount = Transaction::userAccount()->list([
                 'user_id' => $deposit->user_id,

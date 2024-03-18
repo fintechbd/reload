@@ -67,9 +67,8 @@ class RequestMoneyService
         $userAccountData = [
             'previous_amount' => null,
             'current_amount' => null,
-            'deposit_amount' => null,
+            'spent_amount' => null,
         ];
-
         //Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
@@ -149,7 +148,7 @@ class RequestMoneyService
             'converted_currency' => $data->converted_currency,
         ]);
 
-        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
@@ -168,9 +167,8 @@ class RequestMoneyService
         $userAccountData = [
             'previous_amount' => null,
             'current_amount' => null,
-            'spent_amount' => null,
+            'deposit_amount' => null,
         ];
-
         //Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
@@ -202,7 +200,7 @@ class RequestMoneyService
         $orderDetailStoreForMaster->save();
 
         //For Charge
-        $data->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+        /*$data->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
@@ -218,7 +216,7 @@ class RequestMoneyService
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
         $orderDetailStoreForChargeForMaster->notes = 'Request Money receive from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Send to '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
-        $orderDetailStoreForChargeForMaster->save();
+        $orderDetailStoreForChargeForMaster->save();*/
 
         //For Discount
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
@@ -239,6 +237,25 @@ class RequestMoneyService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
+        //For commission
+        $data->amount = -calculate_flat_percent($amount, $serviceStatData['commission']);
+        $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['commission']);
+        $data->order_detail_cause_name = 'commission';
+        $data->order_detail_parent_id = $orderDetailStore->getKey();
+        $data->notes = 'Request Money Deposit Commission Receive from '.$master_user_name;
+        $data->step = 3;
+        $data->order_detail_parent_id = $orderDetailStore->getKey();
+        $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCommissionForMaster = $orderDetailStoreForCommission->replicate();
+        $orderDetailStoreForCommissionForMaster->user_id = $data->sender_receiver_id;
+        $orderDetailStoreForCommissionForMaster->sender_receiver_id = $data->user_id;
+        $orderDetailStoreForCommissionForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['commission']);
+        $orderDetailStoreForCommissionForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['commission']);
+        $orderDetailStoreForCommissionForMaster->order_detail_cause_name = 'commission';
+        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to '.$user_name;
+        $orderDetailStoreForCommissionForMaster->step = 4;
+        $orderDetailStoreForCommissionForMaster->save();
+
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
 
@@ -248,7 +265,7 @@ class RequestMoneyService
             'converted_currency' => $data->converted_currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
