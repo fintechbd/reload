@@ -1,14 +1,6 @@
 <?php
 
 // config for Fintech/Reload
-use Fintech\Reload\Models\CurrencySwap;
-use Fintech\Reload\Models\Deposit;
-use Fintech\Reload\Models\RequestMoney;
-use Fintech\Reload\Models\WalletToWallet;
-use Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository;
-use Fintech\Reload\Repositories\Eloquent\DepositRepository;
-use Fintech\Reload\Repositories\Eloquent\RequestMoneyRepository;
-use Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository;
 
 return [
 
@@ -40,7 +32,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'deposit_model' => Deposit::class,
+    'deposit_model' => \Fintech\Reload\Models\Deposit::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -49,7 +41,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'currency_swap_model' => CurrencySwap::class,
+    'currency_swap_model' => \Fintech\Reload\Models\CurrencySwap::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -58,7 +50,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_to_wallet_model' => WalletToWallet::class,
+    'wallet_to_wallet_model' => \Fintech\Reload\Models\WalletToWallet::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -67,7 +59,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'request_money_model' => RequestMoney::class,
+    'request_money_model' => \Fintech\Reload\Models\RequestMoney::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -107,10 +99,10 @@ return [
     */
 
     'repositories' => [
-        \Fintech\Reload\Interfaces\DepositRepository::class => DepositRepository::class,
-        \Fintech\Reload\Interfaces\CurrencySwapRepository::class => CurrencySwapRepository::class,
-        \Fintech\Reload\Interfaces\WalletToWalletRepository::class => WalletToWalletRepository::class,
-        \Fintech\Reload\Interfaces\RequestMoneyRepository::class => RequestMoneyRepository::class,
+        \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
+        \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
+        \Fintech\Reload\Interfaces\WalletToWalletRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository::class,
+        \Fintech\Reload\Interfaces\RequestMoneyRepository::class => \Fintech\Reload\Repositories\Eloquent\RequestMoneyRepository::class,
 
         \Fintech\Reload\Interfaces\WalletToBankRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToBankRepository::class,
 
