@@ -2,12 +2,15 @@
 
 namespace Fintech\Reload;
 
+use Fintech\Core\Traits\RegisterPackageTrait;
 use Fintech\Reload\Commands\InstallCommand;
 use Fintech\Reload\Commands\ReloadCommand;
 use Illuminate\Support\ServiceProvider;
 
 class ReloadServiceProvider extends ServiceProvider
 {
+    use RegisterPackageTrait;
+
     /**
      * Register any application services.
      *
@@ -15,6 +18,8 @@ class ReloadServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->packageCode = 'reload';
+
         $this->mergeConfigFrom(
             __DIR__.'/../config/reload.php', 'fintech.reload'
         );
@@ -29,6 +34,8 @@ class ReloadServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->injectOnConfig();
+
         $this->publishes([
             __DIR__.'/../config/reload.php' => config_path('fintech/reload.php'),
         ]);
