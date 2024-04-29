@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Reload;
+namespace Fintech\Reload\Providers;
 
 use Fintech\Reload\Events\CurrencySwapped;
 use Fintech\Reload\Events\DepositAccepted;

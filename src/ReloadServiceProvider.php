@@ -5,6 +5,9 @@ namespace Fintech\Reload;
 use Fintech\Core\Traits\RegisterPackageTrait;
 use Fintech\Reload\Commands\InstallCommand;
 use Fintech\Reload\Commands\ReloadCommand;
+use Fintech\Reload\Providers\EventServiceProvider;
+use Fintech\Reload\Providers\RepositoryServiceProvider;
+use Fintech\Reload\Providers\RouteServiceProvider;
 use Illuminate\Support\ServiceProvider;
 
 class ReloadServiceProvider extends ServiceProvider
