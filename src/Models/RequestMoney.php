@@ -37,11 +37,6 @@ class RequestMoney extends Order
     |--------------------------------------------------------------------------
     */
 
-    public function currentStatus()
-    {
-        return $this->status;
-    }
-
     /**
      * @return array
      */
@@ -55,7 +50,7 @@ class RequestMoney extends Order
             'accept' => action_link(route('reload.request-moneys.accept', $primaryKey), __('restapi::messages.action.accept'), 'post'),
         ];
 
-        if (! empty($this->parent_id)) {
+        if (!empty($this->parent_id)) {
             unset($links['accept']);
         }
 
@@ -71,6 +66,11 @@ class RequestMoney extends Order
         }
 
         return $links;
+    }
+
+    public function currentStatus()
+    {
+        return $this->status;
     }
 
     /*

@@ -4,6 +4,7 @@ namespace Fintech\Reload\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository as InterfacesWalletToPrepaidCardRepository;
+use Fintech\Reload\Models\WalletToPrepaidCard;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,7 +15,7 @@ class WalletToPrepaidCardRepository extends MongodbRepository implements Interfa
 {
     public function __construct()
     {
-        parent::__construct(config('fintech.reload.wallet_to_prepaid_card_model', \Fintech\Reload\Models\WalletToPrepaidCard::class));
+        parent::__construct(config('fintech.reload.wallet_to_prepaid_card_model', WalletToPrepaidCard::class));
     }
 
     /**
@@ -28,7 +29,7 @@ class WalletToPrepaidCardRepository extends MongodbRepository implements Interfa
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

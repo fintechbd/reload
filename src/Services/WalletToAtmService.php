@@ -17,20 +17,6 @@ class WalletToAtmService
         $this->walletToAtmRepository = $walletToAtmRepository;
     }
 
-    /**
-     * @return mixed
-     */
-    public function list(array $filters = [])
-    {
-        return $this->walletToAtmRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = [])
-    {
-        return $this->walletToAtmRepository->create($inputs);
-    }
-
     public function find($id, $onlyTrashed = false)
     {
         return $this->walletToAtmRepository->find($id, $onlyTrashed);
@@ -56,8 +42,22 @@ class WalletToAtmService
         return $this->walletToAtmRepository->list($filters);
     }
 
+    /**
+     * @return mixed
+     */
+    public function list(array $filters = [])
+    {
+        return $this->walletToAtmRepository->list($filters);
+
+    }
+
     public function import(array $filters)
     {
         return $this->walletToAtmRepository->create($filters);
+    }
+
+    public function create(array $inputs = [])
+    {
+        return $this->walletToAtmRepository->create($inputs);
     }
 }

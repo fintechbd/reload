@@ -5,6 +5,9 @@ namespace Fintech\Reload;
 use Fintech\Reload\Services\CurrencySwapService;
 use Fintech\Reload\Services\DepositService;
 use Fintech\Reload\Services\RequestMoneyService;
+use Fintech\Reload\Services\WalletToAtmService;
+use Fintech\Reload\Services\WalletToBankService;
+use Fintech\Reload\Services\WalletToPrepaidCardService;
 use Fintech\Reload\Services\WalletToWalletService;
 
 class Reload
@@ -42,27 +45,27 @@ class Reload
     }
 
     /**
-     * @return \Fintech\Reload\Services\WalletToBankService
+     * @return WalletToBankService
      */
     public function walletToBank()
     {
-        return app(\Fintech\Reload\Services\WalletToBankService::class);
+        return app(WalletToBankService::class);
     }
 
     /**
-     * @return \Fintech\Reload\Services\WalletToAtmService
+     * @return WalletToAtmService
      */
     public function walletToAtm()
     {
-        return app(\Fintech\Reload\Services\WalletToAtmService::class);
+        return app(WalletToAtmService::class);
     }
 
     /**
-     * @return \Fintech\Reload\Services\WalletToPrepaidCardService
+     * @return WalletToPrepaidCardService
      */
     public function walletToPrepaidCard()
     {
-        return app(\Fintech\Reload\Services\WalletToPrepaidCardService::class);
+        return app(WalletToPrepaidCardService::class);
     }
 
     //** Crud Service Method Point Do not Remove **//

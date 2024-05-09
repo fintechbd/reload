@@ -17,20 +17,6 @@ class WalletToPrepaidCardService
         $this->walletToPrepaidCardRepository = $walletToPrepaidCardRepository;
     }
 
-    /**
-     * @return mixed
-     */
-    public function list(array $filters = [])
-    {
-        return $this->walletToPrepaidCardRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = [])
-    {
-        return $this->walletToPrepaidCardRepository->create($inputs);
-    }
-
     public function find($id, $onlyTrashed = false)
     {
         return $this->walletToPrepaidCardRepository->find($id, $onlyTrashed);
@@ -56,8 +42,22 @@ class WalletToPrepaidCardService
         return $this->walletToPrepaidCardRepository->list($filters);
     }
 
+    /**
+     * @return mixed
+     */
+    public function list(array $filters = [])
+    {
+        return $this->walletToPrepaidCardRepository->list($filters);
+
+    }
+
     public function import(array $filters)
     {
         return $this->walletToPrepaidCardRepository->create($filters);
+    }
+
+    public function create(array $inputs = [])
+    {
+        return $this->walletToPrepaidCardRepository->create($inputs);
     }
 }

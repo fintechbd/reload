@@ -4,6 +4,7 @@ namespace Fintech\Reload\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Reload\Interfaces\WalletToBankRepository as InterfacesWalletToBankRepository;
+use Fintech\Reload\Models\WalletToBank;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,7 +15,7 @@ class WalletToBankRepository extends MongodbRepository implements InterfacesWall
 {
     public function __construct()
     {
-        parent::__construct(config('fintech.reload.wallet_to_bank_model', \Fintech\Reload\Models\WalletToBank::class));
+        parent::__construct(config('fintech.reload.wallet_to_bank_model', WalletToBank::class));
     }
 
     /**
@@ -28,7 +29,7 @@ class WalletToBankRepository extends MongodbRepository implements InterfacesWall
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

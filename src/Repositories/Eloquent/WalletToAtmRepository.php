@@ -4,6 +4,7 @@ namespace Fintech\Reload\Repositories\Eloquent;
 
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\WalletToAtmRepository as InterfacesWalletToAtmRepository;
+use Fintech\Reload\Models\WalletToAtm;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,7 +15,7 @@ class WalletToAtmRepository extends EloquentRepository implements InterfacesWall
 {
     public function __construct()
     {
-        parent::__construct(config('fintech.reload.wallet_to_atm_model', \Fintech\Reload\Models\WalletToAtm::class));
+        parent::__construct(config('fintech.reload.wallet_to_atm_model', WalletToAtm::class));
     }
 
     /**
@@ -28,7 +29,7 @@ class WalletToAtmRepository extends EloquentRepository implements InterfacesWall
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

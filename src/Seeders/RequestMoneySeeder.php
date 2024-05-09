@@ -49,16 +49,16 @@ class RequestMoneySeeder extends Seeder
      */
     private function serviceTypes(): array
     {
-        $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => null,
                 'service_type_name' => 'Request Money',
                 'service_type_slug' => 'request_money',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'request_money.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'request_money.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'request_money.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'request_money.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
@@ -72,8 +72,8 @@ class RequestMoneySeeder extends Seeder
      */
     private function services(): array
     {
-        $image_svg = __DIR__.'/../../resources/img/service/logo_svg/';
-        $image_png = __DIR__.'/../../resources/img/service/logo_png/';
+        $image_svg = __DIR__ . '/../../resources/img/service/logo_svg/';
+        $image_png = __DIR__ . '/../../resources/img/service/logo_png/';
 
         return [
             [
@@ -81,8 +81,8 @@ class RequestMoneySeeder extends Seeder
                 'service_vendor_id' => 1,
                 'service_name' => 'Request Money',
                 'service_slug' => 'request_money',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'request_money.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'request_money.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'request_money.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'request_money.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
@@ -99,7 +99,7 @@ class RequestMoneySeeder extends Seeder
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
         $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (! empty($roles) && ! empty($source_countries)) {
+        if (!empty($roles) && !empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [

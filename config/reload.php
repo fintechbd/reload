@@ -2,6 +2,21 @@
 
 // config for Fintech/Reload
 
+use Fintech\Reload\Models\CurrencySwap;
+use Fintech\Reload\Models\Deposit;
+use Fintech\Reload\Models\RequestMoney;
+use Fintech\Reload\Models\WalletToAtm;
+use Fintech\Reload\Models\WalletToBank;
+use Fintech\Reload\Models\WalletToPrepaidCard;
+use Fintech\Reload\Models\WalletToWallet;
+use Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository;
+use Fintech\Reload\Repositories\Eloquent\DepositRepository;
+use Fintech\Reload\Repositories\Eloquent\RequestMoneyRepository;
+use Fintech\Reload\Repositories\Eloquent\WalletToAtmRepository;
+use Fintech\Reload\Repositories\Eloquent\WalletToBankRepository;
+use Fintech\Reload\Repositories\Eloquent\WalletToPrepaidCardRepository;
+use Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository;
+
 return [
 
     /*
@@ -32,7 +47,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'deposit_model' => \Fintech\Reload\Models\Deposit::class,
+    'deposit_model' => Deposit::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -41,7 +56,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'currency_swap_model' => \Fintech\Reload\Models\CurrencySwap::class,
+    'currency_swap_model' => CurrencySwap::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -50,7 +65,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_to_wallet_model' => \Fintech\Reload\Models\WalletToWallet::class,
+    'wallet_to_wallet_model' => WalletToWallet::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -59,7 +74,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'request_money_model' => \Fintech\Reload\Models\RequestMoney::class,
+    'request_money_model' => RequestMoney::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +83,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_to_bank_model' => \Fintech\Reload\Models\WalletToBank::class,
+    'wallet_to_bank_model' => WalletToBank::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -77,7 +92,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_to_atm_model' => \Fintech\Reload\Models\WalletToAtm::class,
+    'wallet_to_atm_model' => WalletToAtm::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -86,7 +101,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_to_prepaid_card_model' => \Fintech\Reload\Models\WalletToPrepaidCard::class,
+    'wallet_to_prepaid_card_model' => WalletToPrepaidCard::class,
 
     //** Model Config Point Do not Remove **//
 
@@ -99,16 +114,16 @@ return [
     */
 
     'repositories' => [
-        \Fintech\Reload\Interfaces\DepositRepository::class => \Fintech\Reload\Repositories\Eloquent\DepositRepository::class,
-        \Fintech\Reload\Interfaces\CurrencySwapRepository::class => \Fintech\Reload\Repositories\Eloquent\CurrencySwapRepository::class,
-        \Fintech\Reload\Interfaces\WalletToWalletRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToWalletRepository::class,
-        \Fintech\Reload\Interfaces\RequestMoneyRepository::class => \Fintech\Reload\Repositories\Eloquent\RequestMoneyRepository::class,
+        \Fintech\Reload\Interfaces\DepositRepository::class => DepositRepository::class,
+        \Fintech\Reload\Interfaces\CurrencySwapRepository::class => CurrencySwapRepository::class,
+        \Fintech\Reload\Interfaces\WalletToWalletRepository::class => WalletToWalletRepository::class,
+        \Fintech\Reload\Interfaces\RequestMoneyRepository::class => RequestMoneyRepository::class,
 
-        \Fintech\Reload\Interfaces\WalletToBankRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToBankRepository::class,
+        \Fintech\Reload\Interfaces\WalletToBankRepository::class => WalletToBankRepository::class,
 
-        \Fintech\Reload\Interfaces\WalletToAtmRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToAtmRepository::class,
+        \Fintech\Reload\Interfaces\WalletToAtmRepository::class => WalletToAtmRepository::class,
 
-        \Fintech\Reload\Interfaces\WalletToPrepaidCardRepository::class => \Fintech\Reload\Repositories\Eloquent\WalletToPrepaidCardRepository::class,
+        \Fintech\Reload\Interfaces\WalletToPrepaidCardRepository::class => WalletToPrepaidCardRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],

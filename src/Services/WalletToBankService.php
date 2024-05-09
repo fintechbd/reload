@@ -17,20 +17,6 @@ class WalletToBankService
         $this->walletToBankRepository = $walletToBankRepository;
     }
 
-    /**
-     * @return mixed
-     */
-    public function list(array $filters = [])
-    {
-        return $this->walletToBankRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = [])
-    {
-        return $this->walletToBankRepository->create($inputs);
-    }
-
     public function find($id, $onlyTrashed = false)
     {
         return $this->walletToBankRepository->find($id, $onlyTrashed);
@@ -56,8 +42,22 @@ class WalletToBankService
         return $this->walletToBankRepository->list($filters);
     }
 
+    /**
+     * @return mixed
+     */
+    public function list(array $filters = [])
+    {
+        return $this->walletToBankRepository->list($filters);
+
+    }
+
     public function import(array $filters)
     {
         return $this->walletToBankRepository->create($filters);
+    }
+
+    public function create(array $inputs = [])
+    {
+        return $this->walletToBankRepository->create($inputs);
     }
 }
