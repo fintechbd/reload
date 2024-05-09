@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static WalletToBankService walletToBank()
  * @method static WalletToAtmService walletToAtm()
  * @method static WalletToPrepaidCardService walletToPrepaidCard()
- *                                                                                          // Crud Service Method Point Do not Remove //
+ *                                                                 // Crud Service Method Point Do not Remove //
  *
  * @see \Fintech\Reload\Reload
  */
