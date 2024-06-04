@@ -252,7 +252,7 @@ class WalletToBankService
         $orderDetailStoreForCommissionForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->order_detail_cause_name = 'commission';
-        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to '.$user_name;
+        $orderDetailStoreForCommissionForMaster->notes = 'Local Bank Transfer Deposit Commission Send to '.$user_name;
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
 
