@@ -275,5 +275,4 @@ class WalletToAtmService
         return $userAccountData;
 
     }
-
 }
