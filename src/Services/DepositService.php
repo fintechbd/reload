@@ -43,9 +43,6 @@ class DepositService
         return $this->depositRepository->list($filters);
     }
 
-    /**
-     * @return mixed
-     */
     public function list(array $filters = [])
     {
         return $this->depositRepository->list($filters);
@@ -62,9 +59,6 @@ class DepositService
         return $this->depositRepository->create($inputs);
     }
 
-    /**
-     * @return int[]
-     */
     public function accept($deposit): array
     {
         $userAccountData = [
