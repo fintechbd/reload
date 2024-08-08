@@ -16,9 +16,7 @@ class WalletToWalletService
     /**
      * WalletToWalletService constructor.
      */
-    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository)
-    {
-    }
+    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository) {}
 
     public function find($id, $onlyTrashed = false): ?BaseModel
     {

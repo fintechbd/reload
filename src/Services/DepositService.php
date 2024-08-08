@@ -13,10 +13,7 @@ class DepositService
     /**
      * DepositService constructor.
      */
-    public function __construct(private readonly DepositRepository $depositRepository)
-    {
-
-    }
+    public function __construct(private readonly DepositRepository $depositRepository) {}
 
     public function find($id, $onlyTrashed = false)
     {
