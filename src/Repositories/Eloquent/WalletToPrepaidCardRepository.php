@@ -5,13 +5,14 @@ namespace Fintech\Reload\Repositories\Eloquent;
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository as InterfacesWalletToPrepaidCardRepository;
 use Fintech\Reload\Models\WalletToPrepaidCard;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class WalletToPrepaidCardRepository
  */
-class WalletToPrepaidCardRepository extends EloquentRepository implements InterfacesWalletToPrepaidCardRepository
+class WalletToPrepaidCardRepository extends OrderRepository  implements InterfacesWalletToPrepaidCardRepository
 {
     public function __construct()
     {
