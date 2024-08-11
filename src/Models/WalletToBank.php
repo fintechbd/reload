@@ -21,7 +21,7 @@ class WalletToBank extends BaseModel
 
     protected $guarded = ['id'];
 
-    protected $appends = ['links'];
+
 
     protected $casts = ['wallet_to_bank_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
 

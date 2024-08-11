@@ -21,7 +21,7 @@ class WalletToPrepaidCard extends BaseModel
 
     protected $guarded = ['id'];
 
-    protected $appends = ['links'];
+
 
     protected $casts = ['wallet_to_prepaid_card_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
 
