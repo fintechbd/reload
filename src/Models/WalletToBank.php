@@ -4,9 +4,10 @@ namespace Fintech\Reload\Models;
 
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Traits\AuditableTrait;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class WalletToBank extends BaseModel
+class WalletToBank extends Order
 {
     use AuditableTrait;
     use SoftDeletes;
@@ -16,14 +17,6 @@ class WalletToBank extends BaseModel
     | GLOBAL VARIABLES
     |--------------------------------------------------------------------------
     */
-
-    protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
-
-    protected $casts = ['wallet_to_bank_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
-
-    protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
 
     /*
     |--------------------------------------------------------------------------

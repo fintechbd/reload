@@ -4,9 +4,10 @@ namespace Fintech\Reload\Models;
 
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Traits\AuditableTrait;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class WalletToAtm extends BaseModel
+class WalletToAtm extends Order
 {
     use AuditableTrait;
     use SoftDeletes;
@@ -17,13 +18,6 @@ class WalletToAtm extends BaseModel
     |--------------------------------------------------------------------------
     */
 
-    protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
-
-    protected $casts = ['wallet_to_atm_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
-
-    protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
 
     /*
     |--------------------------------------------------------------------------
