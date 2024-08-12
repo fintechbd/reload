@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Models;
 
-use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Traits\AuditableTrait;
 use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
