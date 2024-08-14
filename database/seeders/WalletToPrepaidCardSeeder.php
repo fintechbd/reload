@@ -95,7 +95,7 @@ class WalletToPrepaidCardSeeder extends Seeder
                     'account_number' => null,
                     'transactional_currency' => 'CAD',
                     'beneficiary_type_id' => 7,
-                    'operator_short_code' => null
+                    'operator_short_code' => null,
                 ],
                 'enabled' => true,
             ],
