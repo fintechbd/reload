@@ -72,7 +72,7 @@ class CurrencySwapSeeder extends Seeder
         return [
             [
                 'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'currency_swap'])->first()->id,
-                'service_vendor_id' => 1,
+                'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'Currency Swap',
                 'service_slug' => 'currency_swap',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'currency_swap.svg')),
@@ -102,7 +102,7 @@ class CurrencySwapSeeder extends Seeder
                     'service_slug' => $service->service_slug,
                     'source_country_id' => $source_countries,
                     'destination_country_id' => $source_countries,
-                    'service_vendor_id' => 1,
+                    'service_vendor_id' => config('fintech.business.default_vendor', 1),
                     'service_stat_data' => [
                         [
                             'lower_limit' => '10.00',
