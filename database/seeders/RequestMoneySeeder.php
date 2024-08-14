@@ -78,7 +78,7 @@ class RequestMoneySeeder extends Seeder
         return [
             [
                 'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'request_money'])->first()->id,
-                'service_vendor_id' => 1,
+                'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'Request Money',
                 'service_slug' => 'request_money',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'request_money.svg')),
@@ -108,7 +108,7 @@ class RequestMoneySeeder extends Seeder
                     'service_slug' => $service->service_slug,
                     'source_country_id' => $source_countries,
                     'destination_country_id' => $source_countries,
-                    'service_vendor_id' => 1,
+                    'service_vendor_id' => config('fintech.business.default_vendor', 1),
                     'service_stat_data' => [
                         [
                             'lower_limit' => '10.00',
