@@ -99,7 +99,8 @@ class ReloadSeeder extends Seeder
                 ],
             ],
             [
-                'service_type_parent_id' => null, 'service_type_name' => 'Wallet to Wallet',
+                'service_type_parent_id' => null,
+                'service_type_name' => 'Wallet to Wallet',
                 'service_type_slug' => 'wallet_to_wallet',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_to_wallet.svg')),
                 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_to_wallet.png')),
