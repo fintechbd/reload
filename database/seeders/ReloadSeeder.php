@@ -22,10 +22,10 @@ class ReloadSeeder extends Seeder
             if (! empty($serviceTypes)) {
 
                 foreach ($this->serviceTypes() as $entry) {
-                    $serviceTypeChild = $entry['serviceTypeChild'] ?? [];
+                    $serviceTypeChildren = $entry['serviceTypeChildren'] ?? [];
 
-                    if (isset($entry['serviceTypeChild'])) {
-                        unset($entry['serviceTypeChild']);
+                    if (isset($entry['serviceTypeChildren'])) {
+                        unset($entry['serviceTypeChildren']);
                     }
 
                     $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
@@ -35,8 +35,8 @@ class ReloadSeeder extends Seeder
                         $serviceTypeModel = Business::serviceType()->create($entry);
                     }
 
-                    if (! empty($serviceTypeChild)) {
-                        array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
+                    if (! empty($serviceTypeChildren)) {
+                        array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                             $item['service_type_parent_id'] = $serviceTypeModel->id;
                             Business::serviceType()->create($item);
                         });
@@ -79,7 +79,7 @@ class ReloadSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
                 'enabled' => true,
-                'serviceTypeChild' => [
+                'serviceTypeChildren' => [
                     [
                         'service_type_name' => 'Bank Deposit',
                         'service_type_slug' => 'bank_deposit',

@@ -20,9 +20,9 @@ class CanadaDepositSeeder extends Seeder implements ServiceSeederInterface
         if (Core::packageExists('Business')) {
 
             foreach ($this->serviceTypes() as $entry) {
-                $serviceTypeChild = $entry['serviceTypeChild'] ?? [];
-                if (isset($entry['serviceTypeChild'])) {
-                    unset($entry['serviceTypeChild']);
+                $serviceTypeChildren = $entry['serviceTypeChildren'] ?? [];
+                if (isset($entry['serviceTypeChildren'])) {
+                    unset($entry['serviceTypeChildren']);
                 }
 
                 $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
@@ -33,8 +33,8 @@ class CanadaDepositSeeder extends Seeder implements ServiceSeederInterface
                     $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
-                if (! empty($serviceTypeChild)) {
-                    array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
+                if (! empty($serviceTypeChildren)) {
+                    array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                         $item['service_type_parent_id'] = $serviceTypeModel->id;
                         Business::serviceType()->create($item);
                     });
@@ -77,7 +77,7 @@ class CanadaDepositSeeder extends Seeder implements ServiceSeederInterface
                 'service_type_is_description' => 'no',
                 'service_type_step' => '2',
                 'enabled' => true,
-                'serviceTypeChild' => [
+                'serviceTypeChildren' => [
                     [
                         'service_type_name' => 'CIBC Bank',
                         'service_type_slug' => 'cibc_bank',
