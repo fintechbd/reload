@@ -5,13 +5,15 @@ namespace Fintech\Reload\Repositories\Eloquent;
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\WalletToBankRepository as InterfacesWalletToBankRepository;
 use Fintech\Reload\Models\WalletToBank;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class WalletToBankRepository
  */
-class WalletToBankRepository extends EloquentRepository implements InterfacesWalletToBankRepository
+class WalletToBankRepository extends OrderRepository implements InterfacesWalletToBankRepository
 {
     public function __construct()
     {
@@ -23,31 +25,12 @@ class WalletToBankRepository extends EloquentRepository implements InterfacesWal
      * filtered options
      *
      * @return Paginator|Collection
+     *
+     * @throws BindingResolutionException
      */
     public function list(array $filters = [])
     {
-        $query = $this->model->newQuery();
-
-        //Searching
-        if (! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('wallet_to_bank_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && $filters['trashed'] === true) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
+        return parent::list($filters);
 
     }
 }

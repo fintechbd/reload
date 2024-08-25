@@ -5,6 +5,7 @@ namespace Fintech\Reload\Repositories\Eloquent;
 use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository as InterfacesWalletToPrepaidCardRepository;
 use Fintech\Reload\Models\WalletToPrepaidCard;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -23,31 +24,12 @@ class WalletToPrepaidCardRepository extends OrderRepository implements Interface
      * filtered options
      *
      * @return Paginator|Collection
+     *
+     * @throws BindingResolutionException
      */
     public function list(array $filters = [])
     {
-        $query = $this->model->newQuery();
-
-        //Searching
-        if (! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('wallet_to_prepaid_card_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && $filters['trashed'] === true) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
+        return parent::list($filters);
 
     }
 }
