@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Repositories\Eloquent;
 
-use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Reload\Interfaces\WalletToAtmRepository as InterfacesWalletToAtmRepository;
 use Fintech\Reload\Models\WalletToAtm;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
