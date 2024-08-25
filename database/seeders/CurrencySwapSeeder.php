@@ -110,7 +110,7 @@ class CurrencySwapSeeder extends Seeder
                             'local_currency_higher_limit' => '25000.00',
                             'charge' => '5%',
                             'discount' => '5%',
-                            'commission' => '5%',
+                            'commission' => '2%',
                             'cost' => '0.00',
                             'charge_refund' => 'yes',
                             'discount_refund' => 'yes',

@@ -165,7 +165,7 @@ class ReloadSeeder extends Seeder
                             'local_currency_higher_limit' => '25000.00',
                             'charge' => mt_rand(1, 7).'%',
                             'discount' => mt_rand(1, 7).'%',
-                            'commission' => mt_rand(1, 7).'%',
+                            'commission' => '1',
                             'cost' => '0.00',
                             'charge_refund' => 'yes',
                             'discount_refund' => 'yes',
