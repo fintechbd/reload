@@ -46,16 +46,16 @@ class CurrencySwapSeeder extends Seeder
 
     private function serviceTypes(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => null,
                 'service_type_name' => 'Currency Swap',
                 'service_type_slug' => 'currency_swap',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'currency_swap.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'currency_swap.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'currency_swap.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'currency_swap.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
@@ -66,8 +66,8 @@ class CurrencySwapSeeder extends Seeder
 
     private function services(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service/logo_png/';
+        $image_svg = __DIR__.'/../../resources/img/service/logo_svg/';
+        $image_png = __DIR__.'/../../resources/img/service/logo_png/';
 
         return [
             [
@@ -75,8 +75,8 @@ class CurrencySwapSeeder extends Seeder
                 'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'Currency Swap',
                 'service_slug' => 'currency_swap',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'currency_swap.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'currency_swap.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'currency_swap.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'currency_swap.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
@@ -93,7 +93,7 @@ class CurrencySwapSeeder extends Seeder
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
         $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (!empty($roles) && !empty($source_countries)) {
+        if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [

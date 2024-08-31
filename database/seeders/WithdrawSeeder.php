@@ -26,16 +26,16 @@ class WithdrawSeeder extends Seeder
      */
     private function serviceTypes(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => null,
                 'service_type_name' => 'Withdraw',
                 'service_type_slug' => 'withdraw',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'withdraw.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'withdraw.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'withdraw.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'withdraw.png')),
                 'service_type_is_parent' => 'yes',
                 'service_type_is_description' => 'no',
                 'service_type_step' => 1,

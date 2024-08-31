@@ -32,7 +32,7 @@ class BankDepositSeeder extends Seeder
                     $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
-                if (!empty($serviceTypeChildren)) {
+                if (! empty($serviceTypeChildren)) {
                     array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                         $item['service_type_parent_id'] = $serviceTypeModel->id;
                         Business::serviceType()->create($item);
@@ -62,16 +62,16 @@ class BankDepositSeeder extends Seeder
 
     private function serviceTypes()
     {
-        $image_svg = __DIR__ . '/../../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__ . '/../../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__.'/../../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__.'/../../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first()->id,
                 'service_type_name' => 'PEOPLES TRUST COMPANY',
                 'service_type_slug' => 'peoples_trust_company',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'peoples_trust_company.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'peoples_trust_company.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'peoples_trust_company.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'peoples_trust_company.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '3',
@@ -81,8 +81,8 @@ class BankDepositSeeder extends Seeder
                 'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first()->id,
                 'service_type_name' => 'INTERAC CANADA',
                 'service_type_slug' => 'interac_canada',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'interac_canada.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'interac_canada.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'interac_canada.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'interac_canada.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '3',
@@ -93,8 +93,8 @@ class BankDepositSeeder extends Seeder
 
     private function service(): array
     {
-        $image_svg = __DIR__ . '/../../../resources/img/service/logo_svg/';
-        $image_png = __DIR__ . '/../../../resources/img/service/logo_png/';
+        $image_svg = __DIR__.'/../../../resources/img/service/logo_svg/';
+        $image_png = __DIR__.'/../../../resources/img/service/logo_png/';
 
         return [
             [
@@ -102,8 +102,8 @@ class BankDepositSeeder extends Seeder
                 'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'PEOPLES TRUST COMPANY',
                 'service_slug' => 'peoples_trust_company',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'peoples_trust_company.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'peoples_trust_company.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'peoples_trust_company.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'peoples_trust_company.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
@@ -126,8 +126,8 @@ class BankDepositSeeder extends Seeder
                 'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'INTERAC CANADA',
                 'service_slug' => 'interac_canada',
-                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'interac_canada.svg')),
-                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'interac_canada.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'interac_canada.svg')),
+                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'interac_canada.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
@@ -156,7 +156,7 @@ class BankDepositSeeder extends Seeder
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
         $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (!empty($roles) && !empty($source_countries)) {
+        if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [
@@ -171,8 +171,8 @@ class BankDepositSeeder extends Seeder
                             'lower_limit' => '10.00',
                             'higher_limit' => '5000.00',
                             'local_currency_higher_limit' => '25000.00',
-                            'charge' => mt_rand(1, 7) . '%',
-                            'discount' => mt_rand(1, 7) . '%',
+                            'charge' => mt_rand(1, 7).'%',
+                            'discount' => mt_rand(1, 7).'%',
                             'commission' => '0',
                             'cost' => '0.00',
                             'charge_refund' => 'yes',
