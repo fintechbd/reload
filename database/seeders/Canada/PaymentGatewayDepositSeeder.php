@@ -33,7 +33,7 @@ class PaymentGatewayDepositSeeder extends Seeder implements ServiceSeederInterfa
                     $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
-                if (! empty($serviceTypeChildren)) {
+                if (!empty($serviceTypeChildren)) {
                     array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                         $item['service_type_parent_id'] = $serviceTypeModel->id;
                         Business::serviceType()->create($item);
@@ -63,16 +63,16 @@ class PaymentGatewayDepositSeeder extends Seeder implements ServiceSeederInterfa
 
     public function serviceTypes(): array
     {
-        $image_svg = __DIR__.'/../../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__.'/../../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                 'service_type_name' => 'INTERAC E TRANSFER',
                 'service_type_slug' => 'interac_e_transfer',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'interac_e_transfer.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'interac_e_transfer.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'interac_e_transfer.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'interac_e_transfer.png')),
                 'service_type_is_parent' => 'yes',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '2',
@@ -81,8 +81,8 @@ class PaymentGatewayDepositSeeder extends Seeder implements ServiceSeederInterfa
                     [
                         'service_type_name' => 'CIBC Bank',
                         'service_type_slug' => 'cibc_bank',
-                        'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'cibc_bank.svg')),
-                        'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'cibc_bank.png')),
+                        'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'cibc_bank.svg')),
+                        'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'cibc_bank.png')),
                         'service_type_is_parent' => 'no',
                         'service_type_is_description' => 'no',
                         'service_type_step' => '3',
@@ -95,8 +95,8 @@ class PaymentGatewayDepositSeeder extends Seeder implements ServiceSeederInterfa
 
     public function service(): array
     {
-        $image_svg = __DIR__.'/../../../resources/img/service/logo_svg/';
-        $image_png = __DIR__.'/../../../resources/img/service/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service/logo_png/';
 
         return [
             [
@@ -104,8 +104,8 @@ class PaymentGatewayDepositSeeder extends Seeder implements ServiceSeederInterfa
                 'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'CIBC Bank',
                 'service_slug' => 'cibc_bank',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'cibc_bank.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'cibc_bank.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'cibc_bank.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'cibc_bank.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',

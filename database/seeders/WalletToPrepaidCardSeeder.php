@@ -49,16 +49,16 @@ class WalletToPrepaidCardSeeder extends Seeder
      */
     private function serviceTypes(): array
     {
-        $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
         return [
             [
                 'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'withdraw'])->first()->id,
                 'service_type_name' => 'Wallet To Prepaid Card',
                 'service_type_slug' => 'wallet_to_prepaid_card',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_to_prepaid_card.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_to_prepaid_card.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'wallet_to_prepaid_card.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'wallet_to_prepaid_card.png')),
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_type_step' => '2',
@@ -72,8 +72,8 @@ class WalletToPrepaidCardSeeder extends Seeder
      */
     private function services(): array
     {
-        $image_svg = __DIR__.'/../../resources/img/service/logo_svg/';
-        $image_png = __DIR__.'/../../resources/img/service/logo_png/';
+        $image_svg = __DIR__ . '/../../resources/img/service/logo_svg/';
+        $image_png = __DIR__ . '/../../resources/img/service/logo_png/';
 
         return [
             [
@@ -81,8 +81,8 @@ class WalletToPrepaidCardSeeder extends Seeder
                 'service_vendor_id' => config('fintech.business.default_vendor', 1),
                 'service_name' => 'Wallet To Prepaid Card',
                 'service_slug' => 'wallet_to_prepaid_card',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_to_prepaid_card.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_to_prepaid_card.png')),
+                'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . 'wallet_to_prepaid_card.svg')),
+                'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . 'wallet_to_prepaid_card.png')),
                 'service_notification' => 'yes',
                 'service_delay' => 'yes',
                 'service_stat_policy' => 'yes',
@@ -108,7 +108,7 @@ class WalletToPrepaidCardSeeder extends Seeder
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
         $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (! empty($roles) && ! empty($source_countries)) {
+        if (!empty($roles) && !empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [

@@ -18,7 +18,7 @@ class DepositRejected
     /**
      * Create a new event instance.
      *
-     * @param  Deposit  $deposit
+     * @param Deposit $deposit
      */
     public function __construct($deposit)
     {

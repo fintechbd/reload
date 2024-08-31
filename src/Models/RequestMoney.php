@@ -50,7 +50,7 @@ class RequestMoney extends Order
             'accept' => action_link(route('reload.request-moneys.accept', $primaryKey), __('restapi::messages.action.accept'), 'post'),
         ];
 
-        if (! empty($this->parent_id)) {
+        if (!empty($this->parent_id)) {
             unset($links['accept']);
         }
 
