@@ -6,7 +6,6 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Traits\HasCoreSettingTrait;
 use Fintech\Transaction\Seeders\TransactionFormSeeder;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class InstallCommand extends Command
 {
@@ -18,9 +17,9 @@ class InstallCommand extends Command
 
     private string $module = 'Reload';
 
-    private string $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
+    private string $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
 
-    private string $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
+    private string $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
     public function handle(): int
     {
@@ -42,8 +41,8 @@ class InstallCommand extends Command
                     'service_type_parent_id' => null,
                     'service_type_name' => 'Fund Deposit',
                     'service_type_slug' => 'fund_deposit',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'fund_deposit.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'fund_deposit.png')),
+                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($this->image_svg . 'fund_deposit.svg')),
+                    'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($this->image_png . 'fund_deposit.png')),
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '1',
@@ -53,8 +52,8 @@ class InstallCommand extends Command
                     'service_type_parent_id' => null,
                     'service_type_name' => 'Withdraw',
                     'service_type_slug' => 'withdraw',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'withdraw.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'withdraw.png')),
+                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($this->image_svg . 'withdraw.svg')),
+                    'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($this->image_png . 'withdraw.png')),
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => 1,
@@ -63,64 +62,49 @@ class InstallCommand extends Command
             ];
 
             foreach ($serviceTypes as $entry) {
-                $this->createServiceType($entry);
+               Business::serviceTypeManager($entry)->execute();
             }
         });
     }
 
     private function addBankCardDeposit(): void
     {
-        if ($this->components->confirm("[<fg=yellow;options=bold>{$this->module}</>] Import Fund Deposit (Bank & Card) Service Types", true)) {
-            $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating Fund Deposit (Bank & Card) Service Types", function () {
-                $types = [
-                    [
-                        'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
-                        'service_type_name' => 'Bank Deposit',
-                        'service_type_slug' => 'bank_deposit',
-                        'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'bank_deposit.svg')),
-                        'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'bank_deposit.png')),
-                        'service_type_is_parent' => 'yes',
-                        'service_type_is_description' => 'no',
-                        'service_type_step' => '2',
-                        'enabled' => true,
-                    ],
-                    [
-                        'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
-                        'service_type_name' => 'Card Deposit',
-                        'service_type_slug' => 'card_deposit',
-                        'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'card_deposit.svg')),
-                        'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'card_deposit.png')),
-                        'service_type_is_parent' => 'yes',
-                        'service_type_is_description' => 'no',
-                        'service_type_step' => '2',
-                        'enabled' => true,
-                    ],
-                ];
-                foreach ($types as $entry) {
-                    $this->createServiceType($entry);
-                }
-            });
-        }
+        $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating Fund Deposit (Bank & Card) Service Types", function () {
+            $types = [
+                [
+                    'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                    'service_type_name' => 'Bank Deposit',
+                    'service_type_slug' => 'bank_deposit',
+                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($this->image_svg . 'bank_deposit.svg')),
+                    'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($this->image_png . 'bank_deposit.png')),
+                    'service_type_is_parent' => 'yes',
+                    'service_type_is_description' => 'no',
+                    'service_type_step' => '2',
+                    'enabled' => true,
+                ],
+                [
+                    'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                    'service_type_name' => 'Card Deposit',
+                    'service_type_slug' => 'card_deposit',
+                    'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($this->image_svg . 'card_deposit.svg')),
+                    'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents($this->image_png . 'card_deposit.png')),
+                    'service_type_is_parent' => 'yes',
+                    'service_type_is_description' => 'no',
+                    'service_type_step' => '2',
+                    'enabled' => true,
+                ],
+            ];
+            foreach ($types as $entry) {
+                $this->createServiceType($entry);
+            }
+        });
     }
 
-    private function createServiceType(&$entry)
+    private function createServiceType(&$entry): void
     {
         $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
         ($findServiceTypeModel)
             ? Business::serviceType()->update($findServiceTypeModel->id, $entry)
             : Business::serviceType()->create($entry);
-    }
-
-    private function addUtilityOptions(): void
-    {
-        $seeders = [
-            TransactionFormSeeder::class => 'transaction form',
-        ];
-
-        foreach ($seeders as $class => $label) {
-            $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating {$label} data", function () use ($class) {
-                Artisan::call('db:seed --class='.addslashes($class).' --quiet');
-            });
-        }
     }
 }
