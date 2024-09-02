@@ -37,22 +37,20 @@ class InstallCommand extends Command
 
             $serviceTypes = [
                 [
-                    'service_type_parent_id' => null,
                     'service_type_name' => 'Fund Deposit',
                     'service_type_slug' => 'fund_deposit',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'fund_deposit.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'fund_deposit.png')),
+                    'logo_svg' => $this->image_svg.'fund_deposit.svg',
+                    'logo_png' => $this->image_png.'fund_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '1',
                     'enabled' => true,
                 ],
                 [
-                    'service_type_parent_id' => null,
                     'service_type_name' => 'Withdraw',
                     'service_type_slug' => 'withdraw',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'withdraw.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'withdraw.png')),
+                    'logo_svg' => $this->image_svg.'withdraw.svg',
+                    'logo_png' => $this->image_png.'withdraw.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => 1,
@@ -69,13 +67,13 @@ class InstallCommand extends Command
     private function addBankCardDeposit(): void
     {
         $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating Fund Deposit (Bank & Card) Service Types", function () {
+            $parentId = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id;
             $types = [
                 [
-                    'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                     'service_type_name' => 'Bank Deposit',
                     'service_type_slug' => 'bank_deposit',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'bank_deposit.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'bank_deposit.png')),
+                    'logo_svg' => $this->image_svg.'bank_deposit.svg',
+                    'logo_png' => $this->image_png.'bank_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '2',
@@ -85,8 +83,8 @@ class InstallCommand extends Command
                     'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                     'service_type_name' => 'Card Deposit',
                     'service_type_slug' => 'card_deposit',
-                    'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($this->image_svg.'card_deposit.svg')),
-                    'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($this->image_png.'card_deposit.png')),
+                    'logo_svg' => $this->image_svg.'card_deposit.svg',
+                    'logo_png' => $this->image_png.'card_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '2',
@@ -94,16 +92,8 @@ class InstallCommand extends Command
                 ],
             ];
             foreach ($types as $entry) {
-                $this->createServiceType($entry);
+                Business::serviceTypeManager($entry, $parentId)->execute();
             }
         });
-    }
-
-    private function createServiceType(&$entry): void
-    {
-        $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
-        ($findServiceTypeModel)
-            ? Business::serviceType()->update($findServiceTypeModel->id, $entry)
-            : Business::serviceType()->create($entry);
     }
 }
