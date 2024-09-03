@@ -95,28 +95,28 @@ class DepositService
         $orderDetailStoreForMaster->save();
 
         //For Charge
-        $deposit->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
-        $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $deposit->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
+        $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $deposit->order_detail_cause_name = 'charge';
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $deposit->notes = 'Deposit Charge Receive from '.$master_user_name;
+        $deposit->notes = 'Deposit Charge Sending to '.$master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $deposit->user_id;
-        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Send to '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Receiving from '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        $deposit->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+        $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
-        $deposit->notes = 'Discount form '.$master_user_name;
+        $deposit->notes = 'Deposit Discount form '.$master_user_name;
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -124,8 +124,8 @@ class DepositService
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $deposit->user_id;
-        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
         $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
@@ -191,8 +191,8 @@ class DepositService
         $orderDetailStoreForMaster->save();
 
         //For Charge
-        $data->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $data->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+        $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $data->notes = 'Deposit Charge Send to '.$master_user_name;
