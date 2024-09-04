@@ -45,6 +45,8 @@ class BankDepositSeeder extends Seeder
             foreach (array_chunk($serviceData, 200) as $block) {
                 set_time_limit(2100);
                 foreach ($block as $entry) {
+                    $entry['roles'] = [7];
+                    $entry['countries'] = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
                     Business::service()->create($entry);
                 }
             }
