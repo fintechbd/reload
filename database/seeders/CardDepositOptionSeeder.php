@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Business\Interfaces\ServiceSeederInterface;
 use Fintech\Business\Traits\ServiceSeeder;

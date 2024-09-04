@@ -5,7 +5,6 @@ namespace Fintech\Reload\Seeders\Dubai;
 use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class BankDepositSeeder extends Seeder

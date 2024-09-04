@@ -2,17 +2,16 @@
 
 namespace Fintech\Reload\Seeders\Canada;
 
-use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Business\Interfaces\ServiceSeederInterface;
 use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class BankDepositSeeder extends Seeder implements ServiceSeederInterface
 {
     use ServiceSeeder;
+
     /**
      * Run the database seeds.
      */
@@ -52,7 +51,7 @@ class BankDepositSeeder extends Seeder implements ServiceSeederInterface
                 }
             }
 
-            $serviceStatData = $this->serviceStat([39],[39]);
+            $serviceStatData = $this->serviceStat([39], [39]);
 
             foreach (array_chunk($serviceStatData, 200) as $block) {
                 set_time_limit(2100);

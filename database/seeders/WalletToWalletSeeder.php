@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
@@ -13,6 +12,7 @@ use Illuminate\Database\Seeder;
 class WalletToWalletSeeder extends Seeder
 {
     use ServiceSeeder;
+
     /**
      * Run the database seeds.
      */
