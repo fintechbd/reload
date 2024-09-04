@@ -4,12 +4,15 @@ namespace Fintech\Reload\Seeders\Canada;
 
 use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
+use Fintech\Business\Interfaces\ServiceSeederInterface;
+use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
-class BankDepositSeeder extends Seeder
+class BankDepositSeeder extends Seeder implements ServiceSeederInterface
 {
+    use ServiceSeeder;
     /**
      * Run the database seeds.
      */
@@ -49,7 +52,7 @@ class BankDepositSeeder extends Seeder
                 }
             }
 
-            $serviceStatData = $this->serviceStat();
+            $serviceStatData = $this->serviceStat([39],[39]);
 
             foreach (array_chunk($serviceStatData, 200) as $block) {
                 set_time_limit(2100);
@@ -60,7 +63,7 @@ class BankDepositSeeder extends Seeder
         }
     }
 
-    private function serviceTypes()
+    public function serviceTypes(): array
     {
         $image_svg = __DIR__.'/../../../resources/img/service_type/logo_svg/';
         $image_png = __DIR__.'/../../../resources/img/service_type/logo_png/';
@@ -91,7 +94,7 @@ class BankDepositSeeder extends Seeder
         ];
     }
 
-    private function service(): array
+    public function service(): array
     {
         $image_svg = __DIR__.'/../../../resources/img/service/logo_svg/';
         $image_png = __DIR__.'/../../../resources/img/service/logo_png/';
@@ -147,45 +150,6 @@ class BankDepositSeeder extends Seeder
                 'enabled' => false,
             ],
         ];
-
-    }
-
-    private function serviceStat(): array
-    {
-        $serviceLists = $this->service();
-        $serviceStats = [];
-        $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
-        $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
-        if (! empty($roles) && ! empty($source_countries)) {
-            foreach ($serviceLists as $serviceList) {
-                $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
-                $serviceStats[] = [
-                    'role_id' => $roles,
-                    'service_id' => $service->getKey(),
-                    'service_slug' => $service->service_slug,
-                    'source_country_id' => $source_countries,
-                    'destination_country_id' => $source_countries,
-                    'service_vendor_id' => 1,
-                    'service_stat_data' => [
-                        [
-                            'lower_limit' => '10.00',
-                            'higher_limit' => '5000.00',
-                            'local_currency_higher_limit' => '25000.00',
-                            'charge' => mt_rand(1, 7).'%',
-                            'discount' => mt_rand(1, 7).'%',
-                            'commission' => '0',
-                            'cost' => '0.00',
-                            'charge_refund' => 'yes',
-                            'discount_refund' => 'yes',
-                            'commission_refund' => 'yes',
-                        ],
-                    ],
-                    'enabled' => true,
-                ];
-            }
-        }
-
-        return $serviceStats;
 
     }
 }

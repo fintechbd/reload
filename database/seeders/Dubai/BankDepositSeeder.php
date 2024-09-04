@@ -46,7 +46,7 @@ class BankDepositSeeder extends Seeder
                 set_time_limit(2100);
                 foreach ($block as $entry) {
                     $entry['roles'] = [7];
-                    $entry['countries'] = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+                    $entry['countries'] = [231];
                     Business::service()->create($entry);
                 }
             }
@@ -134,7 +134,7 @@ class BankDepositSeeder extends Seeder
         $serviceLists = $this->service();
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
-        $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+        $source_countries = [231];
         if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
