@@ -27,7 +27,7 @@ class WalletToPrepaidCardSeeder extends Seeder
                 ->execute();
         }
 
-        if (Core::packageExists('Transaction') && !Transaction::transactionForm()->list(['code' => 'wallet_to_prepaid_card'])->first()) {
+        if (Core::packageExists('Transaction') && ! Transaction::transactionForm()->list(['code' => 'wallet_to_prepaid_card'])->first()) {
             Transaction::transactionForm()->create([
                 'name' => 'Wallet To Prepaid Card',
                 'code' => 'wallet_to_prepaid_card',

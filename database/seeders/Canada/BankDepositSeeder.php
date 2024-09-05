@@ -3,8 +3,6 @@
 namespace Fintech\Reload\Seeders\Canada;
 
 use Fintech\Business\Facades\Business;
-use Fintech\Business\Interfaces\ServiceSeederInterface;
-use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
 use Illuminate\Database\Seeder;
 

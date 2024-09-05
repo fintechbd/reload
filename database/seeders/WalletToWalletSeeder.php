@@ -28,7 +28,7 @@ class WalletToWalletSeeder extends Seeder
                 ->execute();
         }
 
-        if (Core::packageExists('Transaction') && !Transaction::transactionForm()->list(['code' => 'wallet_to_wallet'])->first()) {
+        if (Core::packageExists('Transaction') && ! Transaction::transactionForm()->list(['code' => 'wallet_to_wallet'])->first()) {
             Transaction::transactionForm()->create([
                 'name' => 'Wallet To Wallet Transfer',
                 'code' => 'wallet_to_wallet',

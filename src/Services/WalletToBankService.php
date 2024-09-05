@@ -87,7 +87,7 @@ class WalletToBankService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Local Bank Transfer send to ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Payment Send to ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Send to '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -98,7 +98,7 @@ class WalletToBankService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Local Bank Transfer receive from ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Payment Receive From' . $user_name;
+        $orderDetailStoreForMaster->notes = 'Local Bank Transfer receive from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Receive From'.$user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -106,7 +106,7 @@ class WalletToBankService
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Local Bank Transfer send to ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Send to ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Send to '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -116,7 +116,7 @@ class WalletToBankService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Local Bank Transfer from ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Charge Receive from ' . $user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Local Bank Transfer from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Receive from '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -124,7 +124,7 @@ class WalletToBankService
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Local Bank Transfer from ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount form ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -135,7 +135,7 @@ class WalletToBankService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Local Bank Transfer send to ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount to ' . $user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Local Bank Transfer send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -183,7 +183,7 @@ class WalletToBankService
         $data->order_detail_cause_name = 'cash_withdraw';
         //$data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Local Bank Transfer send to ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Refund From ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Refund From '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -196,7 +196,7 @@ class WalletToBankService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Local Bank Transfer receive from ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Send to ' . $user_name;
+        $orderDetailStoreForMaster->notes = 'Local Bank Transfer receive from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -222,7 +222,7 @@ class WalletToBankService
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Local Bank Transfer receive from ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount form ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer receive from '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
@@ -233,7 +233,7 @@ class WalletToBankService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Local Bank Transfer send to ' . $data->amount . ' ' . $data->currency . ' to ' . $data->converted_amount . ' ' . $data->converted_currency . ' Discount to ' . $user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Local Bank Transfer send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -242,7 +242,7 @@ class WalletToBankService
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $data->order_detail_cause_name = 'commission';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Local Bank Transfer Deposit Commission Receive from ' . $master_user_name;
+        $data->notes = 'Local Bank Transfer Deposit Commission Receive from '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -252,7 +252,7 @@ class WalletToBankService
         $orderDetailStoreForCommissionForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->order_detail_cause_name = 'commission';
-        $orderDetailStoreForCommissionForMaster->notes = 'Local Bank Transfer Deposit Commission Send to ' . $user_name;
+        $orderDetailStoreForCommissionForMaster->notes = 'Local Bank Transfer Deposit Commission Send to '.$user_name;
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
 
