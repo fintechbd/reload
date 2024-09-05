@@ -57,7 +57,6 @@ class InstallCommand extends Command
                     'enabled' => true,
                 ],
             ];
-
             foreach ($serviceTypes as $entry) {
                 Business::serviceTypeManager($entry)->execute();
             }
