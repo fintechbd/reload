@@ -8,10 +8,8 @@ use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
 use Illuminate\Database\Seeder;
 
-class BankDepositSeeder extends Seeder implements ServiceSeederInterface
+class BankDepositSeeder extends Seeder
 {
-    use ServiceSeeder;
-
     /**
      * Run the database seeds.
      */
@@ -19,136 +17,58 @@ class BankDepositSeeder extends Seeder implements ServiceSeederInterface
     {
         if (Core::packageExists('Business')) {
 
-            foreach ($this->serviceTypes() as $entry) {
-                $serviceTypeChildren = $entry['serviceTypeChildren'] ?? [];
+            $parent = Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first();
 
-                if (isset($entry['serviceTypeChildren'])) {
-                    unset($entry['serviceTypeChildren']);
-                }
+            $entries = $this->data();
 
-                $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
-
-                if ($findServiceTypeModel) {
-                    $serviceTypeModel = Business::serviceType()->update($findServiceTypeModel->id, $entry);
-                } else {
-                    $serviceTypeModel = Business::serviceType()->create($entry);
-                }
-
-                if (! empty($serviceTypeChildren)) {
-                    array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
-                        $item['service_type_parent_id'] = $serviceTypeModel->id;
-                        Business::serviceType()->create($item);
-                    });
-                }
-            }
-
-            $serviceData = $this->service();
-
-            foreach (array_chunk($serviceData, 200) as $block) {
-                set_time_limit(2100);
-                foreach ($block as $entry) {
-                    Business::service()->create($entry);
-                }
-            }
-
-            $serviceStatData = $this->serviceStat([39], [39]);
-
-            foreach (array_chunk($serviceStatData, 200) as $block) {
-                set_time_limit(2100);
-                foreach ($block as $entry) {
-                    Business::serviceStat()->customStore($entry);
-                }
-            }
-        }
-    }
-
-    public function serviceTypes(): array
-    {
-        $image_svg = __DIR__.'/../../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__.'/../../../resources/img/service_type/logo_png/';
-
-        return [
-            [
-                'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first()->id,
-                'service_type_name' => 'PEOPLES TRUST COMPANY',
-                'service_type_slug' => 'peoples_trust_company',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'peoples_trust_company.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'peoples_trust_company.png')),
-                'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no',
-                'service_type_step' => '3',
-                'enabled' => true,
-            ],
-            [
-                'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first()->id,
-                'service_type_name' => 'INTERAC CANADA',
-                'service_type_slug' => 'interac_canada',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'interac_canada.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'interac_canada.png')),
-                'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no',
-                'service_type_step' => '3',
-                'enabled' => false,
-            ],
-        ];
-    }
-
-    public function service(): array
-    {
-        $image_svg = __DIR__.'/../../../resources/img/service/logo_svg/';
-        $image_png = __DIR__.'/../../../resources/img/service/logo_png/';
-
-        return [
-            [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'peoples_trust_company'])->first()->id,
-                'service_vendor_id' => config('fintech.business.default_vendor', 1),
-                'service_name' => 'PEOPLES TRUST COMPANY',
-                'service_slug' => 'peoples_trust_company',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'peoples_trust_company.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'peoples_trust_company.png')),
-                'service_notification' => 'yes',
-                'service_delay' => 'yes',
-                'service_stat_policy' => 'yes',
-                'service_serial' => 1,
-                'service_data' => [
-                    'visible_website' => 'yes',
-                    'visible_android_app' => 'yes',
-                    'visible_ios_app' => 'yes',
+            Business::serviceTypeManager($entries[0], $parent)
+                ->hasService()
+                ->servingPairs([39, 39])
+                ->serviceSettings([
                     'account_name' => 'CLAVIS FINTECH SOLUTIONS LTD',
                     'account_number' => '400000000478',
                     'transactional_currency' => 'CAD',
-                    'beneficiary_type_id' => null,
                     'routing_code' => '62120002',
-                    'operator_short_code' => null,
-                ],
-                'enabled' => true,
-            ],
-            [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'interac_canada'])->first()->id,
-                'service_vendor_id' => config('fintech.business.default_vendor', 1),
-                'service_name' => 'INTERAC CANADA',
-                'service_slug' => 'interac_canada',
-                'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'interac_canada.svg')),
-                'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'interac_canada.png')),
-                'service_notification' => 'yes',
-                'service_delay' => 'yes',
-                'service_stat_policy' => 'yes',
-                'service_serial' => 1,
-                'service_data' => [
-                    'visible_website' => 'yes',
-                    'visible_android_app' => 'yes',
-                    'visible_ios_app' => 'yes',
+                ])
+                ->execute();
+
+            Business::serviceTypeManager($entries[1], $parent)
+                ->hasService()
+                ->servingPairs([39, 39])
+                ->serviceSettings([
                     'account_name' => ' CLAVIS FINTECH SOLUTIONS LTD',
                     'account_number' => '400000000478@leatherbackcanada.com',
                     'transactional_currency' => 'CAD',
-                    'beneficiary_type_id' => null,
-                    'routing_code' => null,
                     'interac' => 'ALIAS_REGULAR',
-                    'operator_short_code' => null,
-                ],
+                ])
+                ->execute();
+        }
+    }
+
+    private function data(): array
+    {
+        $image_svg = base_path('vendor/fintech/reload/resources/img/service_type/logo_svg/');
+        $image_png = base_path('vendor/fintech/reload/resources/img/service_type/logo_png/');
+
+        return [
+            [
+                'service_type_name' => 'PEOPLES TRUST COMPANY',
+                'service_type_slug' => 'peoples_trust_company',
+                'logo_svg' => "{$image_svg}peoples_trust_company.svg",
+                'logo_png' => "{$image_png}peoples_trust_company.png",
+                'service_type_is_parent' => 'no',
+                'service_type_is_description' => 'no',
+                'enabled' => true,
+            ],
+            [
+                'service_type_name' => 'INTERAC CANADA',
+                'service_type_slug' => 'interac_canada',
+                'logo_svg' => "{$image_svg}interac_canada.svg",
+                'logo_png' => "{$image_png}interac_canada.png",
+                'service_type_is_parent' => 'no',
+                'service_type_is_description' => 'no',
                 'enabled' => false,
             ],
         ];
-
     }
 }

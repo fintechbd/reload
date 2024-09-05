@@ -18,7 +18,7 @@ class CurrencySwapped
     /**
      * Create a new event instance.
      *
-     * @param  CurrencySwap  $currencySwap
+     * @param CurrencySwap $currencySwap
      */
     public function __construct($currencySwap)
     {

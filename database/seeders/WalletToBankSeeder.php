@@ -27,7 +27,7 @@ class WalletToBankSeeder extends Seeder
                 ->execute();
         }
 
-        if (Core::packageExists('Business')) {
+        if (Core::packageExists('Transaction') && !Transaction::transactionForm()->list(['code' => 'local_bank_transfer'])->first()) {
             Transaction::transactionForm()->create([
                 'name' => 'Local Bank Transfer',
                 'code' => 'local_bank_transfer',

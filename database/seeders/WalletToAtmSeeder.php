@@ -27,7 +27,7 @@ class WalletToAtmSeeder extends Seeder
                 ->execute();
         }
 
-        if (Core::packageExists('Business')) {
+        if (Core::packageExists('Transaction') && !Transaction::transactionForm()->list(['code' => 'local_atm_transfer'])->first()) {
             Transaction::transactionForm()->create([
                 'name' => 'Local ATM Transfer',
                 'code' => 'local_atm_transfer',
