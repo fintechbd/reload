@@ -3,9 +3,7 @@
 namespace Fintech\Reload\Seeders;
 
 use Fintech\Business\Facades\Business;
-use Fintech\Business\Traits\ServiceSeeder;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
@@ -23,7 +21,7 @@ class WalletToBankSeeder extends Seeder
                 ->servingPairs([39, 39], [231, 231], [19, 19])
                 ->serviceSettings([
                     'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT)
+                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
                 ])
                 ->enabled()
                 ->execute();

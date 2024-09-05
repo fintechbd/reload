@@ -2,11 +2,8 @@
 
 namespace Fintech\Reload\Seeders\Bangladesh;
 
-use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
 class BankDepositSeeder extends Seeder
@@ -24,7 +21,7 @@ class BankDepositSeeder extends Seeder
                     ->servingPairs([19, 19])
                     ->serviceSettings([
                         'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                        'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT)
+                        'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
                     ])
                     ->enabled()
                     ->execute();
@@ -36,6 +33,7 @@ class BankDepositSeeder extends Seeder
     {
         $image_svg = base_path('vendor/fintech/reload/resources/img/service_type/logo_svg/');
         $image_png = base_path('vendor/fintech/reload/resources/img/service_type/logo_png/');
+
         return [
             [
                 'service_type_name' => 'BRAC BANK LIMITED',
@@ -43,7 +41,7 @@ class BankDepositSeeder extends Seeder
                 'logo_svg' => "{$image_svg}brac_bank_limited.svg",
                 'logo_png' => "{$image_png}brac_bank_limited.png",
                 'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no'
+                'service_type_is_description' => 'no',
             ],
             [
                 'service_type_name' => 'DUTCH-BANGLA BANK LIMITED',
@@ -51,7 +49,7 @@ class BankDepositSeeder extends Seeder
                 'logo_svg' => "{$image_svg}dutch_bangla_bank_limited.svg",
                 'logo_png' => "{$image_png}dutch_bangla_bank_limited.png",
                 'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no'
+                'service_type_is_description' => 'no',
             ],
             [
                 'service_type_name' => 'THE CITY BANK LIMITED',
@@ -59,7 +57,7 @@ class BankDepositSeeder extends Seeder
                 'logo_svg' => "{$image_svg}the_city_bank_limited.svg",
                 'logo_png' => "{$image_png}the_city_bank_limited.png",
                 'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no'
+                'service_type_is_description' => 'no',
             ],
             [
                 'service_type_name' => 'AGRANI BANK LIMITED',
@@ -67,7 +65,7 @@ class BankDepositSeeder extends Seeder
                 'logo_svg' => "{$image_svg}agrani_bank_limited.svg",
                 'logo_png' => "{$image_png}agrani_bank_limited.png",
                 'service_type_is_parent' => 'no',
-                'service_type_is_description' => 'no'
+                'service_type_is_description' => 'no',
             ],
             [
                 'service_type_name' => 'PUBALI BANK LIMITED',
