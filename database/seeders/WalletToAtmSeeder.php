@@ -18,11 +18,7 @@ class WalletToAtmSeeder extends Seeder
             $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
             Business::serviceTypeManager($this->data(), $parent)
                 ->hasService()
-                ->servingPairs([39, 39], [231, 231], [19, 19])
-                ->serviceSettings([
-                    'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                ])
+                ->hasTransactionForm()
                 ->enabled()
                 ->execute();
         }

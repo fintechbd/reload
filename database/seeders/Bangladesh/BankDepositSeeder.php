@@ -4,6 +4,7 @@ namespace Fintech\Reload\Seeders\Bangladesh;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class BankDepositSeeder extends Seeder
@@ -15,14 +16,13 @@ class BankDepositSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
             $parent = Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first();
+
+            $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'BD'])->pluck('id')->toArray();
+
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)
                     ->hasService()
-                    ->servingPairs([19, 19])
-                    ->serviceSettings([
-                        'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                        'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                    ])
+                    ->srcCountries($servingCountries)
                     ->enabled()
                     ->execute();
             }

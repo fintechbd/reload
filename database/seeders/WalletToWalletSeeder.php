@@ -15,26 +15,15 @@ class WalletToWalletSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
+
             $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
+
             Business::serviceTypeManager($this->data(), $parent)
                 ->hasService()
-//                ->servingPairs([39, 39], [231, 231], [19, 19])
-                ->serviceSettings([
-                    'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                ])
                 ->service(['service_name' => 'Wallet to Wallet Transfer'])
+                ->hasTransactionForm()
                 ->enabled()
                 ->execute();
-        }
-
-        if (Core::packageExists('Transaction') && ! Transaction::transactionForm()->list(['code' => 'wallet_to_wallet'])->first()) {
-            Transaction::transactionForm()->create([
-                'name' => 'Wallet To Wallet Transfer',
-                'code' => 'wallet_to_wallet',
-                'enabled' => true,
-                'transaction_form_data' => [],
-            ]);
         }
     }
 

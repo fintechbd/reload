@@ -20,11 +20,6 @@ class CardDepositOptionSeeder extends Seeder
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)
                     ->hasService()
-                    ->servingPairs([39, 39], [231, 231], [19, 19])
-                    ->serviceSettings([
-                        'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                        'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                    ])
                     ->enabled()
                     ->execute();
             }

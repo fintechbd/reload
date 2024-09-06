@@ -4,6 +4,7 @@ namespace Fintech\Reload\Seeders;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
@@ -15,25 +16,17 @@ class WalletToPrepaidCardSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
+
             $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
+
+            $servingCountries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+
             Business::serviceTypeManager($this->data(), $parent)
                 ->hasService()
-//                ->servingPairs([39, 39], [231, 231], [19, 19])
-                ->serviceSettings([
-                    'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                ])
+                ->hasTransactionForm()
+                ->distCountries($servingCountries)
                 ->enabled()
                 ->execute();
-        }
-
-        if (Core::packageExists('Transaction') && ! Transaction::transactionForm()->list(['code' => 'wallet_to_prepaid_card'])->first()) {
-            Transaction::transactionForm()->create([
-                'name' => 'Wallet To Prepaid Card',
-                'code' => 'wallet_to_prepaid_card',
-                'enabled' => true,
-                'transaction_form_data' => [],
-            ]);
         }
     }
 
