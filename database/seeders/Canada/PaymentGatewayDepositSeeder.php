@@ -51,6 +51,7 @@ class PaymentGatewayDepositSeeder extends Seeder
                 'service_type_is_parent' => 'yes',
                 'service_type_is_description' => 'no',
             ],
+            //child of inter e transfer
             [
                 'service_type_name' => 'CIBC Bank',
                 'service_type_slug' => 'cibc_bank',

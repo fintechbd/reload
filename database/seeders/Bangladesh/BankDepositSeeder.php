@@ -15,6 +15,7 @@ class BankDepositSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
+
             $parent = Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first();
 
             $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'BD'])->pluck('id')->toArray();
