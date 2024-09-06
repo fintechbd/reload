@@ -4,7 +4,6 @@ namespace Fintech\Reload\Seeders;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
 class WalletToWalletSeeder extends Seeder
