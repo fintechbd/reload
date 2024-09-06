@@ -4,6 +4,7 @@ namespace Fintech\Reload\Seeders\Canada;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class BankDepositSeeder extends Seeder
@@ -17,11 +18,13 @@ class BankDepositSeeder extends Seeder
 
             $parent = Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first();
 
+            $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'CA'])->pluck('id')->toArray();
+
             $entries = $this->data();
 
             Business::serviceTypeManager($entries[0], $parent)
                 ->hasService()
-                ->servingPairs([39, 39])
+                ->srcCountries($servingCountries)
                 ->serviceSettings([
                     'account_name' => 'CLAVIS FINTECH SOLUTIONS LTD',
                     'account_number' => '400000000478',
@@ -32,7 +35,7 @@ class BankDepositSeeder extends Seeder
 
             Business::serviceTypeManager($entries[1], $parent)
                 ->hasService()
-                ->servingPairs([39, 39])
+                ->srcCountries($servingCountries)
                 ->serviceSettings([
                     'account_name' => ' CLAVIS FINTECH SOLUTIONS LTD',
                     'account_number' => '400000000478@leatherbackcanada.com',

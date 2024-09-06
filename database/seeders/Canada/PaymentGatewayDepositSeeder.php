@@ -4,6 +4,7 @@ namespace Fintech\Reload\Seeders\Canada;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class PaymentGatewayDepositSeeder extends Seeder
@@ -19,8 +20,10 @@ class PaymentGatewayDepositSeeder extends Seeder
 
             $entries = $this->data();
 
+            $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'CA'])->pluck('id')->toArray();
+
             Business::serviceTypeManager($entries[0], $fundDepositParent)
-                ->servingPairs([39, 39])
+                ->srcCountries($servingCountries)
                 ->enabled()
                 ->execute();
 
@@ -28,11 +31,7 @@ class PaymentGatewayDepositSeeder extends Seeder
 
             Business::serviceTypeManager($entries[1], $interactParent)
                 ->hasService()
-                ->servingPairs([39, 39])
-                ->serviceSettings([
-                    'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'),
-                    'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT),
-                ])
+                ->srcCountries($servingCountries)
                 ->enabled()
                 ->execute();
         }
