@@ -16,14 +16,15 @@ class WalletToPrepaidCardSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
+            $parent = Business::serviceType()->list(['service_type_slug' => 'withdraw'])->first();
 
             $servingCountries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
 
             Business::serviceTypeManager($this->data(), $parent)
+                ->srcCountries($servingCountries)
+                ->distCountries($servingCountries)
                 ->hasService()
                 ->hasTransactionForm()
-                ->distCountries($servingCountries)
                 ->enabled()
                 ->execute();
         }

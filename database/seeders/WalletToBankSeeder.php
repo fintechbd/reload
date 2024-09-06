@@ -14,7 +14,9 @@ class WalletToBankSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
-            $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
+
+            $parent = Business::serviceType()->list(['service_type_slug' => 'withdraw'])->first();
+
             Business::serviceTypeManager($this->data(), $parent)
                 ->hasService()
                 ->hasTransactionForm()
