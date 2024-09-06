@@ -2,11 +2,9 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Seeder;
 
 class CurrencySwapSeeder extends Seeder
