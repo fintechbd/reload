@@ -16,7 +16,7 @@ class RequestMoneySeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $servingCountries = MetaData::country()->servingIds();;
+            $servingCountries = MetaData::country()->servingIds();
 
             Business::serviceTypeManager($this->data())
                 ->hasService()
