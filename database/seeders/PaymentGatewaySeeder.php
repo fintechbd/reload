@@ -108,7 +108,7 @@ class PaymentGatewaySeeder extends Seeder
         $serviceLists = $this->service();
         $serviceStats = [];
         $roles = Auth::role()->list(['id_not_in' => [1]])->pluck('id')->toArray();
-        $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+        $source_countries = MetaData::country()->servingIds();;
         if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
                 $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();

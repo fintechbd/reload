@@ -18,7 +18,7 @@ class BankDepositSeeder extends Seeder
 
             $parent = Business::serviceType()->list(['service_type_slug' => 'bank_deposit'])->first();
 
-            $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'BD'])->pluck('id')->toArray();
+            $servingCountries = MetaData::country()->servingIds(['iso2' => 'BD']);
 
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)

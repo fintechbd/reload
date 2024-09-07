@@ -16,7 +16,7 @@ class CurrencySwapSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $servingCountries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+            $servingCountries = MetaData::country()->servingIds();;
 
             Business::serviceTypeManager($this->data())
                 ->hasService()

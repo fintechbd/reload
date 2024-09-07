@@ -20,7 +20,7 @@ class PaymentGatewayDepositSeeder extends Seeder
 
             $entries = $this->data();
 
-            $servingCountries = MetaData::country()->list(['is_serving' => true, 'iso2' => 'CA'])->pluck('id')->toArray();
+            $servingCountries = MetaData::country()->servingIds(['iso2' => 'CA']);
 
             Business::serviceTypeManager($entries[0], $fundDepositParent)
                 ->srcCountries($servingCountries)
