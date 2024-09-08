@@ -4,6 +4,7 @@ namespace Fintech\Reload\Seeders;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class WalletToWalletSeeder extends Seeder
@@ -17,9 +18,12 @@ class WalletToWalletSeeder extends Seeder
 
             $parent = Business::serviceType()->list(['service_type_slug' => 'withdraw'])->first();
 
+            $servingCountries = MetaData::country()->servingIds();
+
             Business::serviceTypeManager($this->data(), $parent)
                 ->hasService()
                 ->service(['service_name' => 'Wallet to Wallet Transfer'])
+                ->distCountries($servingCountries)
                 ->hasTransactionForm()
                 ->enabled()
                 ->execute();
