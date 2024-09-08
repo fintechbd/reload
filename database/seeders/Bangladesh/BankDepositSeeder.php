@@ -29,7 +29,6 @@ class BankDepositSeeder extends Seeder
             }
         }
     }
-
     private function data(): array
     {
         $image_svg = base_path('vendor/fintech/reload/resources/img/service_type/logo_svg/');
