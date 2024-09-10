@@ -22,7 +22,6 @@ class RequestMoneySeeder extends Seeder
                 ->hasService()
                 ->distCountries($servingCountries)
                 ->hasTransactionForm()
-                ->enabled()
                 ->execute();
         }
     }

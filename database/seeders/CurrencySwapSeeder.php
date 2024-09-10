@@ -22,7 +22,6 @@ class CurrencySwapSeeder extends Seeder
                 ->hasService()
                 ->distCountries($servingCountries)
                 ->hasTransactionForm()
-                ->enabled()
                 ->execute();
         }
     }

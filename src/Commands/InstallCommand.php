@@ -66,7 +66,7 @@ class InstallCommand extends Command
     private function addBankCardDeposit(): void
     {
         $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating Fund Deposit (Bank & Card) Service Types", function () {
-            $parentId = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id;
+            $parent = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first();
             $types = [
                 [
                     'service_type_name' => 'Bank Deposit',
@@ -87,11 +87,11 @@ class InstallCommand extends Command
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '2',
-                    'enabled' => true,
+                    'enabled' => false,
                 ],
             ];
             foreach ($types as $entry) {
-                Business::serviceTypeManager($entry, $parentId)->execute();
+                Business::serviceTypeManager($entry, $parent)->execute();
             }
         });
     }
