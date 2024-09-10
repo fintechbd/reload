@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Seeders;
 
+use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
@@ -35,6 +36,8 @@ class WalletToWalletSeeder extends Seeder
         $image_svg = base_path('vendor/fintech/reload/resources/img/service_type/logo_svg/');
         $image_png = base_path('vendor/fintech/reload/resources/img/service_type/logo_png/');
 
+        $walletTransferId = 1;
+
         return [
             'service_type_name' => 'Wallet to Wallet',
             'service_type_slug' => 'wallet_to_wallet',
@@ -42,7 +45,14 @@ class WalletToWalletSeeder extends Seeder
             'logo_png' => "{$image_png}wallet_to_wallet.png",
             'service_type_is_parent' => 'no',
             'service_type_is_description' => 'no',
-
+            'service_stat_data' => [
+                'local_currency_lower_limit' => '1000',
+                'local_currency_higher_limit' => '2500',
+                'charge' => '1%',
+                'discount' => '2%',
+                'commission' => '0',
+                'beneficiary_type_id' => $walletTransferId,
+            ]
         ];
     }
 }

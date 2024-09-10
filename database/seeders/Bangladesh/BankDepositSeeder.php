@@ -43,6 +43,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}brac_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ],
             ],
             [
                 'service_type_name' => 'DUTCH-BANGLA BANK LIMITED',
@@ -51,6 +58,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}dutch_bangla_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'THE CITY BANK LIMITED',
@@ -59,6 +73,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}the_city_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'AGRANI BANK LIMITED',
@@ -67,6 +88,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}agrani_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'PUBALI BANK LIMITED',
@@ -75,6 +103,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}pubali_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'EASTERN BANK LIMITED',
@@ -83,6 +118,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}eastern_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'EXIM BANK LIMITED',
@@ -91,6 +133,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}exim_bank_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'ISLAMI BANK BANGLDESH LIMITED',
@@ -99,6 +148,13 @@ class BankDepositSeeder extends Seeder
                 'logo_png' => "{$image_png}islami_bank_bangladesh_limited.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
         ];
     }

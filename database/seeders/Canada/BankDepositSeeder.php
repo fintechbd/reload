@@ -25,23 +25,11 @@ class BankDepositSeeder extends Seeder
             Business::serviceTypeManager($entries[0], $parent)
                 ->hasService()
                 ->srcCountries($servingCountries)
-                ->serviceSettings([
-                    'account_name' => 'CLAVIS FINTECH SOLUTIONS LTD',
-                    'account_number' => '400000000478',
-                    'transactional_currency' => 'CAD',
-                    'routing_code' => '62120002',
-                ])
                 ->execute();
 
             Business::serviceTypeManager($entries[1], $parent)
                 ->hasService()
                 ->srcCountries($servingCountries)
-                ->serviceSettings([
-                    'account_name' => ' CLAVIS FINTECH SOLUTIONS LTD',
-                    'account_number' => '400000000478@leatherbackcanada.com',
-                    'transactional_currency' => 'CAD',
-                    'interac' => 'ALIAS_REGULAR',
-                ])
                 ->execute();
         }
     }
@@ -60,6 +48,19 @@ class BankDepositSeeder extends Seeder
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'enabled' => true,
+                'service_settings' => [
+                    'account_name' => 'CLAVIS FINTECH SOLUTIONS LTD',
+                    'account_number' => '400000000478',
+                    'transactional_currency' => 'CAD',
+                    'routing_code' => '62120002',
+                ],
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'INTERAC CANADA',
@@ -69,6 +70,19 @@ class BankDepositSeeder extends Seeder
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'enabled' => false,
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ],
+                'service_settings' => [
+                    'account_name' => ' CLAVIS FINTECH SOLUTIONS LTD',
+                    'account_number' => '400000000478@leatherbackcanada.com',
+                    'transactional_currency' => 'CAD',
+                    'interac' => 'ALIAS_REGULAR',
+                ]
             ],
         ];
     }

@@ -39,6 +39,13 @@ class CardDepositOptionSeeder extends Seeder
                 'logo_png' => "{$image_png}visa_card.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
 
             ],
             [
@@ -48,6 +55,13 @@ class CardDepositOptionSeeder extends Seeder
                 'logo_png' => "{$image_png}master_card.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
             [
                 'service_type_name' => 'Discover Card',
@@ -56,6 +70,13 @@ class CardDepositOptionSeeder extends Seeder
                 'logo_png' => "{$image_png}discover_card.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_stat_data' => [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ]
             ],
         ];
     }

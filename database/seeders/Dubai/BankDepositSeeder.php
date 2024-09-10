@@ -21,6 +21,14 @@ class BankDepositSeeder extends Seeder
             $servingCountries = MetaData::country()->servingIds(['iso2' => 'AE']);
 
             foreach ($this->data() as $entry) {
+                $entry['service_stat_data'] = [
+                    'local_currency_lower_limit' => '1000',
+                    'local_currency_higher_limit' => '2500',
+                    'charge' => '1%',
+                    'discount' => '2%',
+                    'commission' => '0',
+                ];
+
                 Business::serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->srcCountries($servingCountries)

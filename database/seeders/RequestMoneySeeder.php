@@ -39,7 +39,13 @@ class RequestMoneySeeder extends Seeder
             'logo_png' => "{$image_png}request_money.png",
             'service_type_is_parent' => 'no',
             'service_type_is_description' => 'no',
-
+            'service_stat_data' => [
+                'local_currency_lower_limit' => '1000',
+                'local_currency_higher_limit' => '2500',
+                'charge' => '1%',
+                'discount' => '2%',
+                'commission' => '0',
+            ]
         ];
     }
 }
