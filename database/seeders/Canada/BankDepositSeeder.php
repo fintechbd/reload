@@ -60,7 +60,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'INTERAC CANADA',
@@ -82,7 +82,7 @@ class BankDepositSeeder extends Seeder
                     'account_number' => '400000000478@leatherbackcanada.com',
                     'transactional_currency' => 'CAD',
                     'interac' => 'ALIAS_REGULAR',
-                ]
+                ],
             ],
         ];
     }

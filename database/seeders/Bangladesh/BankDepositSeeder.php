@@ -64,7 +64,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'THE CITY BANK LIMITED',
@@ -79,7 +79,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'AGRANI BANK LIMITED',
@@ -94,7 +94,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'PUBALI BANK LIMITED',
@@ -109,7 +109,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'EASTERN BANK LIMITED',
@@ -124,7 +124,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'EXIM BANK LIMITED',
@@ -139,7 +139,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'ISLAMI BANK BANGLDESH LIMITED',
@@ -154,7 +154,7 @@ class BankDepositSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
         ];
     }

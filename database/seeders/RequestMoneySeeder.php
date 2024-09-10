@@ -44,7 +44,7 @@ class RequestMoneySeeder extends Seeder
                 'charge' => '1%',
                 'discount' => '2%',
                 'commission' => '0',
-            ]
+            ],
         ];
     }
 }

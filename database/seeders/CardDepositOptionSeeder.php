@@ -45,7 +45,7 @@ class CardDepositOptionSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
 
             ],
             [
@@ -61,7 +61,7 @@ class CardDepositOptionSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Discover Card',
@@ -76,7 +76,7 @@ class CardDepositOptionSeeder extends Seeder
                     'charge' => '1%',
                     'discount' => '2%',
                     'commission' => '0',
-                ]
+                ],
             ],
         ];
     }

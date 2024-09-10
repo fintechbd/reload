@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
@@ -52,7 +51,7 @@ class WalletToWalletSeeder extends Seeder
                 'discount' => '2%',
                 'commission' => '0',
                 'beneficiary_type_id' => $walletTransferId,
-            ]
+            ],
         ];
     }
 }
