@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Vendors;
 
-use ErrorException;
 use Fintech\Core\Abstracts\BaseModel;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -35,7 +34,7 @@ class LeatherBack
             ->acceptJson()
             ->contentType('application/json')
             ->withHeaders([
-                'X-Api' => $this->config[$this->status]['api_key']
+                'X-Api' => $this->config[$this->status]['api_key'],
             ]);
     }
 
@@ -63,23 +62,23 @@ class LeatherBack
     public function initPayment(BaseModel $order): array
     {
         $params = [
-            "amount" => $order->amount,
-            "channel" => "Interac",
-            "currency" => $order->currency,
-            "narration" => $order->note,
-            "reference" => $order->order_number,
-            "userInformation" => [
-                "firstName" => "ogr",
-                "lastName" => "et",
-                "phone" => "08100969815",
-                "emailAddress" => "anmshawkat@gmail.com"
+            'amount' => $order->amount,
+            'channel' => 'Interac',
+            'currency' => $order->currency,
+            'narration' => $order->note,
+            'reference' => $order->order_number,
+            'userInformation' => [
+                'firstName' => 'ogr',
+                'lastName' => 'et',
+                'phone' => '08100969815',
+                'emailAddress' => 'anmshawkat@gmail.com',
             ],
-            "paymentRequestProps" => [
-                "email" => "anmshawkat@gmail.com"
+            'paymentRequestProps' => [
+                'email' => 'anmshawkat@gmail.com',
             ],
-            "metaData" => [
-                "return-url" => "https://test.co"
-            ]
+            'metaData' => [
+                'return-url' => 'https://test.co',
+            ],
         ];
 
         return $this->post('/payment/pay/initiate', $params);

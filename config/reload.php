@@ -46,11 +46,11 @@ return [
             'driver' => Fintech\Reload\Vendors\LeatherBack::class,
             'live' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
-                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY')
+                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
-                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY')
+                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
             ],
         ],
     ],
