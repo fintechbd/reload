@@ -30,6 +30,13 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
+                Route::post('interac', function (\Illuminate\Http\Request $request) {
+                    return response()->created([
+                        'message' => __('restapi::messages.resource.created', ['model' => 'Interac-E-Transfer']),
+                        'id' => mt_rand(1,9)
+                    ]);
+                });
+
                 Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
                     ->name('deposits.reject');
 
