@@ -33,7 +33,7 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::post('interac', function (\Illuminate\Http\Request $request) {
                     return response()->created([
                         'message' => __('restapi::messages.resource.created', ['model' => 'Interac-E-Transfer']),
-                        'id' => mt_rand(1,9)
+                        'id' => mt_rand(1, 9),
                     ]);
                 });
 
