@@ -4,6 +4,7 @@ namespace Fintech\Reload;
 
 use Fintech\Core\Traits\RegisterPackageTrait;
 use Fintech\Reload\Commands\InstallCommand;
+use Fintech\Reload\Commands\LeatherBackSetupCommand;
 use Fintech\Reload\Providers\EventServiceProvider;
 use Fintech\Reload\Providers\RepositoryServiceProvider;
 use Illuminate\Support\ServiceProvider;
@@ -59,6 +60,7 @@ class ReloadServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
+                LeatherBackSetupCommand::class
             ]);
         }
     }
