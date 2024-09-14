@@ -4,7 +4,6 @@ namespace Fintech\Reload\Commands;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -35,6 +34,7 @@ class LeatherBackSetupCommand extends Command
             return self::FAILURE;
         }
     }
+
     private function addServiceVendor(): void
     {
         $dir = __DIR__.'/../../resources/img/service_vendor/';

@@ -60,7 +60,7 @@ class ReloadServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
-                LeatherBackSetupCommand::class
+                LeatherBackSetupCommand::class,
             ]);
         }
     }
