@@ -26,14 +26,14 @@ class InstallCommand extends Command
 
         $this->addBankCardDeposit();
 
-        $this->components->twoColumnDetail("[<fg=yellow;options=bold>{$this->module}</>] Installation", '<fg=green;options=bold>COMPLETED</>');
+        $this->components->twoColumnDetail("<fg=black;bg=bright-yellow;options=bold> {$this->module} </> Installation", '<fg=green;options=bold>COMPLETED</>');
 
         return self::SUCCESS;
     }
 
     private function addDefaultServiceTypes(): void
     {
-        $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Creating system default service types", function () {
+        $this->components->task("<fg=black;bg=bright-yellow;options=bold> {$this->module} </> Creating system default service types", function () {
 
             $serviceTypes = [
                 [
@@ -65,7 +65,7 @@ class InstallCommand extends Command
 
     private function addBankCardDeposit(): void
     {
-        $this->components->task("[<fg=yellow;options=bold>{$this->module}</>] Populating Fund Deposit (Bank & Card) Service Types", function () {
+        $this->components->task("<fg=black;bg=bright-yellow;options=bold> {$this->module} </> Populating Fund Deposit (Bank & Card) Service Types", function () {
             $parent = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first();
             $types = [
                 [
