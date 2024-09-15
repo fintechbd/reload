@@ -4,6 +4,7 @@ use Fintech\RestApi\Http\Controllers\Reload\Charts\DepositPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\Charts\WithdrawPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\CurrencySwapController;
 use Fintech\RestApi\Http\Controllers\Reload\DepositController;
+use Fintech\RestApi\Http\Controllers\Reload\InteracTransferController;
 use Fintech\RestApi\Http\Controllers\Reload\RequestMoneyController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToAtmController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToBankController;
@@ -31,12 +32,8 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
-                Route::post('interac', function (Request $request) {
-                    return response()->created([
-                        'message' => __('restapi::messages.resource.created', ['model' => 'Interac-E-Transfer']),
-                        'id' => mt_rand(1, 9),
-                    ]);
-                });
+                Route::apiResource('interac-transfers', InteracTransferController::class)
+                    ->only(['index', 'store', 'show']);
 
                 Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
                     ->name('deposits.reject');
