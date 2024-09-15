@@ -9,6 +9,7 @@ use Fintech\RestApi\Http\Controllers\Reload\WalletToAtmController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToBankController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToPrepaidCardController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToWalletController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +31,7 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
-                Route::post('interac', function (\Illuminate\Http\Request $request) {
+                Route::post('interac', function (Request $request) {
                     return response()->created([
                         'message' => __('restapi::messages.resource.created', ['model' => 'Interac-E-Transfer']),
                         'id' => mt_rand(1, 9),

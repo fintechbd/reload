@@ -38,27 +38,6 @@ class LeatherBack
             ]);
     }
 
-    private function post($url = '', $payload = [])
-    {
-        $response = $this->client->post($url, $payload)->json();
-
-        if ($response['isSuccess'] == true) {
-            return [
-                'status' => true,
-                'amount' => intval($response['value']['paymentItem']['totalAmount']),
-                'message' => $response['value']['message'] ?? null,
-                'origin_message' => $response,
-            ];
-        }
-
-        return [
-            'status' => false,
-            'amount' => null,
-            'message' => $response['error'] ?? null,
-            'origin_message' => $response,
-        ];
-    }
-
     public function initPayment(BaseModel $order): array
     {
         $params = [
@@ -82,6 +61,27 @@ class LeatherBack
         ];
 
         return $this->post('/payment/pay/initiate', $params);
+    }
+
+    private function post($url = '', $payload = [])
+    {
+        $response = $this->client->post($url, $payload)->json();
+
+        if ($response['isSuccess'] == true) {
+            return [
+                'status' => true,
+                'amount' => intval($response['value']['paymentItem']['totalAmount']),
+                'message' => $response['value']['message'] ?? null,
+                'origin_message' => $response,
+            ];
+        }
+
+        return [
+            'status' => false,
+            'amount' => null,
+            'message' => $response['error'] ?? null,
+            'origin_message' => $response,
+        ];
     }
 
     public function paymentStatus(BaseModel $order): mixed
