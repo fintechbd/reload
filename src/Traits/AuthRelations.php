@@ -24,7 +24,5 @@ if (Core::packageExists('Auth')) {
         }
     }
 } else {
-    trait AuthRelations
-    {
-    }
+    trait AuthRelations {}
 }

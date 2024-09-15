@@ -16,15 +16,15 @@ class InstallCommand extends Command
 
     private string $module = 'Reload';
 
-    private string $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
+    private string $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
 
-    private string $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
+    private string $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
 
     public function handle(): int
     {
-        $this->infoMessage("Module Installation", 'RUNNING');
+        $this->infoMessage('Module Installation', 'RUNNING');
 
-        $this->task("Module Installation", function () {
+        $this->task('Module Installation', function () {
             $this->addDefaultServiceTypes();
 
             $this->addBankCardDeposit();
@@ -36,14 +36,14 @@ class InstallCommand extends Command
 
     private function addDefaultServiceTypes(): void
     {
-        $this->task("Creating system default service types", function () {
+        $this->task('Creating system default service types', function () {
 
             $serviceTypes = [
                 [
                     'service_type_name' => 'Fund Deposit',
                     'service_type_slug' => 'fund_deposit',
-                    'logo_svg' => $this->image_svg . 'fund_deposit.svg',
-                    'logo_png' => $this->image_png . 'fund_deposit.png',
+                    'logo_svg' => $this->image_svg.'fund_deposit.svg',
+                    'logo_png' => $this->image_png.'fund_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '1',
@@ -52,8 +52,8 @@ class InstallCommand extends Command
                 [
                     'service_type_name' => 'Withdraw',
                     'service_type_slug' => 'withdraw',
-                    'logo_svg' => $this->image_svg . 'withdraw.svg',
-                    'logo_png' => $this->image_png . 'withdraw.png',
+                    'logo_svg' => $this->image_svg.'withdraw.svg',
+                    'logo_png' => $this->image_png.'withdraw.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => 1,
@@ -68,14 +68,14 @@ class InstallCommand extends Command
 
     private function addBankCardDeposit(): void
     {
-        $this->task("Populating Fund Deposit (Bank & Card) Service Types", function () {
+        $this->task('Populating Fund Deposit (Bank & Card) Service Types', function () {
             $parent = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first();
             $types = [
                 [
                     'service_type_name' => 'Bank Deposit',
                     'service_type_slug' => 'bank_deposit',
-                    'logo_svg' => $this->image_svg . 'bank_deposit.svg',
-                    'logo_png' => $this->image_png . 'bank_deposit.png',
+                    'logo_svg' => $this->image_svg.'bank_deposit.svg',
+                    'logo_png' => $this->image_png.'bank_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '2',
@@ -85,8 +85,8 @@ class InstallCommand extends Command
                     'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
                     'service_type_name' => 'Card Deposit',
                     'service_type_slug' => 'card_deposit',
-                    'logo_svg' => $this->image_svg . 'card_deposit.svg',
-                    'logo_png' => $this->image_png . 'card_deposit.png',
+                    'logo_svg' => $this->image_svg.'card_deposit.svg',
+                    'logo_png' => $this->image_png.'card_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
                     'service_type_step' => '2',
