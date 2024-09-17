@@ -68,17 +68,16 @@ class LeatherBack
             ],
         ];
 
-        logger("payload", $params);
-
         $response = $this->post('/payment/pay/initiate', $params);
 
-        $status = ($response['status'])
-            ? OrderStatus::Accepted->value
-            : OrderStatus::AdminVerification->value;
-
         $order_data['vendor_data'] = $response;
+        $info['order_data'] = $order_data;
 
-        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
+        if (!$response['status']) {
+            $info['status'] = OrderStatus::AdminVerification->value;
+        }
+
+        if (Transaction::order()->update($order->getKey(), $info)) {
             $order->fresh();
             return $order;
         }
