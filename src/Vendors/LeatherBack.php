@@ -3,6 +3,8 @@
 namespace Fintech\Reload\Vendors;
 
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -38,11 +40,13 @@ class LeatherBack
             ]);
     }
 
-    public function initPayment(BaseModel $order): array
+    public function initPayment(BaseModel $order): ?BaseModel
     {
-        $interacData = $order->order_data['interac_data'];
+        $order_data = $order->order_data;
 
-        $nameSplitted = json_decode(preg_replace('/(.*) (.+)/iu', '["$1", "$2"]', $order->order_data['created_by']), true);
+        $interacData = $order_data['interac_data'];
+
+        $nameSplit = json_decode(preg_replace('/(.*) (.+)/iu', '["$1", "$2"]', $order->order_data['created_by']), true);
 
         $params = [
             'amount' => intval($order->amount),
@@ -51,10 +55,10 @@ class LeatherBack
             'narration' => $order->note ?? '',
             'reference' => $order->order_number,
             'userInformation' => [
-                'firstName' => $interacData['first_name'] ?? $nameSplitted[0],
-                'lastName' => $interacData['last_name'] ?? $nameSplitted[1],
-                'phone' => $interacData['phone'] ?? $order->order_data['created_by_mobile_number'],
-                'emailAddress' => $order->order_data['created_by_email'],
+                'firstName' => $interacData['first_name'] ?? $nameSplit[0],
+                'lastName' => $interacData['last_name'] ?? $nameSplit[1],
+                'phone' => $interacData['phone'] ?? $order_data['created_by_mobile_number'],
+                'emailAddress' => $order_data['created_by_email'],
             ],
             'paymentRequestProps' => [
                 'email' => $interacData['email'],
@@ -64,27 +68,29 @@ class LeatherBack
             ],
         ];
 
+        logger("payload", $params);
+
         $response = $this->post('/payment/pay/initiate', $params);
 
-        if ($response['status']) {
-            $status = (in_array($response['Code'], ['0001', '0002']))
-                ? OrderStatus::Accepted->value
-                : OrderStatus::AdminVerification->value;
-        }
+        $status = ($response['status'])
+            ? OrderStatus::Accepted->value
+            : OrderStatus::AdminVerification->value;
+
         $order_data['vendor_data'] = $response;
 
         if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
             $order->fresh();
-
             return $order;
         }
+
+        return null;
     }
 
     private function post($url = '', $payload = [])
     {
         $response = $this->client->post($url, $payload)->json();
 
-        if ($response['origin_message']['isSuccess']) {
+        if ($response['isSuccess']) {
             return [
                 'status' => true,
                 'amount' => intval($response['value']['paymentItem']['totalAmount']),

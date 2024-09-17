@@ -47,12 +47,10 @@ return [
             'live' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
                 'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
-                'email' => env('PACKAGE_RELOAD_LEATHER_BACK_INTERAC_EMAIL'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
                 'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
-                'email' => env('PACKAGE_RELOAD_LEATHER_BACK_INTERAC_EMAIL'),
             ],
         ],
     ],
