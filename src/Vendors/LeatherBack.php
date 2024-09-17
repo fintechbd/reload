@@ -73,12 +73,13 @@ class LeatherBack
         $order_data['vendor_data'] = $response;
         $info['order_data'] = $order_data;
 
-        if (!$response['status']) {
+        if (! $response['status']) {
             $info['status'] = OrderStatus::AdminVerification->value;
         }
 
         if (Transaction::order()->update($order->getKey(), $info)) {
             $order->fresh();
+
             return $order;
         }
 
