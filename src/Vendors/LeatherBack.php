@@ -68,7 +68,7 @@ class LeatherBack
             ],
         ];
 
-        logger("payload", $params);
+        logger('payload', $params);
 
         $response = $this->post('/payment/pay/initiate', $params);
 
@@ -80,6 +80,7 @@ class LeatherBack
 
         if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
             $order->fresh();
+
             return $order;
         }
 
