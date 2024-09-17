@@ -40,34 +40,51 @@ class LeatherBack
 
     public function initPayment(BaseModel $order): array
     {
+        $interacData = $order->order_data['interac_data'];
+
+        $nameSplitted = json_decode(preg_replace('/(.*) (.+)/iu', '["$1", "$2"]', $order->order_data['created_by']), true);
+
         $params = [
-            'amount' => $order->amount,
+            'amount' => intval($order->amount),
             'channel' => 'Interac',
             'currency' => $order->currency,
-            'narration' => $order->note,
+            'narration' => $order->note ?? '',
             'reference' => $order->order_number,
             'userInformation' => [
-                'firstName' => 'ogr',
-                'lastName' => 'et',
-                'phone' => '08100969815',
-                'emailAddress' => 'anmshawkat@gmail.com',
+                'firstName' => $interacData['first_name'] ?? $nameSplitted[0],
+                'lastName' => $interacData['last_name'] ?? $nameSplitted[1],
+                'phone' => $interacData['phone'] ?? $order->order_data['created_by_mobile_number'],
+                'emailAddress' => $order->order_data['created_by_email'],
             ],
             'paymentRequestProps' => [
-                'email' => 'anmshawkat@gmail.com',
+                'email' => $interacData['email'],
             ],
             'metaData' => [
-                'return-url' => 'https://test.co',
+                'return-url' => route('reload.interac-transfers.callback'),
             ],
         ];
 
-        return $this->post('/payment/pay/initiate', $params);
+        $response = $this->post('/payment/pay/initiate', $params);
+
+        if ($response['status']) {
+            $status = (in_array($response['Code'], ['0001', '0002']))
+                ? OrderStatus::Accepted->value
+                : OrderStatus::AdminVerification->value;
+        }
+            $order_data['vendor_data'] = $response;
+
+            if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
+                $order->fresh();
+
+                return $order;
+            }
     }
 
     private function post($url = '', $payload = [])
     {
         $response = $this->client->post($url, $payload)->json();
 
-        if ($response['isSuccess'] == true) {
+        if ($response['origin_message']['isSuccess']) {
             return [
                 'status' => true,
                 'amount' => intval($response['value']['paymentItem']['totalAmount']),
@@ -84,7 +101,7 @@ class LeatherBack
         ];
     }
 
-    public function paymentStatus(BaseModel $order): mixed
+    public function paymentStatus(BaseModel $order, array $inputs = []): mixed
     {
         $params = [
             'transaction_id' => $order->order_data[''],

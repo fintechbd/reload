@@ -32,6 +32,8 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
+                Route::any('interac-transfers/callback', [InteracTransferController::class, 'callback'])->name('interac-transfers.callback');
+
                 Route::apiResource('interac-transfers', InteracTransferController::class)
                     ->only(['index', 'store', 'show']);
 
