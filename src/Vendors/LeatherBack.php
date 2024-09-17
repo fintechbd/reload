@@ -71,13 +71,13 @@ class LeatherBack
                 ? OrderStatus::Accepted->value
                 : OrderStatus::AdminVerification->value;
         }
-            $order_data['vendor_data'] = $response;
+        $order_data['vendor_data'] = $response;
 
-            if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
-                $order->fresh();
+        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
+            $order->fresh();
 
-                return $order;
-            }
+            return $order;
+        }
     }
 
     private function post($url = '', $payload = [])
