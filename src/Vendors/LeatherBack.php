@@ -71,8 +71,6 @@ class LeatherBack implements InstantDeposit
 
         $response = $this->client->post('/payment/pay/initiate', $params)->json();
 
-
-
         if ($response['isSuccess']) {
             $response = [
                 'status' => true,
@@ -105,7 +103,6 @@ class LeatherBack implements InstantDeposit
         return null;
     }
 
-
     public function paymentStatus(BaseModel $order): ?BaseModel
     {
         return $this->post("/payment/transactions/{$eference}");
@@ -118,6 +115,6 @@ class LeatherBack implements InstantDeposit
 
     public function trackPayment(BaseModel $order): ?BaseModel
     {
-        return $this->get("/payment/transactions/");
+        return $this->get('/payment/transactions/');
     }
 }

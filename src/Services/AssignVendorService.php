@@ -8,11 +8,8 @@ use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Reload\Contracts\InstantDeposit;
-use Fintech\Remit\Contracts\MoneyTransfer;
-use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 
@@ -51,7 +48,6 @@ class AssignVendorService
 
         return $this->serviceVendorDriver->requestQuote($order);
     }
-
 
     /**
      * @throws ErrorException
