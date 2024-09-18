@@ -4,11 +4,12 @@ namespace Fintech\Reload\Vendors;
 
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Reload\Contracts\InstantDeposit;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-class LeatherBack
+class LeatherBack implements InstantDeposit
 {
     private mixed $config;
 
@@ -68,7 +69,25 @@ class LeatherBack
             ],
         ];
 
-        $response = $this->post('/payment/pay/initiate', $params);
+        $response = $this->client->post('/payment/pay/initiate', $params)->json();
+
+
+
+        if ($response['isSuccess']) {
+            $response = [
+                'status' => true,
+                'amount' => intval($response['value']['paymentItem']['totalAmount']),
+                'message' => $response['value']['message'] ?? null,
+                'origin_message' => $response,
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'amount' => null,
+                'message' => $response['error'] ?? null,
+                'origin_message' => $response,
+            ];
+        }
 
         $order_data['vendor_data'] = $response;
         $info['order_data'] = $order_data;
@@ -86,35 +105,19 @@ class LeatherBack
         return null;
     }
 
-    private function post($url = '', $payload = [])
+
+    public function paymentStatus(BaseModel $order): ?BaseModel
     {
-        $response = $this->client->post($url, $payload)->json();
-
-        if ($response['isSuccess']) {
-            return [
-                'status' => true,
-                'amount' => intval($response['value']['paymentItem']['totalAmount']),
-                'message' => $response['value']['message'] ?? null,
-                'origin_message' => $response,
-            ];
-        }
-
-        return [
-            'status' => false,
-            'amount' => null,
-            'message' => $response['error'] ?? null,
-            'origin_message' => $response,
-        ];
+        return $this->post("/payment/transactions/{$eference}");
     }
 
-    public function paymentStatus(BaseModel $order, array $inputs = []): mixed
+    public function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
     {
-        $params = [
-            'transaction_id' => $order->order_data[''],
-            'utility_auth_key' => $this->options[$order->order_data['']]['utility_auth_key'],
-            'utility_secret_key' => $this->options[$order->order_data['']]['utility_secret_key'],
-        ];
+        // TODO: Implement cancelPayment() method.
+    }
 
-        return $this->post('/bill-status', $params);
+    public function trackPayment(BaseModel $order): ?BaseModel
+    {
+        return $this->get("/payment/transactions/");
     }
 }

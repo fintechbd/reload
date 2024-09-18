@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload;
 
+use Fintech\Reload\Services\AssignVendorService;
 use Fintech\Reload\Services\CurrencySwapService;
 use Fintech\Reload\Services\DepositService;
 use Fintech\Reload\Services\RequestMoneyService;
@@ -66,6 +67,14 @@ class Reload
     public function walletToPrepaidCard()
     {
         return app(WalletToPrepaidCardService::class);
+    }
+
+    /**
+     * @return AssignVendorService
+     */
+    public function assignVendor()
+    {
+        return app(AssignVendorService::class);
     }
 
     //** Crud Service Method Point Do not Remove **//
