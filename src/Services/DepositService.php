@@ -131,11 +131,11 @@ class DepositService
             DB::commit();
 
             if ($inputs['order_data']['is_interac_transfer']) :
-                event(new InteracTransferReceived($deposit));
+                InteracTransferReceived::dispatch($deposit);
             elseif ($inputs['order_data']['is_card_deposit']) :
-                event(new CardDepositReceived($deposit));
+                CardDepositReceived::dispatch($deposit);
             else :
-                event(new BankDepositReceived($deposit));
+                BankDepositReceived::dispatch($deposit);
             endif;
 
             return $deposit;

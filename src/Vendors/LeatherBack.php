@@ -45,8 +45,6 @@ class LeatherBack implements InstantDeposit
     {
         $order_data = $order->order_data;
 
-        $interacData = $order_data['interac_data'];
-
         $nameSplit = json_decode(preg_replace('/(.*) (.+)/iu', '["$1", "$2"]', $order->order_data['created_by']), true);
 
         $params = [
@@ -56,13 +54,13 @@ class LeatherBack implements InstantDeposit
             'narration' => $order->note ?? '',
             'reference' => $order->order_number,
             'userInformation' => [
-                'firstName' => $interacData['first_name'] ?? $nameSplit[0],
-                'lastName' => $interacData['last_name'] ?? $nameSplit[1],
-                'phone' => $interacData['phone'] ?? $order_data['created_by_mobile_number'],
+                'firstName' => trim($nameSplit[0]),
+                'lastName' => trim($nameSplit[1] ?? ''),
+                'phone' => $order_data['created_by_mobile_number'],
                 'emailAddress' => $order_data['created_by_email'],
             ],
             'paymentRequestProps' => [
-                'email' => $interacData['email'],
+                'email' => $order_data['interac_email'],
             ],
             'metaData' => [
                 'return-url' => route('reload.interac-transfers.callback'),
@@ -71,49 +69,50 @@ class LeatherBack implements InstantDeposit
 
         $response = $this->client->post('/payment/pay/initiate', $params)->json();
 
-        if ($response['isSuccess']) {
-            $response = [
+        $response = ($response['isSuccess'])
+            ? [
                 'status' => true,
                 'amount' => intval($response['value']['paymentItem']['totalAmount']),
                 'message' => $response['value']['message'] ?? null,
                 'origin_message' => $response,
-            ];
-        } else {
-            $response = [
+            ]
+            : [
                 'status' => false,
                 'amount' => null,
                 'message' => $response['error'] ?? null,
                 'origin_message' => $response,
             ];
-        }
 
         $order_data['vendor_data'] = $response;
+
         $info['order_data'] = $order_data;
 
-        if (! $response['status']) {
+        if (!$response['status']) {
             $info['status'] = OrderStatus::AdminVerification->value;
         }
 
         if (Transaction::order()->update($order->getKey(), $info)) {
             $order->fresh();
-
             return $order;
         }
 
         return null;
     }
 
-    public function paymentStatus(BaseModel $order): ?BaseModel
+    public
+    function paymentStatus(BaseModel $order): ?BaseModel
     {
         return $this->post("/payment/transactions/{$eference}");
     }
 
-    public function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
+    public
+    function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
     {
         // TODO: Implement cancelPayment() method.
     }
 
-    public function trackPayment(BaseModel $order): ?BaseModel
+    public
+    function trackPayment(BaseModel $order): ?BaseModel
     {
         return $this->get('/payment/transactions/');
     }

@@ -9,7 +9,6 @@ use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Reload\Contracts\InstantDeposit;
-use Fintech\Reload\Exceptions\ReloadException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
@@ -41,18 +40,8 @@ class AssignVendorService
     }
 
     /**
-     * @throws RemitException|ErrorException
-     */
-    public function requestQuote(BaseModel $order, string $vendor_slug): mixed
-    {
-        $this->initVendor($vendor_slug);
-
-        return $this->serviceVendorDriver->requestQuote($order);
-    }
-
-    /**
      * @throws ErrorException
-     * @throws UpdateOperationException|RemitException
+     * @throws UpdateOperationException|VendorNotFoundException
      */
     public function initPayment(BaseModel $order, string $vendor_slug): mixed
     {
@@ -62,12 +51,12 @@ class AssignVendorService
             'vendor' => $vendor_slug,
             'service_vendor_id' => $this->serviceVendorModel->getKey(),
             'status' => OrderStatus::Processing->value])) {
-            throw new UpdateOperationException(__('remit::assign_vendor.failed', ['slug' => $vendor_slug]));
+            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $vendor_slug]));
         }
 
         $order->fresh();
 
-        return $this->serviceVendorDriver->executeOrder($order);
+        return $this->serviceVendorDriver->initPayment($order);
     }
 
     /**
