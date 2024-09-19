@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToBankService walletToBank(array $filters = null)
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToAtmService walletToAtm(array $filters = null)
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToPrepaidCardService walletToPrepaidCard(array $filters = null)
- * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|AssignVendorService assignVendor(array $filters = null)
+ * @method static AssignVendorService assignVendor()
  *
  * // Crud Service Method Point Do not Remove //
  *

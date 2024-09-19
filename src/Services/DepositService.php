@@ -14,6 +14,8 @@ use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\MetaData\Facades\MetaData;
 use Fintech\Reload\Events\BankDepositReceived;
+use Fintech\Reload\Events\CardDepositReceived;
+use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Interfaces\DepositRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -121,12 +123,20 @@ class DepositService
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
 
         DB::beginTransaction();
+
         $deposit = $this->depositRepository->create($inputs);
+
         if ($deposit) {
+
             DB::commit();
 
-            event(new BankDepositReceived($deposit));
-
+            if ($inputs['order_data']['is_interac_transfer']) :
+                event(new InteracTransferReceived($deposit));
+            elseif ($inputs['order_data']['is_card_deposit']) :
+                event(new CardDepositReceived($deposit));
+            else :
+                event(new BankDepositReceived($deposit));
+            endif;
 
             return $deposit;
         }

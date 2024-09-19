@@ -7,29 +7,28 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
+use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Reload\Contracts\InstantDeposit;
-use Fintech\Remit\Exceptions\RemitException;
+use Fintech\Reload\Exceptions\ReloadException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 
 class AssignVendorService
 {
-    use \Fintech\Core\Traits\HasFindWhereSearch;
-
     private $serviceVendorModel;
 
     private InstantDeposit $serviceVendorDriver;
 
     /**
-     * @throws RemitException
+     * @throws VendorNotFoundException
      */
     private function initVendor(string $slug): void
     {
-        $availableVendors = config('fintech.remit.providers', []);
+        $availableVendors = config('fintech.reload.providers', []);
 
         if (! isset($availableVendors[$slug])) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
+            throw new VendorNotFoundException(ucfirst($slug));
         }
 
         $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
