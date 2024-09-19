@@ -71,7 +71,7 @@ class DepositService
      * @throws MasterCurrencyUnavailableException
      * @throws RequestAmountExistsException
      */
-    public function create(array $inputs = [])
+    public function create(array $inputs = []): ?\Fintech\Core\Abstracts\BaseModel
     {
         $depositUser = Auth::user()->find($inputs['user_id']);
 
@@ -101,7 +101,7 @@ class DepositService
                 throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
             }
 
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'point_reload'])->first()->getKey();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_reload'])->getKey();
 
             if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
                 throw new RequestAmountExistsException;

@@ -16,11 +16,11 @@ class PaymentGatewayDepositSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $fundDepositParent = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first();
+            $fundDepositParent = Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
 
             $servingCountries = MetaData::country()->servingIds(['iso2' => 'CA']);
 
-            $vendor = Business::serviceVendor()->list(['service_vendor_slug' => 'leatherback'])->first();
+            $vendor = Business::serviceVendor()->findWhere(['service_vendor_slug' => 'leatherback']);
 
             Business::serviceTypeManager($this->data(), $fundDepositParent)
                 ->srcCountries($servingCountries)

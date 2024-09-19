@@ -15,7 +15,7 @@ class CardDepositOptionSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->list(['service_type_slug' => 'card_deposit'])->first();
+            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'card_deposit']);
 
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)

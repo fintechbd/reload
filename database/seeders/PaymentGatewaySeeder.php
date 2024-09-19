@@ -24,7 +24,7 @@ class PaymentGatewaySeeder extends Seeder
                     unset($entry['serviceTypeChildren']);
                 }
 
-                $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
+                $findServiceTypeModel = Business::serviceType()->findWhere(['service_type_slug' => $entry['service_type_slug']]);
 
                 if ($findServiceTypeModel) {
                     $serviceTypeModel = Business::serviceType()->update($findServiceTypeModel->id, $entry);
@@ -67,7 +67,7 @@ class PaymentGatewaySeeder extends Seeder
 
         return [
             [
-                'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                'service_type_parent_id' => Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit'])->id,
                 'service_type_name' => 'PAYNOW',
                 'service_type_slug' => 'pay_now',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'pay_now.svg')),
@@ -78,7 +78,7 @@ class PaymentGatewaySeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                'service_type_parent_id' => Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit'])->id,
                 'service_type_name' => 'E-NETS',
                 'service_type_slug' => 'e_nets',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'e_nets.svg')),
@@ -97,8 +97,8 @@ class PaymentGatewaySeeder extends Seeder
         $image_png = __DIR__.'/../../resources/img/service/logo_png/';
 
         return [
-            ['service_type_id' => Business::serviceType()->list(['service_type_slug' => 'pay_now'])->first()->id, 'service_vendor_id' => config('fintech.business.default_vendor', 1), 'service_name' => 'Pay Now', 'service_slug' => 'pay_now', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'pay_now.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'pay_now.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'), 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null], 'enabled' => true],
-            ['service_type_id' => Business::serviceType()->list(['service_type_slug' => 'e_nets'])->first()->id, 'service_vendor_id' => config('fintech.business.default_vendor', 1), 'service_name' => 'E-nets', 'service_slug' => 'e_nets', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'e_nets.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'e_nets.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'), 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null], 'enabled' => true],
+            ['service_type_id' => Business::serviceType()->findWhere(['service_type_slug' => 'pay_now'])->id, 'service_vendor_id' => config('fintech.business.default_vendor', 1), 'service_name' => 'Pay Now', 'service_slug' => 'pay_now', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'pay_now.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'pay_now.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'), 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null], 'enabled' => true],
+            ['service_type_id' => Business::serviceType()->findWhere(['service_type_slug' => 'e_nets'])->id, 'service_vendor_id' => config('fintech.business.default_vendor', 1), 'service_name' => 'E-nets', 'service_slug' => 'e_nets', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'e_nets.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'e_nets.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => config('fintech.business.default_vendor_name', 'Fintech Bangladesh'), 'account_number' => str_pad(date('siHdmY'), 16, '0', STR_PAD_LEFT), 'transactional_currency' => 'BDT', 'beneficiary_type_id' => null, 'operator_short_code' => null], 'enabled' => true],
         ];
 
     }
@@ -111,7 +111,7 @@ class PaymentGatewaySeeder extends Seeder
         $source_countries = MetaData::country()->servingIds();
         if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
-                $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
+                $service = Business::service()->findWhere(['service_slug' => $serviceList['service_slug']]);
                 $serviceStats[] = [
                     'role_id' => $roles,
                     'service_id' => $service->getKey(),

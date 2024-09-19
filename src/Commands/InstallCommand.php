@@ -69,7 +69,7 @@ class InstallCommand extends Command
     private function addBankCardDeposit(): void
     {
         $this->task('Populating Fund Deposit (Bank & Card) Service Types', function () {
-            $parent = Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first();
+            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
             $types = [
                 [
                     'service_type_name' => 'Bank Deposit',
@@ -82,7 +82,7 @@ class InstallCommand extends Command
                     'enabled' => true,
                 ],
                 [
-                    'service_type_parent_id' => Business::serviceType()->list(['service_type_slug' => 'fund_deposit'])->first()->id,
+                    'service_type_parent_id' => Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit'])->id,
                     'service_type_name' => 'Card Deposit',
                     'service_type_slug' => 'card_deposit',
                     'logo_svg' => $this->image_svg.'card_deposit.svg',
