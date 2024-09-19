@@ -8,8 +8,10 @@ use Fintech\Transaction\Facades\Transaction;
 /**
  * Class WalletToBankService
  */
-class WalletToBankService extends \Fintech\Core\Abstracts\Service
+class WalletToBankService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * WalletToBankService constructor.
      */

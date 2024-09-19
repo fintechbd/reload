@@ -11,8 +11,10 @@ use Illuminate\Support\Collection;
 /**
  * Class WalletToWalletService
  */
-class WalletToWalletService extends \Fintech\Core\Abstracts\Service
+class WalletToWalletService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * WalletToWalletService constructor.
      */

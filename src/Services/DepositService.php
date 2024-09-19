@@ -12,7 +12,6 @@ use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Reload\Events\DepositReceived;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Interfaces\DepositRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,8 +19,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 /**
  * Class DepositService
  */
-class DepositService extends \Fintech\Core\Abstracts\Service
+class DepositService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * DepositService constructor.
      */

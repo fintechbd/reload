@@ -11,8 +11,10 @@ use Illuminate\Support\Collection;
 /**
  * Class CurrencySwapService
  */
-class CurrencySwapService extends \Fintech\Core\Abstracts\Service
+class CurrencySwapService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     private CurrencySwapRepository $currencySwapRepository;
 
     /**

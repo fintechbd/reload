@@ -7,8 +7,10 @@ use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository;
 /**
  * Class WalletToPrepaidCardService
  */
-class WalletToPrepaidCardService extends \Fintech\Core\Abstracts\Service
+class WalletToPrepaidCardService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * WalletToPrepaidCardService constructor.
      */

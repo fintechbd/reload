@@ -8,8 +8,10 @@ use Fintech\Transaction\Facades\Transaction;
 /**
  * Class RequestMoneyService
  */
-class RequestMoneyService extends \Fintech\Core\Abstracts\Service
+class RequestMoneyService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * RequestMoneyService constructor.
      */
