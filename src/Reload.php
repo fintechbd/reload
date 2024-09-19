@@ -49,8 +49,8 @@ class Reload
     }
 
     public function assignVendor()
-{
-	return \app(AssignVendorService::class);
+    {
+        return \app(AssignVendorService::class);
     }
 
     //** Crud Service Method Point Do not Remove **//
