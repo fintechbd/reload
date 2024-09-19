@@ -8,7 +8,7 @@ use Fintech\Transaction\Facades\Transaction;
 /**
  * Class RequestMoneyService
  */
-class RequestMoneyService
+class RequestMoneyService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * RequestMoneyService constructor.

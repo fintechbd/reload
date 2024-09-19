@@ -3,12 +3,12 @@
 namespace Fintech\Reload\Commands;
 
 use Fintech\Business\Facades\Business;
-use Fintech\Core\Traits\HasCoreSettingTrait;
+use Fintech\Core\Traits\HasCoreSetting;
 use Illuminate\Console\Command;
 
 class InstallCommand extends Command
 {
-    use HasCoreSettingTrait;
+    use HasCoreSetting;
 
     public $signature = 'reload:install';
 

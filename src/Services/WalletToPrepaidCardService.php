@@ -7,7 +7,7 @@ use Fintech\Reload\Interfaces\WalletToPrepaidCardRepository;
 /**
  * Class WalletToPrepaidCardService
  */
-class WalletToPrepaidCardService
+class WalletToPrepaidCardService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * WalletToPrepaidCardService constructor.

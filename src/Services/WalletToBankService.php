@@ -8,7 +8,7 @@ use Fintech\Transaction\Facades\Transaction;
 /**
  * Class WalletToBankService
  */
-class WalletToBankService
+class WalletToBankService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * WalletToBankService constructor.

@@ -13,7 +13,7 @@ use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 
-class AssignVendorService
+class AssignVendorService extends \Fintech\Core\Abstracts\Service
 {
     private $serviceVendorModel;
 

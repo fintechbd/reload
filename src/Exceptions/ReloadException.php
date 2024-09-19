@@ -11,7 +11,7 @@ use Throwable;
 class ReloadException extends Exception
 {
     /**
-     * CoreException constructor.
+     * ReloadException constructor.
      *
      * @param  string  $message
      * @param  int  $code

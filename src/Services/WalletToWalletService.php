@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 /**
  * Class WalletToWalletService
  */
-class WalletToWalletService
+class WalletToWalletService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * WalletToWalletService constructor.

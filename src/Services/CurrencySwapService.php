@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 /**
  * Class CurrencySwapService
  */
-class CurrencySwapService
+class CurrencySwapService extends \Fintech\Core\Abstracts\Service
 {
     private CurrencySwapRepository $currencySwapRepository;
 
