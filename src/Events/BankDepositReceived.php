@@ -9,7 +9,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DepositReceived
+class BankDepositReceived
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,7 +18,6 @@ class DepositReceived
     /**
      * Create a new event instance.
      *
-     * @param  Deposit  $deposit
      */
     public function __construct($deposit)
     {

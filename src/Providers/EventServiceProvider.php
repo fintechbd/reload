@@ -5,7 +5,7 @@ namespace Fintech\Reload\Providers;
 use Fintech\Reload\Events\CurrencySwapped;
 use Fintech\Reload\Events\DepositAccepted;
 use Fintech\Reload\Events\DepositCancelled;
-use Fintech\Reload\Events\DepositReceived;
+use Fintech\Reload\Events\BankDepositReceived;
 use Fintech\Reload\Events\DepositRejected;
 use Fintech\Reload\Events\WalletTransferred;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -21,7 +21,7 @@ class EventServiceProvider extends ServiceProvider
         CurrencySwapped::class => [
 
         ],
-        DepositReceived::class => [
+        BankDepositReceived::class => [
 
         ],
         DepositRejected::class => [
