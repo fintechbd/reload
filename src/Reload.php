@@ -16,65 +16,65 @@ class Reload
     /**
      * @return DepositService
      */
-    public function deposit()
-    {
-        return app(DepositService::class);
+    public function deposit($filters = null)
+{
+	return \singleton(DepositService::class, $filters);
     }
 
     /**
      * @return CurrencySwapService
      */
-    public function currencySwap()
-    {
-        return app(CurrencySwapService::class);
+    public function currencySwap($filters = null)
+{
+	return \singleton(CurrencySwapService::class, $filters);
     }
 
     /**
      * @return WalletToWalletService
      */
-    public function walletToWallet()
-    {
-        return app(WalletToWalletService::class);
+    public function walletToWallet($filters = null)
+{
+	return \singleton(WalletToWalletService::class, $filters);
     }
 
     /**
      * @return RequestMoneyService
      */
-    public function requestMoney()
-    {
-        return app(RequestMoneyService::class);
+    public function requestMoney($filters = null)
+{
+	return \singleton(RequestMoneyService::class, $filters);
     }
 
     /**
      * @return WalletToBankService
      */
-    public function walletToBank()
-    {
-        return app(WalletToBankService::class);
+    public function walletToBank($filters = null)
+{
+	return \singleton(WalletToBankService::class, $filters);
     }
 
     /**
      * @return WalletToAtmService
      */
-    public function walletToAtm()
-    {
-        return app(WalletToAtmService::class);
+    public function walletToAtm($filters = null)
+{
+	return \singleton(WalletToAtmService::class, $filters);
     }
 
     /**
      * @return WalletToPrepaidCardService
      */
-    public function walletToPrepaidCard()
-    {
-        return app(WalletToPrepaidCardService::class);
+    public function walletToPrepaidCard($filters = null)
+{
+	return \singleton(WalletToPrepaidCardService::class, $filters);
     }
 
     /**
      * @return AssignVendorService
      */
-    public function assignVendor()
-    {
-        return app(AssignVendorService::class);
+    public function assignVendor($filters = null)
+{
+	return \singleton(AssignVendorService::class, $filters);
     }
 
     //** Crud Service Method Point Do not Remove **//
