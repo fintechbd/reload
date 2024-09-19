@@ -13,14 +13,14 @@ use Fintech\Reload\Services\WalletToWalletService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static DepositService deposit()
- * @method static CurrencySwapService currencySwap()
- * @method static WalletToWalletService walletToWallet()
- * @method static RequestMoneyService requestMoney()
- * @method static WalletToBankService walletToBank()
- * @method static WalletToAtmService walletToAtm()
- * @method static WalletToPrepaidCardService walletToPrepaidCard()
- * @method static AssignVendorService assignVendor()
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|DepositService deposit(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|CurrencySwapService currencySwap(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToWalletService walletToWallet(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|RequestMoneyService requestMoney(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToBankService walletToBank(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToAtmService walletToAtm(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletToPrepaidCardService walletToPrepaidCard(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|AssignVendorService assignVendor(array $filters = null)
  *
  * // Crud Service Method Point Do not Remove //
  *
