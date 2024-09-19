@@ -83,19 +83,13 @@ class DepositService
 
         if (Transaction::orderQueue()->addToQueueUserWise($depositUser->getKey()) > 0) {
 
-            $depositAccount = Transaction::userAccount()->list([
-                'user_id' => $depositUser->getKey(),
-                'country_id' => $inputs['source_country_id'],
-            ])->first();
+            $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $depositUser->getKey(), 'country_id' => $inputs['source_country_id'],]);
 
             if (! $depositAccount) {
                 throw new CurrencyUnavailableException($inputs['source_country_id']);
             }
 
-            $masterUser = Auth::user()->list([
-                'role_name' => SystemRole::MasterUser->value,
-                'country_id' => $inputs['source_country_id'],
-            ])->first();
+            $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id'],]);
 
             if (! $masterUser) {
                 throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
