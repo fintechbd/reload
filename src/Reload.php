@@ -17,56 +17,56 @@ class Reload
      * @return DepositService
      */
     public function deposit($filters = null)
-{
-	return \singleton(DepositService::class, $filters);
+    {
+        return \singleton(DepositService::class, $filters);
     }
 
     /**
      * @return CurrencySwapService
      */
     public function currencySwap($filters = null)
-{
-	return \singleton(CurrencySwapService::class, $filters);
+    {
+        return \singleton(CurrencySwapService::class, $filters);
     }
 
     /**
      * @return WalletToWalletService
      */
     public function walletToWallet($filters = null)
-{
-	return \singleton(WalletToWalletService::class, $filters);
+    {
+        return \singleton(WalletToWalletService::class, $filters);
     }
 
     /**
      * @return RequestMoneyService
      */
     public function requestMoney($filters = null)
-{
-	return \singleton(RequestMoneyService::class, $filters);
+    {
+        return \singleton(RequestMoneyService::class, $filters);
     }
 
     /**
      * @return WalletToBankService
      */
     public function walletToBank($filters = null)
-{
-	return \singleton(WalletToBankService::class, $filters);
+    {
+        return \singleton(WalletToBankService::class, $filters);
     }
 
     /**
      * @return WalletToAtmService
      */
     public function walletToAtm($filters = null)
-{
-	return \singleton(WalletToAtmService::class, $filters);
+    {
+        return \singleton(WalletToAtmService::class, $filters);
     }
 
     /**
      * @return WalletToPrepaidCardService
      */
     public function walletToPrepaidCard($filters = null)
-{
-	return \singleton(WalletToPrepaidCardService::class, $filters);
+    {
+        return \singleton(WalletToPrepaidCardService::class, $filters);
     }
 
     /**
