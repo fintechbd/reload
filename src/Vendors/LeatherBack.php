@@ -87,32 +87,30 @@ class LeatherBack implements InstantDeposit
 
         $info['order_data'] = $order_data;
 
-        if (!$response['status']) {
+        if (! $response['status']) {
             $info['status'] = OrderStatus::AdminVerification->value;
         }
 
         if (Transaction::order()->update($order->getKey(), $info)) {
             $order->fresh();
+
             return $order;
         }
 
         return null;
     }
 
-    public
-    function paymentStatus(BaseModel $order): ?BaseModel
+    public function paymentStatus(BaseModel $order): ?BaseModel
     {
         return $this->post("/payment/transactions/{$eference}");
     }
 
-    public
-    function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
+    public function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
     {
         // TODO: Implement cancelPayment() method.
     }
 
-    public
-    function trackPayment(BaseModel $order): ?BaseModel
+    public function trackPayment(BaseModel $order): ?BaseModel
     {
         return $this->get('/payment/transactions/');
     }

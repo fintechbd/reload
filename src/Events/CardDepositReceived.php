@@ -15,7 +15,6 @@ class CardDepositReceived
 
     /**
      * Create a new event instance.
-     *
      */
     public function __construct($deposit)
     {

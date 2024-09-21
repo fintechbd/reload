@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Events;
 
-use Fintech\Reload\Models\Deposit;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -17,7 +16,6 @@ class BankDepositReceived
 
     /**
      * Create a new event instance.
-     *
      */
     public function __construct($deposit)
     {
