@@ -4,6 +4,7 @@ namespace Fintech\Reload\Vendors;
 
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Reload\Contracts\InstantDeposit;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Http\Client\PendingRequest;
@@ -41,28 +42,22 @@ class LeatherBack implements InstantDeposit
             ]);
     }
 
-    public function initPayment($deposit): ?BaseModel
+    public function initPayment($deposit): AssignVendorVerdict
     {
-        $info = [
-            'order_data' => $deposit->order_data,
-            'status' => $deposit->status,
-            'timeline' => $deposit->timeline,
-        ];
-
         $order_data = $deposit->order_data;
 
-        $name = explode(' ', $deposit->order_data['created_by']);
+        $name = explode(' ', $order_data['created_by']);
         $lastName = (count($name) > 1) ? array_pop($name) : '';
         $firstName = implode(' ', $name);
 
-        $params = [
+        $payload = [
             'amount' => intval($deposit->amount),
             'channel' => 'Interac',
             'currency' => $deposit->currency,
             'narration' => $deposit->note ?? '',
             'reference' => $order_data['purchase_number'],
             'userInformation' => [
-                'fullName' => $deposit->order_data['created_by'] ?? '',
+                'fullName' => $order_data['created_by'] ?? '',
                 'firstName' => trim($firstName),
                 'lastName' => trim($lastName),
                 'phone' => $order_data['created_by_mobile_number'],
@@ -76,50 +71,32 @@ class LeatherBack implements InstantDeposit
             ],
         ];
 
-        $response = $this->client->post('/payment/pay/initiate', $params)->json();
+        $response = $this->client->post('/payment/pay/initiate', $payload)->json();
+
+        $verdict = AssignVendorVerdict::make();
 
         if ($response['isSuccess']) {
-            $responseFormatted = [
-                'status' => true,
-                'amount' => intval($response['value']['paymentItem']['totalAmount']),
-                'message' => $response['value']['message'] ?? '',
-                'origin_message' => $response,
-            ];
-            $info['timeline'][] = [
-                'message' => '(Leather Back) responded with '.strtolower($responseFormatted['message']),
-                'flag' => 'success',
-                'timestamp' => now(),
-            ];
-        } else {
-            $responseFormatted = [
-                'status' => false,
-                'amount' => null,
-                'message' => '',
-                'origin_message' => $response,
-            ];
-            if ($response['type'] == 'ValidationException') {
-                $responseFormatted['message'] = $response['title'];
-                foreach ($response['failures'] as $key => $value) {
-                    $responseFormatted['message'] .= ($key + 1).". {$value}. ";
-                }
+            return $verdict->status(true)
+                ->original($response)
+                ->amount($response['value']['paymentItem']['totalAmount'] ?? 0)
+                ->message($response['value']['message'] ?? '')
+                ->charge($response['value']['paymentItem']['fees'] ?? 0)
+                ->ref_number($response['value']['paymentItem']['paymentReference'] ?? '')
+                ->orderTimeline('(Leather Back) responded with ' . strtolower($verdict->message) . '.', 'success');
+        }
+
+        $verdict->status(false)->original($response);
+
+        if ($response['type'] == 'ValidationException') {
+            $verdict->message = '';
+            foreach ($response['failures'] as $key => $value) {
+                $verdict->message .= ($key + 1) . ". {$value} ";
             }
-            $info['status'] = OrderStatus::AdminVerification->value;
-            $info['timeline'][] = [
-                'message' => '(Leather Back) reported error: '.strtolower($responseFormatted['message']),
-                'flag' => 'error',
-                'timestamp' => now(),
-            ];
+        } else {
+            $verdict->message = $response['title'] ?? 'Unknown error';
         }
 
-        $info['order_data']['vendor_data'] = $responseFormatted;
-
-        if (Transaction::order()->update($deposit->getKey(), $info)) {
-            $deposit->fresh();
-
-            return $deposit;
-        }
-
-        return null;
+        return $verdict->orderTimeline('(Leather Back) reported error: ' . strtolower($verdict->message), 'error');
     }
 
     public function paymentStatus(BaseModel $deposit): ?BaseModel
@@ -127,9 +104,9 @@ class LeatherBack implements InstantDeposit
         return $this->post("/payment/transactions/{$eference}");
     }
 
-    public function cancelPayment(BaseModel $order, array $inputs = []): ?BaseModel
+    public function cancelPayment(BaseModel $order, array $inputs = []): AssignVendorVerdict
     {
-        // TODO: Implement cancelPayment() method.
+        return AssignVendorVerdict::make();
     }
 
     public function trackPayment(BaseModel $deposit): ?BaseModel

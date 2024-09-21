@@ -41,32 +41,37 @@ class AssignVendorService
     }
 
     /**
-     * @throws ErrorException
+     * @param BaseModel $deposit
      * @throws UpdateOperationException|VendorNotFoundException
      */
     public function initPayment($deposit): mixed
     {
+        $data['timeline'] = $deposit->timeline ?? [];
+
         $this->initVendor($deposit->vendor);
 
         $service = Business::service()->find($deposit->service_id);
 
-        $timeline = $deposit->timeline ?? [];
-
-        $timeline[] = [
+        $data['timeline'][] = [
             'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for {$service->service_name} payment request",
             'flag' => 'info',
             'timestamp' => now(),
         ];
 
-        if (! Transaction::order()->update($deposit->getKey(), [
-            'timeline' => $timeline,
-            'status' => OrderStatus::Processing->value])) {
-            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $deposit->vendor]));
+        $verdict = $this->serviceVendorDriver->initPayment($deposit);
+
+        $data['timeline'][] = $verdict->timeline;
+        $data['note'] = $verdict->message;
+        $data['order_data'] = $deposit->order_data;
+        $data['order_data']['vendor_data'] = $verdict->toArray();
+
+        if (!$verdict->status) {
+            $data['status'] = OrderStatus::AdminVerification->value;
         }
 
-        $deposit->fresh();
-
-        return $this->serviceVendorDriver->initPayment($deposit);
+        if (! Transaction::order()->update($deposit->getKey(), $data) {
+            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $deposit->vendor]));
+        }
     }
 
     /**

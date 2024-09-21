@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Jobs\Deposits;
 
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Reload\Events\InteracTransferReceived;
@@ -25,22 +26,17 @@ class InitInteracPaymentJob implements ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
-        try {
-            Reload::assignVendor()->initPayment($event->deposit);
-        } catch (\ErrorException $e) {
-
-        } catch (UpdateOperationException $e) {
-
-        } catch (VendorNotFoundException $e) {
-
-        }
+        Reload::assignVendor()->initPayment($event->deposit);
     }
 
-    //    /**
-    //     * Handle a failure.
-    //     */
-    //    public function failed(InteracTransferReceived $event, \Throwable $exception): void
-    //    {
-    //        // ...
-    //    }
+    /**
+     * Handle a failure.
+     */
+    public function failed(InteracTransferReceived $event, \Throwable $exception): void
+    {
+        Reload::deposit()->update($event->deposit->getKey(), [
+            'status' => OrderStatus::AdminVerification->value,
+            'note' => $exception->getMessage()
+        ]);
+    }
 }
