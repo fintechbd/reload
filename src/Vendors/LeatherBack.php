@@ -41,26 +41,31 @@ class LeatherBack implements InstantDeposit
             ]);
     }
 
-    public function initPayment(BaseModel $order): ?BaseModel
+    public function initPayment(BaseModel $deposit): ?BaseModel
     {
-        $order_data = $order->order_data;
+        $order_data = $deposit->order_data;
 
-        $nameSplit = json_decode(preg_replace('/(.*) (.+)/iu', '["$1", "$2"]', $order->order_data['created_by']), true);
+        $timeline = $deposit->timeline;
+
+        $name = explode(" ", $deposit->order_data['created_by']);
+        $lastName = (count($name) > 1) ? array_pop($name) : '';
+        $firstName = implode(" ", $name);
 
         $params = [
-            'amount' => intval($order->amount),
+            'amount' => intval($deposit->amount),
             'channel' => 'Interac',
-            'currency' => $order->currency,
-            'narration' => $order->note ?? '',
-            'reference' => $order->order_number,
+            'currency' => $deposit->currency,
+            'narration' => $deposit->note ?? '',
+            'reference' => $deposit->order_number,
             'userInformation' => [
-                'firstName' => trim($nameSplit[0]),
-                'lastName' => trim($nameSplit[1] ?? ''),
+                'fullName' => $deposit->order_data['created_by'] ?? '',
+                'firstName' => trim($firstName),
+                'lastName' => trim($lastName),
                 'phone' => $order_data['created_by_mobile_number'],
                 'emailAddress' => $order_data['created_by_email'],
             ],
             'paymentRequestProps' => [
-                'email' => $order_data['interac_email'],
+                'email' => $order_data['interac_email'] ?? $order_data['created_by_email'],
             ],
             'metaData' => [
                 'return-url' => route('reload.interac-transfers.callback'),
@@ -73,13 +78,13 @@ class LeatherBack implements InstantDeposit
             ? [
                 'status' => true,
                 'amount' => intval($response['value']['paymentItem']['totalAmount']),
-                'message' => $response['value']['message'] ?? null,
+                'message' => $response['value']['message'] ?? '',
                 'origin_message' => $response,
             ]
             : [
                 'status' => false,
                 'amount' => null,
-                'message' => $response['error'] ?? null,
+                'message' => $response['error'] ?? '',
                 'origin_message' => $response,
             ];
 
@@ -87,14 +92,31 @@ class LeatherBack implements InstantDeposit
 
         $info['order_data'] = $order_data;
 
-        if (! $response['status']) {
+        if (!$response['status']) {
+
             $info['status'] = OrderStatus::AdminVerification->value;
+
+            $timeline[] = [
+                'message' => "(Leather Back) payment request reported error: " . $response['message'],
+                'flag' => 'error',
+                'timestamp' => now(),
+            ];
         }
 
-        if (Transaction::order()->update($order->getKey(), $info)) {
-            $order->fresh();
+        if ($response['status']) {
+            $timeline[] = [
+                'message' => "(Leather Back) payment request response: " . $response['message'],
+                'flag' => 'success',
+                'timestamp' => now(),
+            ];
+        }
 
-            return $order;
+        $info['timeline'] = $timeline;
+
+        if (Transaction::order()->update($deposit->getKey(), $info)) {
+            $deposit->fresh();
+
+            return $deposit;
         }
 
         return null;

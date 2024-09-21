@@ -2,6 +2,8 @@
 
 namespace Fintech\Reload\Jobs\Deposits;
 
+use Fintech\Core\Exceptions\UpdateOperationException;
+use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,29 +18,29 @@ class InitInteracPaymentJob implements ShouldQueue
      *
      * @var int
      */
-    public $tries = 3;
-
-    /**
-     * Determine the time at which the listener should timeout.
-     */
-    public function retryUntil()
-    {
-        return now()->addSeconds(30);
-    }
+    public $tries = 1;
 
     /**
      * Handle the event.
      */
     public function handle(InteracTransferReceived $event): void
     {
-        Reload::assignVendor()->initPayment($event->deposit);
+        try {
+            Reload::assignVendor()->initPayment($event->deposit);
+        } catch (\ErrorException $e) {
+
+        } catch (UpdateOperationException $e) {
+
+        } catch (VendorNotFoundException $e) {
+
+        }
     }
 
-    /**
-     * Handle a failure.
-     */
-    public function failed(InteracTransferReceived $event, \Throwable $exception): void
-    {
-        // ...
-    }
+//    /**
+//     * Handle a failure.
+//     */
+//    public function failed(InteracTransferReceived $event, \Throwable $exception): void
+//    {
+//        // ...
+//    }
 }

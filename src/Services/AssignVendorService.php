@@ -8,7 +8,9 @@ use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
+use Fintech\Core\Facades\Core;
 use Fintech\Reload\Contracts\InstantDeposit;
+use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
@@ -43,20 +45,29 @@ class AssignVendorService
      * @throws ErrorException
      * @throws UpdateOperationException|VendorNotFoundException
      */
-    public function initPayment(BaseModel $order, string $vendor_slug): mixed
+    public function initPayment(BaseModel $deposit): mixed
     {
-        $this->initVendor($vendor_slug);
+        $this->initVendor($deposit->vendor);
 
-        if (! Transaction::order()->update($order->getKey(), [
-            'vendor' => $vendor_slug,
-            'service_vendor_id' => $this->serviceVendorModel->getKey(),
+        $service = Business::service()->find($deposit->service_id);
+
+        $timeline = $deposit->timeline;
+
+        $timeline[] = [
+            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for {$service->service_name} payment request",
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
+        if (! Transaction::order()->update($deposit->getKey(), [
+            'timeline' => $timeline,
             'status' => OrderStatus::Processing->value])) {
-            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $vendor_slug]));
+            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $deposit->vendor]));
         }
 
-        $order->fresh();
+        $deposit->fresh();
 
-        return $this->serviceVendorDriver->initPayment($order);
+        return $this->serviceVendorDriver->initPayment($deposit);
     }
 
     /**

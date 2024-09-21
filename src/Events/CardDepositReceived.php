@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Events;
 
+use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -16,20 +17,16 @@ class CardDepositReceived
     /**
      * Create a new event instance.
      */
-    public function __construct($deposit)
+    public function __construct($cardDeposit)
     {
-        $this->deposit = $deposit;
-    }
+        $timeline = $cardDeposit->timeline;
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
+        $timeline[] = [
+            'message' => 'Card deposit received',
+            'flag' => 'info',
+            'timestamp' => now(),
         ];
+
+        $this->deposit = Reload::deposit()->update($cardDeposit->getKey(), ['timeline' => $timeline]);
     }
 }

@@ -6,7 +6,7 @@ use Fintech\Core\Abstracts\BaseModel;
 
 interface InstantDeposit
 {
-    public function initPayment(BaseModel $order): ?BaseModel;
+    public function initPayment(BaseModel $deposit): ?BaseModel;
 
     public function paymentStatus(BaseModel $order): ?BaseModel;
 
