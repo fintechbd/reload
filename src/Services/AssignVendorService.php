@@ -8,7 +8,6 @@ use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
-use Fintech\Core\Facades\Core;
 use Fintech\Reload\Contracts\InstantDeposit;
 use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;

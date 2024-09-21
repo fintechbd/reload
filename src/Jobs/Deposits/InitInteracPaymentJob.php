@@ -36,11 +36,11 @@ class InitInteracPaymentJob implements ShouldQueue
         }
     }
 
-//    /**
-//     * Handle a failure.
-//     */
-//    public function failed(InteracTransferReceived $event, \Throwable $exception): void
-//    {
-//        // ...
-//    }
+    //    /**
+    //     * Handle a failure.
+    //     */
+    //    public function failed(InteracTransferReceived $event, \Throwable $exception): void
+    //    {
+    //        // ...
+    //    }
 }

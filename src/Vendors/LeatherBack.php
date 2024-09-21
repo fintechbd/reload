@@ -51,9 +51,9 @@ class LeatherBack implements InstantDeposit
 
         $order_data = $deposit->order_data;
 
-        $name = explode(" ", $deposit->order_data['created_by']);
+        $name = explode(' ', $deposit->order_data['created_by']);
         $lastName = (count($name) > 1) ? array_pop($name) : '';
-        $firstName = implode(" ", $name);
+        $firstName = implode(' ', $name);
 
         $params = [
             'amount' => intval($deposit->amount),
@@ -86,7 +86,7 @@ class LeatherBack implements InstantDeposit
                 'origin_message' => $response,
             ];
             $info['timeline'][] = [
-                'message' => "(Leather Back) responded with " . strtolower($responseFormatted['message']),
+                'message' => '(Leather Back) responded with '.strtolower($responseFormatted['message']),
                 'flag' => 'success',
                 'timestamp' => now(),
             ];
@@ -100,12 +100,12 @@ class LeatherBack implements InstantDeposit
             if ($response['type'] == 'ValidationException') {
                 $responseFormatted['message'] = $response['title'];
                 foreach ($response['failures'] as $key => $value) {
-                    $responseFormatted['message'] .= ($key + 1) . ". {$value}. ";
+                    $responseFormatted['message'] .= ($key + 1).". {$value}. ";
                 }
             }
             $info['status'] = OrderStatus::AdminVerification->value;
             $info['timeline'][] = [
-                'message' => "(Leather Back) reported error: " . strtolower($responseFormatted['message']),
+                'message' => '(Leather Back) reported error: '.strtolower($responseFormatted['message']),
                 'flag' => 'error',
                 'timestamp' => now(),
             ];
@@ -115,6 +115,7 @@ class LeatherBack implements InstantDeposit
 
         if (Transaction::order()->update($deposit->getKey(), $info)) {
             $deposit->fresh();
+
             return $deposit;
         }
 
