@@ -27,13 +27,13 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.reload.providers', []);
 
-        if (! isset($availableVendors[$slug])) {
+        if (!isset($availableVendors[$slug])) {
             throw new VendorNotFoundException(ucfirst($slug));
         }
 
         $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
 
-        if (! $this->serviceVendorModel) {
+        if (!$this->serviceVendorModel) {
             throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
         }
 
@@ -44,7 +44,7 @@ class AssignVendorService
      * @param BaseModel $deposit
      * @throws UpdateOperationException|VendorNotFoundException
      */
-    public function initPayment($deposit): mixed
+    public function initPayment($deposit)
     {
         $data['timeline'] = $deposit->timeline ?? [];
 
@@ -67,16 +67,29 @@ class AssignVendorService
 
         if (!$verdict->status) {
             $data['status'] = OrderStatus::AdminVerification->value;
+            $data['timeline'][] = [
+                'message' => "Updating {$service->service_name} payment request status. Requires ". OrderStatus::AdminVerification->label()." confirmation",
+                'flag' => 'error',
+                'timestamp' => now(),
+            ];
+        } else {
+            $data['timeline'][] = [
+                'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve {$service->service_name} payment request.",
+                'flag' => 'info',
+                'timestamp' => now(),
+            ];
         }
 
-        if (! Transaction::order()->update($deposit->getKey(), $data) {
-            throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $deposit->vendor]));
+        if (!Transaction::order()->update($deposit->getKey(), $data)) {
+            throw new \ErrorException(__('remit::messages.assign_vendor.failed', [
+                'slug' => $deposit->vendor
+            ]));
         }
     }
 
     /**
      * @throws RemitException
-     * @throws ErrorException
+     * @throws ErrorException|VendorNotFoundException
      */
     public function trackPayment(BaseModel $order): mixed
     {
@@ -91,7 +104,7 @@ class AssignVendorService
     }
 
     /**
-     * @throws ErrorException
+     * @throws ErrorException|VendorNotFoundException
      */
     public function cancelPayment(BaseModel $order): mixed
     {
@@ -101,7 +114,7 @@ class AssignVendorService
     }
 
     /**
-     * @throws RemitException
+     * @throws RemitException|VendorNotFoundException
      */
     public function paymentStatus(BaseModel $order): mixed
     {

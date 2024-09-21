@@ -121,7 +121,7 @@ class DepositService
 
         $inputs['timeline'][] = [
             'message' => 'Fund deposit entry created successfully',
-            'flag' => 'info',
+            'flag' => 'create',
             'timestamp' => now(),
         ];
 
