@@ -45,13 +45,13 @@ class AssignVendorService
      * @throws ErrorException
      * @throws UpdateOperationException|VendorNotFoundException
      */
-    public function initPayment(BaseModel $deposit): mixed
+    public function initPayment($deposit): mixed
     {
         $this->initVendor($deposit->vendor);
 
         $service = Business::service()->find($deposit->service_id);
 
-        $timeline = $deposit->timeline;
+        $timeline = $deposit->timeline ?? [];
 
         $timeline[] = [
             'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for {$service->service_name} payment request",

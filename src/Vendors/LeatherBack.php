@@ -41,11 +41,15 @@ class LeatherBack implements InstantDeposit
             ]);
     }
 
-    public function initPayment(BaseModel $deposit): ?BaseModel
+    public function initPayment($deposit): ?BaseModel
     {
-        $order_data = $deposit->order_data;
+        $info = [
+            'order_data' => $deposit->order_data,
+            'status' => $deposit->status,
+            'timeline' => $deposit->timeline,
+        ];
 
-        $timeline = $deposit->timeline;
+        $order_data = $deposit->order_data;
 
         $name = explode(" ", $deposit->order_data['created_by']);
         $lastName = (count($name) > 1) ? array_pop($name) : '';
@@ -56,7 +60,7 @@ class LeatherBack implements InstantDeposit
             'channel' => 'Interac',
             'currency' => $deposit->currency,
             'narration' => $deposit->note ?? '',
-            'reference' => $deposit->order_number,
+            'reference' => $order_data['purchase_number'],
             'userInformation' => [
                 'fullName' => $deposit->order_data['created_by'] ?? '',
                 'firstName' => trim($firstName),
@@ -74,55 +78,50 @@ class LeatherBack implements InstantDeposit
 
         $response = $this->client->post('/payment/pay/initiate', $params)->json();
 
-        $response = ($response['isSuccess'])
-            ? [
+        if ($response['isSuccess']) {
+            $responseFormatted = [
                 'status' => true,
                 'amount' => intval($response['value']['paymentItem']['totalAmount']),
                 'message' => $response['value']['message'] ?? '',
                 'origin_message' => $response,
-            ]
-            : [
+            ];
+            $info['timeline'][] = [
+                'message' => "(Leather Back) responded with " . strtolower($responseFormatted['message']),
+                'flag' => 'success',
+                'timestamp' => now(),
+            ];
+        } else {
+            $responseFormatted = [
                 'status' => false,
                 'amount' => null,
-                'message' => $response['error'] ?? '',
+                'message' => '',
                 'origin_message' => $response,
             ];
-
-        $order_data['vendor_data'] = $response;
-
-        $info['order_data'] = $order_data;
-
-        if (!$response['status']) {
-
+            if ($response['type'] == 'ValidationException') {
+                $responseFormatted['message'] = $response['title'];
+                foreach ($response['failures'] as $key => $value) {
+                    $responseFormatted['message'] .= ($key + 1) . ". {$value}. ";
+                }
+            }
             $info['status'] = OrderStatus::AdminVerification->value;
-
-            $timeline[] = [
-                'message' => "(Leather Back) payment request reported error: " . $response['message'],
+            $info['timeline'][] = [
+                'message' => "(Leather Back) reported error: " . strtolower($responseFormatted['message']),
                 'flag' => 'error',
                 'timestamp' => now(),
             ];
         }
 
-        if ($response['status']) {
-            $timeline[] = [
-                'message' => "(Leather Back) payment request response: " . $response['message'],
-                'flag' => 'success',
-                'timestamp' => now(),
-            ];
-        }
-
-        $info['timeline'] = $timeline;
+        $info['order_data']['vendor_data'] = $responseFormatted;
 
         if (Transaction::order()->update($deposit->getKey(), $info)) {
             $deposit->fresh();
-
             return $deposit;
         }
 
         return null;
     }
 
-    public function paymentStatus(BaseModel $order): ?BaseModel
+    public function paymentStatus(BaseModel $deposit): ?BaseModel
     {
         return $this->post("/payment/transactions/{$eference}");
     }
@@ -132,7 +131,7 @@ class LeatherBack implements InstantDeposit
         // TODO: Implement cancelPayment() method.
     }
 
-    public function trackPayment(BaseModel $order): ?BaseModel
+    public function trackPayment(BaseModel $deposit): ?BaseModel
     {
         return $this->get('/payment/transactions/');
     }

@@ -17,6 +17,8 @@ class Deposit extends Order implements HasMedia
     |--------------------------------------------------------------------------
     */
 
+    protected $casts = ['order_data' => 'array', 'timeline' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
+
     /*
     |--------------------------------------------------------------------------
     | FUNCTIONS
