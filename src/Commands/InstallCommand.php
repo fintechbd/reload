@@ -25,6 +25,7 @@ class InstallCommand extends Command
         $this->infoMessage('Module Installation', 'RUNNING');
 
         $this->task('Module Installation', function () {
+
             $this->addDefaultServiceTypes();
 
             $this->addBankCardDeposit();
