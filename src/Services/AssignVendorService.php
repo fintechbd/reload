@@ -54,7 +54,7 @@ class AssignVendorService
         $service = Business::service()->find($deposit->service_id);
 
         $data['timeline'][] = [
-            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for {$service->service_name} payment request",
+            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for ". ucwords(strtolower($service->service_name))." payment request",
             'flag' => 'info',
             'timestamp' => now(),
         ];
@@ -75,7 +75,7 @@ class AssignVendorService
             ];
         } else {
             $data['timeline'][] = [
-                'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve {$service->service_name} payment request.",
+                'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve ". ucwords(strtolower($service->service_name))." payment request.",
                 'flag' => 'info',
                 'timestamp' => now(),
             ];

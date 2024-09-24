@@ -86,7 +86,7 @@ class Deposit extends Order implements HasMedia
 
     public function currentStatus()
     {
-        return $this->status;
+        return $this->status->value;
     }
 
     /*
