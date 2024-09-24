@@ -2,6 +2,8 @@
 
 namespace Fintech\Reload\Models;
 
+use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Transaction\Models\Order;
 use Spatie\MediaLibrary\HasMedia;
@@ -17,7 +19,14 @@ class Deposit extends Order implements HasMedia
     |--------------------------------------------------------------------------
     */
 
-    protected $casts = ['order_data' => 'array', 'timeline' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
+    protected $casts = [
+        'order_data' => 'array',
+        'timeline' => 'array',
+        'restored_at' => 'datetime',
+        'enabled' => 'bool',
+        'risk_profile' => RiskProfile::class,
+        'status' => DepositStatus::class,
+    ];
 
     /*
     |--------------------------------------------------------------------------

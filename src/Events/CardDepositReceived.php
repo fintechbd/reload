@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Events;
 
+use Fintech\Business\Facades\Business;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -20,8 +21,10 @@ class CardDepositReceived
     {
         $timeline = $cardDeposit->timeline;
 
+        $service = Business::service()->find($cardDeposit->service_id);
+
         $timeline[] = [
-            'message' => 'Card deposit received',
+            'message' => ucwords(strtolower($service->service_name)).' card deposit received',
             'flag' => 'info',
             'timestamp' => now(),
         ];
