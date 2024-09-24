@@ -32,9 +32,8 @@ if (Config::get('fintech.reload.enabled')) {
                     ->only(['index', 'store', 'show']);
 
                 Route::any('interac-transfers/callback', function (Request $request) {
-                    logger("Interact Log", $request->all());
+                    logger('Interact Log', $request->all());
                 })->name('interac-transfers.callback');
-
 
                 Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
                     ->name('deposits.reject');
