@@ -4,7 +4,6 @@ use Fintech\RestApi\Http\Controllers\Reload\Charts\DepositPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\Charts\WithdrawPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\CurrencySwapController;
 use Fintech\RestApi\Http\Controllers\Reload\DepositController;
-use Fintech\RestApi\Http\Controllers\Reload\InteracTransferController;
 use Fintech\RestApi\Http\Controllers\Reload\RequestMoneyController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToAtmController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToBankController;
@@ -32,10 +31,10 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
-                Route::any('interac-transfers/callback', [InteracTransferController::class, 'callback'])->name('interac-transfers.callback');
+                Route::any('interac-transfers/callback', function (Request $request) {
+                    logger("Interact Log", $request->all());
+                })->name('interac-transfers.callback');
 
-                Route::apiResource('interac-transfers', InteracTransferController::class)
-                    ->only(['index', 'store', 'show']);
 
                 Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
                     ->name('deposits.reject');
