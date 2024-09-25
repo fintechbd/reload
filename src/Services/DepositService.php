@@ -145,8 +145,10 @@ class DepositService
             'timestamp' => now(),
         ];
 
-        return DB::transaction(function () use ($inputs) {
-            $deposit = $this->depositRepository->create($inputs);
+        DB::beginTransaction();
+
+        if ($deposit = $this->depositRepository->create($inputs)) {
+            DB::commit();
             if ($inputs['order_data']['order_type'] == 'interac_e_transfer') {
                 InteracTransferReceived::dispatch($deposit);
             } elseif ($inputs['order_data']['order_type'] == 'card_deposit') {
@@ -156,9 +158,12 @@ class DepositService
             }
 
             return $deposit;
-        });
+        }
+
+        DB::rollBack();
 
         return null;
+
     }
 
     public function accept($deposit): array
