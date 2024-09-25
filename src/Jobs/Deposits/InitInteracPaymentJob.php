@@ -20,6 +20,13 @@ class InitInteracPaymentJob implements ShouldQueue
     public $tries = 1;
 
     /**
+     * The time (seconds) before the job should be processed.
+     *
+     * @var int
+     */
+    public $delay = 3;
+
+    /**
      * Handle the event.
      */
     public function handle(InteracTransferReceived $event): void
@@ -36,5 +43,13 @@ class InitInteracPaymentJob implements ShouldQueue
             'status' => OrderStatus::AdminVerification->value,
             'note' => $exception->getMessage(),
         ]);
+    }
+
+    /**
+     * Determine whether the listener should be queued.
+     */
+    public function shouldQueue(InteracTransferReceived $event): bool
+    {
+        return true;
     }
 }

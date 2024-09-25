@@ -43,7 +43,7 @@ class AssignVendorService
     /**
      * @param  BaseModel  $deposit
      *
-     * @throws UpdateOperationException|VendorNotFoundException
+     * @throws VendorNotFoundException|ErrorException
      */
     public function initPayment($deposit)
     {
@@ -74,6 +74,7 @@ class AssignVendorService
                 'timestamp' => now(),
             ];
         } else {
+            $data['status'] = OrderStatus::Processing->value;
             $data['timeline'][] = [
                 'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve ".ucwords(strtolower($service->service_name)).' payment request.',
                 'flag' => 'info',
