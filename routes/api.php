@@ -31,10 +31,6 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('deposits', DepositController::class)
                     ->only(['index', 'store', 'show']);
 
-                Route::any('interac-transfers/callback', function (Request $request) {
-                    logger('Interact Log', $request->all());
-                })->name('interac-transfers.callback');
-
                 Route::post('deposits/{deposit}/reject', [DepositController::class, 'reject'])
                     ->name('deposits.reject');
 
@@ -85,4 +81,8 @@ if (Config::get('fintech.reload.enabled')) {
                 });
             });
     });
+
+    Route::any('api/reload/interac-transfers/callback', function (Request $request) {
+        logger()->info('Interact Log', $request->all());
+    })->name('interac-transfers.callback');
 }
