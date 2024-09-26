@@ -78,11 +78,13 @@ class DepositService
      */
     public function create(array $inputs = []): ?BaseModel
     {
-        $depositUser = Auth::user()->find($inputs['user_id']);
+        $depositor = Auth::user()->find($inputs['user_id']);
 
-        if (! $depositUser) {
+        if (! $depositor) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
+
+        $role = $depositor->roles?->first() ?? null;
 
         if (! empty($inputs['order_data']['interac_email'])) {
             $inputs['order_data']['order_type'] = OrderType::InteracDeposit;
@@ -95,9 +97,9 @@ class DepositService
             $inputs['status'] = DepositStatus::Processing;
         }
 
-        $inputs['source_country_id'] = $inputs['source_country_id'] ?? $depositUser->profile?->present_country_id;
+        $inputs['source_country_id'] = $inputs['source_country_id'] ?? $depositor->profile?->present_country_id;
 
-        $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $depositUser->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $inputs['source_country_id']]);
 
         if (! $depositAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
@@ -120,12 +122,14 @@ class DepositService
         $inputs['risk'] = RiskProfile::Low;
         $inputs['converted_amount'] = $inputs['amount'];
         $inputs['converted_currency'] = $inputs['currency'];
-        $inputs['order_data']['created_by'] = $depositUser->name ?? 'N/A';
-        $inputs['order_data']['created_by_mobile_number'] = $depositUser->mobile ?? 'N/A';
-        $inputs['order_data']['created_by_email'] = $depositUser->email ?? 'N/A';
+        $inputs['order_data']['created_by'] = $depositor->name ?? 'N/A';
+        $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile ?? 'N/A';
+        $inputs['order_data']['created_by_email'] = $depositor->email ?? 'N/A';
         $inputs['order_data']['created_at'] = now();
-        $inputs['order_data']['current_amount'] = ($depositAccount->user_account_data['available_amount'] ?? 0) + $inputs['amount'];
         $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
+        $serviceCost = Business::serviceStat()->cost([...$inputs, 'role_id' => $role->getKey(), 'reload' => true]);
+        $inputs['order_data']['current_amount'] = ($depositAccount->user_account_data['available_amount'] ?? 0) + $serviceCost['total_amount'];
+
         $inputs['order_data']['master_user_name'] = $masterUser->name;
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
