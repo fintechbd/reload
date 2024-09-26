@@ -203,6 +203,7 @@ class DepositService
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
         $deposit->notes = 'Point purchases by '.$master_user_name;
         $timeline[] = ['message' => '(System) Step 1: Balance '.\currency($deposit->converted_amount, $deposit->converted_currency).' purchases by system user ('.$master_user_name.').', 'flag' => 'info', 'timestamp' => now()];
+
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -220,8 +221,8 @@ class DepositService
         $timeline[] = ['message' => '(System) Step 2: Balance '.\currency($deposit->converted_amount, $deposit->converted_currency).' sold to depositor ('.$user_name.').', 'flag' => 'info', 'timestamp' => now()];
 
         //For Charge
-        $deposit->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $deposit->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+        $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $deposit->order_detail_cause_name = 'charge';
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $deposit->notes = 'Deposit Charge Sending to '.$master_user_name;
@@ -232,19 +233,21 @@ class DepositService
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $deposit->user_id;
-        $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
-        $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
         $orderDetailStoreForChargeForMaster->notes = 'Deposit Charge Receiving from '.$user_name;
         $timeline[] = ['message' => '(System) Step 4: Deposit Charge '.\currency($serviceStatData['charge_amount'], $deposit->converted_currency).' received from depositor ('.$user_name.').', 'flag' => 'info', 'timestamp' => now()];
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        $deposit->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        //For Discount
+        $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+        $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
         $deposit->notes = 'Deposit Discount form '.$master_user_name;
         $timeline[] = ['message' => '(System) Step 5: Deposit Discount '.\currency($serviceStatData['discount_amount'], $deposit->converted_currency).' received from system user ('.$master_user_name.').', 'flag' => 'info', 'timestamp' => now()];
+
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -252,11 +255,12 @@ class DepositService
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $deposit->user_id;
-        $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
         $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to '.$user_name;
         $timeline[] = ['message' => '(System) Step 6: Deposit Discount '.\currency($serviceStatData['discount_amount'], $deposit->converted_currency).' sent to depositor ('.$user_name.').', 'flag' => 'info', 'timestamp' => now()];
+
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
