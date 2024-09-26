@@ -25,7 +25,7 @@ class CardDepositReceived implements ShouldDispatchAfterCommit
         $service = Business::service()->find($cardDeposit->service_id);
 
         $timeline[] = [
-            'message' => ucwords(strtolower($service->service_name)) . ' card deposit received',
+            'message' => ucwords(strtolower($service->service_name)).' card deposit received',
             'flag' => 'info',
             'timestamp' => now(),
         ];

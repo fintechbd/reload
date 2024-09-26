@@ -6,7 +6,6 @@ use ErrorException;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Reload\Contracts\InstantDeposit;
 use Fintech\Remit\Exceptions\RemitException;
