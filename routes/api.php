@@ -1,5 +1,6 @@
 <?php
 
+use Fintech\Reload\Http\Controllers\Callback\InteracTransferController;
 use Fintech\RestApi\Http\Controllers\Reload\Charts\DepositPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\Charts\WithdrawPartnerController;
 use Fintech\RestApi\Http\Controllers\Reload\CurrencySwapController;
@@ -9,7 +10,6 @@ use Fintech\RestApi\Http\Controllers\Reload\WalletToAtmController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToBankController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToPrepaidCardController;
 use Fintech\RestApi\Http\Controllers\Reload\WalletToWalletController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -82,7 +82,6 @@ if (Config::get('fintech.reload.enabled')) {
             });
     });
 
-    Route::any('api/reload/interac-transfers/callback', function (Request $request) {
-        logger()->info('Interact Log', $request->all());
-    })->name('interac-transfers.callback');
+    Route::any('api/reload/interac-transfers/callback', InteracTransferController::class)
+        ->name('interac-transfers.callback');
 }
