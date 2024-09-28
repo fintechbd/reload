@@ -16,6 +16,7 @@ use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\MetaData\Facades\MetaData;
 use Fintech\Reload\Events\BankDepositReceived;
 use Fintech\Reload\Events\CardDepositReceived;
@@ -153,6 +154,7 @@ class DepositService
         $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
         $inputs['order_data']['current_amount'] = $inputs['order_data']['previous_amount'] + $inputs['order_data']['service_stat_data']['total_amount'];
         $inputs['order_data']['master_user_name'] = $masterUser->name;
+        $inputs['order_data']['user_name'] = $depositor->name;
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
 
@@ -224,7 +226,7 @@ class DepositService
             'service_id' => $depositArray['service_id'],
         ]);
         $depositArray['order_data']['service_stat_data'] = $serviceStatData;
-        $depositArray['order_data']['user_name'] = $depositor->name;
+        $depositArray['order_data']['user_name'] = $depositor->name ?? 'N/A';
         $depositArray['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
         $depositArray['order_data']['current_amount'] = ($depositArray['order_data']['previous_amount'] + $serviceStatData['total_amount']);
 
@@ -238,12 +240,15 @@ class DepositService
                 'user_id' => $deposit->user_id,
                 'converted_currency' => $deposit->converted_currency,
             ]);
-            $this->depositAcceptDetailEntries($deposit, $depositArray['timeline']);
+
+            $this->depositAcceptDetailEntries($deposit, $depositArray);
+
             $userBalanceData['current_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
                 'user_id' => $deposit->user_id,
                 'converted_currency' => $deposit->converted_currency,
             ]);
+
             $userBalanceData['deposit_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
                 'user_id' => $deposit->user_id,
@@ -268,8 +273,7 @@ class DepositService
 
             if (!Transaction::userAccount()->update($depositedAccount->getKey(), ['user_account_data' => $depositedAccountData])
                 || !$this->depositRepository->update($deposit->getKey(), $depositArray)) {
-                throw new Exception(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label(),
-                ]));
+                throw new UpdateOperationException(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
 
             DB::commit();
@@ -289,21 +293,22 @@ class DepositService
         }
     }
 
-    private function depositAcceptDetailEntries(BaseModel $deposit, array &$timeline, array &$serviceStatData): void
+    private function depositAcceptDetailEntries(BaseModel $deposit, array &$depositArray): void
     {
-        /************************************ Start Order Detail Ledger Entries ****************************************/
+        $serviceStatData = $depositArray['order_data']['service_stat_data'];
 
-        $master_user_name = $deposit->order_data['master_user_name'];
-        $user_name = $deposit->order_data['user_name'];
+        //For Balance
+        $master_user_name = $depositArray['order_data']['master_user_name'];
+        $user_name = $depositArray['order_data']['user_name'];
         $deposit->order_detail_cause_name = 'cash_deposit';
-        $deposit->order_detail_number = $deposit->order_data['accepted_number'];
-        $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
+        $deposit->order_detail_number = $depositArray['order_data']['accepted_number'];
+        $deposit->order_detail_response_id = $depositArray['order_data']['purchase_number'];
         $deposit->notes = 'Point purchases by ' . $master_user_name;
         $timeline[] = ['message' => '(System) Step 1: Balance ' . \currency($deposit->converted_amount, $deposit->converted_currency) . ' purchases by system user (' . $master_user_name . ').', 'flag' => 'info', 'timestamp' => now()];
-
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
+
         $orderDetailStore->refresh();
         $amount = $deposit->amount;
         $converted_amount = $deposit->converted_amount;
@@ -339,32 +344,30 @@ class DepositService
         $orderDetailStoreForChargeForMaster->save();
 
         //For Discount
-        $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        $deposit->order_detail_cause_name = 'discount';
-        $deposit->notes = 'Deposit Discount form ' . $master_user_name;
-        $timeline[] = ['message' => '(System) Step 5: Deposit Discount ' . \currency($serviceStatData['discount_amount'], $deposit->converted_currency) . ' received from system user (' . $master_user_name . ').', 'flag' => 'info', 'timestamp' => now()];
+        if (calculate_flat_percent($amount, $serviceStatData['discount']) > 0) {
+            $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+            $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+            $deposit->order_detail_cause_name = 'discount';
+            $deposit->notes = 'Deposit Discount form ' . $master_user_name;
+            $timeline[] = ['message' => '(System) Step 5: Deposit Discount ' . \currency($serviceStatData['discount_amount'], $deposit->converted_currency) . ' received from system user (' . $master_user_name . ').', 'flag' => 'info', 'timestamp' => now()];
+            $deposit->step = 5;
+            //$data->order_detail_parent_id = $orderDetailStore->getKey();
+            //$updateData['order_data']['previous_amount'] = 0;
+            $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
+            $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+            $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
+            $orderDetailStoreForDiscountForMaster->sender_receiver_id = $deposit->user_id;
+            $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+            $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+            $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
+            $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to ' . $user_name;
+            $timeline[] = ['message' => '(System) Step 6: Deposit Discount ' . \currency($serviceStatData['discount_amount'], $deposit->converted_currency) . ' sent to depositor (' . $user_name . ').', 'flag' => 'info', 'timestamp' => now()];
 
-        $deposit->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
-        $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
-        $orderDetailStoreForDiscountForMaster->sender_receiver_id = $deposit->user_id;
-        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Deposit Discount to ' . $user_name;
-        $timeline[] = ['message' => '(System) Step 6: Deposit Discount ' . \currency($serviceStatData['discount_amount'], $deposit->converted_currency) . ' sent to depositor (' . $user_name . ').', 'flag' => 'info', 'timestamp' => now()];
+            $orderDetailStoreForDiscountForMaster->step = 6;
+            $orderDetailStoreForDiscountForMaster->save();
+        }
 
-        $orderDetailStoreForDiscountForMaster->step = 6;
-        $orderDetailStoreForDiscountForMaster->save();
-
-        //@TODO Commission
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
-        /************************************ End Order Detail Ledger Entries ****************************************/
+        array_push($depositArray['timeline'], ...$timeline);
     }
 
     public function cancel($data): array
