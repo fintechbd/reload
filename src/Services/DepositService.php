@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Services;
 
+use Exception;
 use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Exceptions\BusinessException;
 use Fintech\Business\Facades\Business;
@@ -83,7 +84,7 @@ class DepositService
      * @throws RequestAmountExistsException
      * @throws \Exception
      */
-    public function create(array $inputs = []): ?BaseModel
+    public function create(array $inputs = []): BaseModel
     {
         if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
             throw new RequestOrderExistsException;
@@ -169,7 +170,9 @@ class DepositService
 
         DB::beginTransaction();
 
-        if ($deposit = $this->depositRepository->create($inputs)) {
+        try {
+
+            $deposit = $this->depositRepository->create($inputs);
 
             DB::commit();
 
@@ -180,27 +183,23 @@ class DepositService
             } else {
                 BankDepositReceived::dispatch($deposit);
             }
-
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-
             return $deposit;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            throw $e;
         }
-
-        DB::rollBack();
-
-        Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-
-        return null;
-
     }
 
     /**
      * @throws BusinessException
      * @throws RequestOrderExistsException
+     * @throws \Exception
      */
-    public function accept(BaseModel $deposit, array $inputs = []): array
+    public function accept(BaseModel $deposit, array $inputs = []): BaseModel
     {
-        if (Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey()) == 0) {
+        if (Transaction::orderQueue()->addToQueueOrderWise($deposit->getKey()) == 0) {
             throw new RequestOrderExistsException;
         }
 
@@ -208,66 +207,94 @@ class DepositService
 
         $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $deposit->destination_country_id]);
 
-        $approver = $request->user('sanctum');
-
-        $updateData = $deposit->toArray();
-        $updateData['status'] = DepositStatus::Accepted->value;
-        $updateData['order_data']['accepted_by'] = $approver->name;
-        $updateData['order_data']['accepted_at'] = now();
-        $updateData['order_data']['accepted_number'] = entry_number($updateData['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
-        $updateData['order_number'] = entry_number($updateData['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
-        $updateData['order_data']['accepted_by_mobile_number'] = $approver->mobile;
+        $depositArray = $deposit->toArray();
+        $depositArray['status'] = DepositStatus::Accepted->value;
+        $depositArray['order_data']['accepted_by'] = $inputs['approver']?->name ?? 'System';
+        $depositArray['order_data']['accepted_by_mobile_number'] = $inputs['approver']?->mobile ?? 'N/A';
+        $depositArray['order_data']['accepted_at'] = now();
+        $depositArray['order_data']['accepted_number'] = entry_number($depositArray['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
+        $depositArray['order_number'] = entry_number($depositArray['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
         $serviceStatData = Business::serviceStat()->serviceStateData([
-            'role_id' => $updateData['order_data']['role_id'],
-            'reload' => $updateData['order_data']['is_reload'],
-            'reverse' => $updateData['order_data']['is_reverse'],
-            'source_country_id' => $updateData['source_country_id'],
-            'destination_country_id' => $updateData['destination_country_id'],
-            'amount' => $updateData['amount'],
-            'service_id' => $updateData['service_id'],
+            'role_id' => $depositArray['order_data']['role_id'],
+            'reload' => $depositArray['order_data']['is_reload'],
+            'reverse' => $depositArray['order_data']['is_reverse'],
+            'source_country_id' => $depositArray['source_country_id'],
+            'destination_country_id' => $depositArray['destination_country_id'],
+            'amount' => $depositArray['amount'],
+            'service_id' => $depositArray['service_id'],
         ]);
-        $updateData['order_data']['service_stat_data'] = $serviceStatData;
-        $updateData['order_data']['user_name'] = $depositor->name;
-
-        $updateData['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
-        $updateData['order_data']['current_amount'] = ($updateData['order_data']['previous_amount'] + $serviceStatData['total_amount']);
-
-        $service = Business::service()->find($updateData['service_id']);
-
-        $updateData['timeline'][] = [
-            'message' => ucwords(strtolower($service->service_name)) . " deposit manually accepted by ({$approver->name}).",
-            'flag' => 'success',
-            'timestamp' => now(),
-        ];
-
-        if (!Reload::deposit()->update($deposit->getKey(), $updateData)) {
-            throw new Exception(__('reload::messages.status_change_failed', [
-                'current_status' => $deposit->status->label(),
-                'target_status' => DepositStatus::Accepted->label(),
-            ]));
-        }
-
-        $transactionOrder = Reload::deposit()->find($deposit->getKey());
-
-        $userAccountData = [
-            'previous_amount' => null,
-            'current_amount' => null,
-            'deposit_amount' => null,
-        ];
-
-        $timeline = $deposit->timeline;
+        $depositArray['order_data']['service_stat_data'] = $serviceStatData;
+        $depositArray['order_data']['user_name'] = $depositor->name;
+        $depositArray['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
+        $depositArray['order_data']['current_amount'] = ($depositArray['order_data']['previous_amount'] + $serviceStatData['total_amount']);
 
         //Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $deposit->user_id,
-            'converted_currency' => $deposit->converted_currency,
-        ]);
+        DB::beginTransaction();
 
-        $serviceStatData = $deposit->order_data['service_stat_data'];
+        try {
+
+            $userBalanceData['previous_amount'] = Transaction::orderDetail([
+                'get_order_detail_amount_sum' => true,
+                'user_id' => $deposit->user_id,
+                'converted_currency' => $deposit->converted_currency,
+            ]);
+            $this->depositAcceptDetailEntries($deposit, $depositArray['timeline']);
+            $userBalanceData['current_amount'] = Transaction::orderDetail([
+                'get_order_detail_amount_sum' => true,
+                'user_id' => $deposit->user_id,
+                'converted_currency' => $deposit->converted_currency,
+            ]);
+            $userBalanceData['deposit_amount'] = Transaction::orderDetail([
+                'get_order_detail_amount_sum' => true,
+                'user_id' => $deposit->user_id,
+                'order_id' => $deposit->getKey(),
+                'converted_currency' => $deposit->converted_currency,
+            ]);
+
+            $depositedAccountData = $depositedAccount->user_account_data;
+            $depositedAccountData['deposit_amount'] = (float)$depositedAccountData['deposit_amount'] + (float)$userBalanceData['deposit_amount'];
+            $depositedAccountData['available_amount'] = (float)$userBalanceData['current_amount'];
+
+            $service = Business::service()->find($depositArray['service_id']);
+            $message = isset($inputs['approver'])
+                ? ucwords(strtolower($service->service_name)) . " deposit manually accepted by ({$depositArray['order_data']['accepted_by']})."
+                : ucwords(strtolower($service->service_name)) . " deposit automatically accepted by system.";
+
+            $depositArray['timeline'][] = [
+                'message' => $message,
+                'flag' => 'success',
+                'timestamp' => now(),
+            ];
+
+            if (!Transaction::userAccount()->update($depositedAccount->getKey(), ['user_account_data' => $depositedAccountData])
+                || !$this->depositRepository->update($deposit->getKey(), $depositArray)) {
+                throw new Exception(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label(),
+                ]));
+            }
+
+            DB::commit();
+
+            Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
+
+            $deposit->refresh();
+
+            DepositAccepted::dispatch($deposit);
+
+            return $deposit;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
+            throw $e;
+        }
+    }
+
+    private function depositAcceptDetailEntries(BaseModel $deposit, array &$timeline, array &$serviceStatData): void
+    {
+        /************************************ Start Order Detail Ledger Entries ****************************************/
+
         $master_user_name = $deposit->order_data['master_user_name'];
         $user_name = $deposit->order_data['user_name'];
-
         $deposit->order_detail_cause_name = 'cash_deposit';
         $deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
@@ -277,7 +304,7 @@ class DepositService
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
-        $orderDetailStore->fresh();
+        $orderDetailStore->refresh();
         $amount = $deposit->amount;
         $converted_amount = $deposit->converted_amount;
         $orderDetailStoreForMaster = $orderDetailStore->replicate();
@@ -334,44 +361,10 @@ class DepositService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $deposit->user_id,
-            'converted_currency' => $deposit->converted_currency,
-        ]);
-
-        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $deposit->user_id,
-            'order_id' => $deposit->getKey(),
-            'converted_currency' => $deposit->converted_currency,
-        ]);
         //@TODO Commission
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
-
-        $this->depositRepository->update($deposit->getKey(), ['timeline' => $timeline]);
-
-        return $userAccountData;
-
-        $userUpdatedBalance = Reload::deposit()->accept($transactionOrder);
-
-        //update User Account
-        $depositedUpdatedAccount = $depositedAccount->toArray();
-        $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float)$depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float)$userUpdatedBalance['deposit_amount'];
-        $depositedUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
-
-        if (!Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
-            throw new Exception(__('reload::messages.status_change_failed', [
-                'current_status' => $deposit->status->label(),
-                'target_status' => DepositStatus::Accepted->label(),
-            ]));
-        }
-
-        Transaction::orderQueue()->removeFromQueueOrderWise($id);
-
-        event(new DepositAccepted($deposit));
-
+        /************************************ End Order Detail Ledger Entries ****************************************/
     }
 
     public function cancel($data): array
