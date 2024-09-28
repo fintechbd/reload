@@ -15,21 +15,15 @@ class InteracTransferController extends Controller
         logger("Interaction Transfer Log, Method: {$request->method()}", $request->all());
 
         match ($request->input('Event.PaymentSuccessful')) {
-            "PaymentLinkSuccessful" => $this->paymentLinkSentEvent($request),
-            "PaymentSuccessful" => $this->paymentExecuted($request),
+            'PaymentLinkSuccessful' => $this->paymentLinkSentEvent($request),
+            'PaymentSuccessful' => $this->paymentExecuted($request),
             default => logger("Interaction Transfer Unknown Event: {$request->input('Event.PaymentSuccessful')}", $request->all()),
         };
 
         return response()->json();
     }
 
-    private function paymentLinkSentEvent(Request $request)
-    {
+    private function paymentLinkSentEvent(Request $request) {}
 
-    }
-
-    private function paymentExecuted(Request $request)
-    {
-
-    }
+    private function paymentExecuted(Request $request) {}
 }
