@@ -23,5 +23,4 @@ class DepositAccepted
     {
         $this->deposit = $deposit;
     }
-
 }
