@@ -14,6 +14,7 @@ use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
+use Fintech\Core\Exceptions\Transaction\OrderRequestFailedException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\Core\Exceptions\UpdateOperationException;
@@ -84,14 +85,14 @@ class DepositService
      */
     public function create(array $inputs = []): BaseModel
     {
-        if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
-            throw new RequestOrderExistsException;
-        }
-
         $depositor = Auth::user()->find($inputs['user_id']);
 
         if (! $depositor) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
+        }
+
+        if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
+            throw new RequestOrderExistsException;
         }
 
         if (! empty($inputs['order_data']['interac_email'])) {
@@ -155,11 +156,10 @@ class DepositService
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
 
-        if ($service = Business::service()->find($inputs['service_id'])) {
+        $service = Business::service()->find($inputs['service_id']);
             $vendor = $service->serviceVendor;
             $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
             $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
-        }
 
         $inputs['timeline'][] = [
             'message' => 'Bank Transfer entry created successfully',
@@ -172,7 +172,6 @@ class DepositService
         try {
 
             $deposit = $this->depositRepository->create($inputs);
-
             DB::commit();
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
@@ -187,7 +186,7 @@ class DepositService
         } catch (Exception $e) {
             DB::rollBack();
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-            throw $e;
+            throw new OrderRequestFailedException($inputs['order_data']['order_type']->value, 0, $e);
         }
     }
 
