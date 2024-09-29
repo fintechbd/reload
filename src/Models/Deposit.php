@@ -25,7 +25,7 @@ class Deposit extends Order implements HasMedia
         'restored_at' => 'datetime',
         'enabled' => 'bool',
         'risk_profile' => RiskProfile::class,
-        'status' => DepositStatus::class,
+        'status' => OrderStatus::class,
     ];
 
     /*
