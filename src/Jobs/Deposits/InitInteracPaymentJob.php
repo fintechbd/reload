@@ -4,10 +4,12 @@ namespace Fintech\Reload\Jobs\Deposits;
 
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 
-class InitInteracPaymentJob implements \Illuminate\Contracts\Queue\ShouldQueue
+class InitInteracPaymentJob implements ShouldQueue
 {
-    use \Illuminate\Queue\InteractsWithQueue;
+    use InteractsWithQueue;
 
     /**
      * The number of times the queued listener may be attempted.
@@ -21,6 +23,7 @@ class InitInteracPaymentJob implements \Illuminate\Contracts\Queue\ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
+        logger("Job start");
         Reload::assignVendor()->initPayment($event->deposit);
     }
 

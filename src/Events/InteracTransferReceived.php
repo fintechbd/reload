@@ -12,7 +12,7 @@ class InteracTransferReceived
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public ?BaseModel $deposit;
+    public $deposit;
 
     /**
      * Create a new event instance.

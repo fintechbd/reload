@@ -10,6 +10,7 @@ use Fintech\Reload\Events\DepositCancelled;
 use Fintech\Reload\Events\DepositRejected;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Events\WalletTransferred;
+use Fintech\Reload\Jobs\Deposits\InitInteracPaymentJob;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -30,7 +31,7 @@ class EventServiceProvider extends ServiceProvider
 
         ],
         InteracTransferReceived::class => [
-            \Fintech\Reload\Jobs\Deposits\InitInteracPaymentJob::class,
+            InitInteracPaymentJob::class,
         ],
 
         DepositRejected::class => [
