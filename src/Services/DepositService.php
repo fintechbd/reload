@@ -157,9 +157,9 @@ class DepositService
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
 
         $service = Business::service()->find($inputs['service_id']);
-            $vendor = $service->serviceVendor;
-            $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
-            $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
+        $vendor = $service->serviceVendor;
+        $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
+        $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
 
         $inputs['timeline'][] = [
             'message' => 'Bank Transfer entry created successfully',
