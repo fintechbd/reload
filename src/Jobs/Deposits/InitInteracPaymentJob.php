@@ -23,7 +23,7 @@ class InitInteracPaymentJob implements ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
-        logger("Job start");
+        logger('Job start');
         Reload::assignVendor()->initPayment($event->deposit);
     }
 

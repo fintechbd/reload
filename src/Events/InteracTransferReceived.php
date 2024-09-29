@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Events;
 
-use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
