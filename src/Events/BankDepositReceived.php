@@ -5,11 +5,10 @@ namespace Fintech\Reload\Events;
 use Fintech\Business\Facades\Business;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class BankDepositReceived implements ShouldDispatchAfterCommit
+class BankDepositReceived
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

@@ -2,15 +2,13 @@
 
 namespace Fintech\Reload\Jobs\Deposits;
 
-use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
-class InitInteracPaymentJob implements ShouldQueue
+
+class InitInteracPaymentJob implements \Illuminate\Contracts\Queue\ShouldQueue
 {
-    use InteractsWithQueue;
+    use \Illuminate\Queue\InteractsWithQueue;
 
     /**
      * The number of times the queued listener may be attempted.
@@ -18,13 +16,6 @@ class InitInteracPaymentJob implements ShouldQueue
      * @var int
      */
     public $tries = 1;
-
-    /**
-     * The time (seconds) before the job should be processed.
-     *
-     * @var int
-     */
-    public $delay = 3;
 
     /**
      * Handle the event.
@@ -40,7 +31,7 @@ class InitInteracPaymentJob implements ShouldQueue
     public function failed(InteracTransferReceived $event, \Throwable $exception): void
     {
         Reload::deposit()->update($event->deposit->getKey(), [
-            'status' => OrderStatus::AdminVerification->value,
+            'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'note' => $exception->getMessage(),
         ]);
     }

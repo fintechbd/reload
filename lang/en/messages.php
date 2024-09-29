@@ -21,6 +21,6 @@ return [
         'status_change_failed' => 'Failed to change from :current_status to :target_status status.',
         'status_change_success' => 'Deposit moved to :status status successfully.',
         'failed' => 'Your transaction for Bank Deposit Request is Failed',
-        'created' => 'Your transaction for Bank Deposit Request is Successfully Submitted',
+        'created' => 'Your transaction for :service Request is Successfully Submitted',
     ],
 ];
