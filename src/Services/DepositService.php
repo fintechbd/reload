@@ -234,7 +234,7 @@ class DepositService
             $userBalanceData['previous_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
                 'user_id' => $deposit->user_id,
-                'converted_currency' => $deposit->converted_currency,
+                'order_detail_currency' => $deposit->currency,
             ]);
 
             $this->depositAcceptDetailEntries($deposit, $depositArray);
@@ -242,14 +242,14 @@ class DepositService
             $userBalanceData['current_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
                 'user_id' => $deposit->user_id,
-                'converted_currency' => $deposit->converted_currency,
+                'order_detail_currency' => $deposit->currency,
             ]);
 
             $userBalanceData['deposit_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
                 'user_id' => $deposit->user_id,
                 'order_id' => $deposit->getKey(),
-                'converted_currency' => $deposit->converted_currency,
+                'order_detail_currency' => $deposit->currency,
             ]);
 
             $depositedAccountData = $depositedAccount->user_account_data;
