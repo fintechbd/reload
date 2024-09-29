@@ -5,7 +5,6 @@ namespace Fintech\Reload\Jobs\Deposits;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
 
-
 class InitInteracPaymentJob implements \Illuminate\Contracts\Queue\ShouldQueue
 {
     use \Illuminate\Queue\InteractsWithQueue;

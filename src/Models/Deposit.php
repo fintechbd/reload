@@ -3,7 +3,6 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Core\Enums\Auth\RiskProfile;
-use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Transaction\Models\Order;
 use Spatie\MediaLibrary\HasMedia;
