@@ -80,7 +80,7 @@ class LeatherBack implements InstantDeposit
                 ->message($response['value']['message'] ?? '')
                 ->charge($response['value']['paymentItem']['fees'] ?? 0)
                 ->ref_number($response['value']['paymentItem']['paymentReference'] ?? '')
-                ->orderTimeline('(Leather Back) responded with '.strtolower($verdict->message).'.', 'success');
+                ->orderTimeline('(Leather Back) responded with '.strtolower($verdict->message).'.');
         }
 
         $verdict->status(false)->original($response);
