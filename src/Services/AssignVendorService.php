@@ -61,7 +61,7 @@ class AssignVendorService
         $verdict = $this->serviceVendorDriver->initPayment($deposit);
 
         $data['timeline'][] = $verdict->timeline;
-        $data['note'] = $verdict->message;
+        $data['notes'] = $verdict->message;
         $data['order_data'] = $deposit->order_data;
         $data['order_data']['vendor_data'] = $verdict->toArray();
 

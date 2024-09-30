@@ -23,7 +23,6 @@ class InitInteracPaymentJob implements ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
-        logger('Job start');
         Reload::assignVendor()->initPayment($event->deposit);
     }
 
@@ -34,7 +33,7 @@ class InitInteracPaymentJob implements ShouldQueue
     {
         Reload::deposit()->update($event->deposit->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
-            'note' => $exception->getMessage(),
+            'notes' => $exception->getMessage(),
         ]);
     }
 }
