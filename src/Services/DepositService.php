@@ -237,7 +237,7 @@ class DepositService
                 'order_detail_currency' => $deposit->currency,
             ]);
 
-            $this->depositAcceptDetailEntries($deposit, $depositArray);
+            $this->debitTransaction($deposit, $depositArray);
 
             $userBalanceData['current_amount'] = Transaction::orderDetail([
                 'get_order_detail_amount_sum' => true,
@@ -289,7 +289,7 @@ class DepositService
         }
     }
 
-    private function depositAcceptDetailEntries(BaseModel $deposit, array &$depositArray): void
+    private function debitTransaction(BaseModel $deposit, array &$depositArray): void
     {
         $serviceStatData = $depositArray['order_data']['service_stat_data'];
 
