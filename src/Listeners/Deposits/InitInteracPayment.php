@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Reload\Jobs\Deposits;
+namespace Fintech\Reload\Listeners\Deposits;
 
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
