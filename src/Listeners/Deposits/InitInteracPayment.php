@@ -7,7 +7,7 @@ use Fintech\Reload\Facades\Reload;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class InitInteracPaymentJob implements ShouldQueue
+class InitInteracPayment implements ShouldQueue
 {
     use InteractsWithQueue;
 
