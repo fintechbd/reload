@@ -82,6 +82,6 @@ if (Config::get('fintech.reload.enabled')) {
             });
     });
 
-    Route::any('api/reload/interac-transfers/callback', InteracTransferController::class)
+    Route::post('api/reload/interac-transfers/callback', InteracTransferController::class)
         ->name('reload.interac-transfers.callback');
 }
