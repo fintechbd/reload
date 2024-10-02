@@ -69,7 +69,7 @@ class AssignVendorService
             $data['status'] = OrderStatus::AdminVerification->value;
             $data['timeline'][] = [
                 'message' => "Updating {$service->service_name} payment request status. Requires ".OrderStatus::AdminVerification->label().' confirmation',
-                'flag' => 'error',
+                'flag' => 'warn',
                 'timestamp' => now(),
             ];
         } else {
