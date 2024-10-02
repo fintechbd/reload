@@ -98,12 +98,15 @@ class DepositService
         if (! empty($inputs['order_data']['interac_email'])) {
             $inputs['order_data']['order_type'] = OrderType::InteracDeposit;
             $inputs['status'] = DepositStatus::Pending;
+            $inputs['description'] = 'Interac e-Transfer Deposit';
         } elseif (! empty($inputs['order_data']['card_token'])) {
             $inputs['order_data']['order_type'] = OrderType::CardDeposit;
             $inputs['status'] = DepositStatus::Pending;
+            $inputs['description'] = 'Card Deposit';
         } else {
             $inputs['order_data']['order_type'] = OrderType::BankDeposit;
             $inputs['status'] = DepositStatus::Processing;
+            $inputs['description'] = 'Bank Deposit';
         }
 
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $depositor->profile?->present_country_id;
