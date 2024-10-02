@@ -285,8 +285,7 @@ class DepositService
 
             return $deposit;
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
             throw $e;
