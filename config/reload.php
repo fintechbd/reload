@@ -42,7 +42,7 @@ return [
 
     'providers' => [
         'leatherback' => [
-            'mode' => 'sandbox',
+            'mode' => env('PACKAGE_RELOAD_LEATHER_BACK_MODE', 'sandbox'),
             'driver' => Fintech\Reload\Vendors\LeatherBack::class,
             'live' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
