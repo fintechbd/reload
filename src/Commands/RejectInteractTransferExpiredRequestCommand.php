@@ -4,7 +4,6 @@ namespace Fintech\Reload\Commands;
 
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Reload\DepositStatus;
-use Fintech\Core\Facades\Core;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Jobs\Deposit\InteracExpiredRequestRejectJob;
 use Illuminate\Console\Command;
@@ -22,14 +21,14 @@ class RejectInteractTransferExpiredRequestCommand extends Command
 
             $deposits = Reload::deposit()->list([
                 'service_slug' => '',
-                'status' => DepositStatus::Processing->value
+                'status' => DepositStatus::Processing->value,
             ]);
 
             foreach ($deposits as $deposit) {
                 $this->info("Deposit #{$deposit->getKey()} setting to rejected due to expiration.");
                 InteracExpiredRequestRejectJob::dispatch($deposit->getKey());
             }
-            
+
             return self::SUCCESS;
 
         } catch (Throwable $th) {

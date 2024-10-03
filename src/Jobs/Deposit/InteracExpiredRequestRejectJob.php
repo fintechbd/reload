@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Jobs\Deposit;
 
-use Fintech\Airtime\Facades\Airtime;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Bus\Queueable;
