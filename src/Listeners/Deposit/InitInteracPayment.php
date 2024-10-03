@@ -1,13 +1,13 @@
 <?php
 
-namespace Fintech\Reload\Jobs\Deposits;
+namespace Fintech\Reload\Listeners\Deposit;
 
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class InteracExpiredRequestRejectJob implements ShouldQueue
+class InitInteracPayment implements ShouldQueue
 {
     use InteractsWithQueue;
 

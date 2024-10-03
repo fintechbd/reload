@@ -19,6 +19,7 @@ class LeatherBackSetupCommand extends Command
 
             if (Core::packageExists('Business')) {
                 $this->addServiceVendor();
+                $this->addSchedulerTasks();
             } else {
                 $this->info('`fintech/business` is not installed. Skipped');
             }
@@ -54,5 +55,33 @@ class LeatherBackSetupCommand extends Command
             Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
+    }
+
+    private function addSchedulerTasks()
+    {
+        $tasks = [
+            [
+                'name' => 'Reject Expired Scheduled Requests',
+                'description' => 'This schedule program will reject all the old interact requests that is still in processing.',
+                'command' => 'reload:reject-transfer-expired-request',
+                'enabled' => false,
+                'timezone' => 'Asia/Dhaka',
+                'interval' => '0 0 * * *',
+                'priority' => 10,
+            ],
+        ];
+
+        $this->task('Register schedule tasks', function () use (&$tasks) {
+            foreach ($tasks as $task) {
+
+                $taskModel = Core::schedule()->findWhere(['command' => $task['command']]);
+
+                if ($taskModel) {
+                    continue;
+                }
+
+                Core::schedule()->create($task);
+            }
+        });
     }
 }

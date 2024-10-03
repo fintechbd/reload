@@ -1,22 +1,32 @@
 <?php
 
-namespace Fintech\Reload\Listeners\Deposits;
+namespace Fintech\Reload\Jobs\Deposit;
 
+use Fintech\Airtime\Facades\Airtime;
 use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-class InitInteracPayment implements ShouldQueue
+class InteracExpiredRequestRejectJob implements ShouldQueue
 {
-    use InteractsWithQueue;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The number of times the queued listener may be attempted.
-     *
-     * @var int
+     * @var \Fintech\Core\Abstracts\BaseModel|null
      */
-    public $tries = 1;
+    private $deposit;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct($order_id)
+    {
+        $this->deposit = Reload::deposit()->find($order_id);
+    }
 
     /**
      * Handle the event.

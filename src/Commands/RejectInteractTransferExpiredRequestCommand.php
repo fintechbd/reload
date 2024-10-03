@@ -6,6 +6,7 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Facades\Core;
 use Fintech\Reload\Facades\Reload;
+use Fintech\Reload\Jobs\Deposit\InteracExpiredRequestRejectJob;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -26,17 +27,9 @@ class RejectInteractTransferExpiredRequestCommand extends Command
 
             foreach ($deposits as $deposit) {
                 $this->info("Deposit #{$deposit->getKey()} setting to rejected due to expiration.");
-
+                InteracExpiredRequestRejectJob::dispatch($deposit->getKey());
             }
-
-            if (Core::packageExists('Business')) {
-                $this->addServiceVendor();
-            } else {
-                $this->info('`fintech/business` is not installed. Skipped');
-            }
-
-            $this->info('Leather Back reload service vendor setup completed.');
-
+            
             return self::SUCCESS;
 
         } catch (Throwable $th) {

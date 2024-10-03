@@ -30,7 +30,7 @@ class EventServiceProvider extends ServiceProvider
 
         ],
         InteracTransferReceived::class => [
-            \Fintech\Reload\Listeners\Deposits\InitInteracPayment::class,
+            \Fintech\Reload\Listeners\Deposit\InitInteracPayment::class,
         ],
 
         DepositRejected::class => [
