@@ -23,7 +23,7 @@ class BankDepositSeeder extends Seeder
             foreach ($this->data() as $entry) {
                 $entry['service_stat_data'] = [
                     'charge' => '1%',
-                    'discount' => '2%',
+                    'discount' => '0',
                     'commission' => '0',
                 ];
 

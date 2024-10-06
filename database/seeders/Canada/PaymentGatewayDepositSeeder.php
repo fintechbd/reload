@@ -45,7 +45,7 @@ class PaymentGatewayDepositSeeder extends Seeder
             'service_stat_data' => [
                 'transactional_currency' => 'CAD',
                 'charge' => '1%',
-                'discount' => '2%',
+                'discount' => '0',
                 'commission' => '0',
             ],
         ];
