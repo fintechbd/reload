@@ -44,7 +44,7 @@ class AssignVendorService
      *
      * @throws VendorNotFoundException|ErrorException
      */
-    public function initPayment($deposit): void
+    public function requestPayout($deposit): void
     {
         $data['timeline'] = $deposit->timeline ?? [];
 

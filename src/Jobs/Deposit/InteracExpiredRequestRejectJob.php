@@ -32,7 +32,7 @@ class InteracExpiredRequestRejectJob implements ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
-        Reload::assignVendor()->initPayment($event->deposit);
+        Reload::assignVendor()->requestPayout($event->deposit);
     }
 
     /**
