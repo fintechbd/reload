@@ -21,15 +21,9 @@ class LeatherBack implements InstantDeposit
     public function __construct()
     {
         $this->config = config('fintech.reload.providers.leatherback');
+        $this->status = config('fintech.reload.providers.leatherback.mode', 'sandbox');
+        $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if ($this->config['mode'] === 'sandbox') {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->status = 'sandbox';
-
-        } else {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->status = 'live';
-        }
 
         $this->client = Http::withoutVerifying()
             ->baseUrl($this->apiUrl)
@@ -80,7 +74,7 @@ class LeatherBack implements InstantDeposit
                 ->message($response['value']['message'] ?? '')
                 ->charge($response['value']['paymentItem']['fees'] ?? 0)
                 ->ref_number($response['value']['paymentItem']['paymentReference'] ?? '')
-                ->orderTimeline('(Leather Back) responded with '.strtolower($verdict->message).'.');
+                ->orderTimeline('(Leather Back) responded with ' . strtolower($verdict->message) . '.');
         }
 
         $verdict->status(false)->original($response);
@@ -88,13 +82,13 @@ class LeatherBack implements InstantDeposit
         if ($response['type'] == 'ValidationException') {
             $verdict->message = '';
             foreach ($response['failures'] as $key => $value) {
-                $verdict->message .= ($key + 1).". {$value} ";
+                $verdict->message .= ($key + 1) . ". {$value} ";
             }
         } else {
             $verdict->message = $response['title'] ?? 'Unknown error';
         }
 
-        return $verdict->orderTimeline('(Leather Back) reported error: '.strtolower($verdict->message), 'error');
+        return $verdict->orderTimeline('(Leather Back) reported error: ' . strtolower($verdict->message), 'error');
     }
 
     public function paymentStatus(BaseModel $deposit): ?BaseModel
