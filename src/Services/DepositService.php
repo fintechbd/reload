@@ -165,7 +165,7 @@ class DepositService
         $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
 
         $inputs['timeline'][] = [
-            'message' => 'Bank Transfer entry created successfully',
+            'message' => 'Fund Deposit entry created successfully',
             'flag' => 'create',
             'timestamp' => now(),
         ];
