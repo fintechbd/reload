@@ -27,11 +27,11 @@ class InteracTransferController extends Controller
 
     private function acceptTheDeposit(Request $request): void
     {
-        $deposit = Reload::deposit()->findWhere(['paginate' => false, 'order_number' => $request->input('Data.Reference')]);
+        $deposit = Reload::deposit()->findWhere(['paginate' => false, 'purchase_number' => $request->input('Data.Reference')]);
 
         try {
 
-            if (! $deposit) {
+            if (!$deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $request->input('Data.Reference'));
             }
 
@@ -44,7 +44,7 @@ class InteracTransferController extends Controller
                 }
             }
 
-            if (! $exists) {
+            if (!$exists) {
                 throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'SUCCESSFUL') {
@@ -53,10 +53,10 @@ class InteracTransferController extends Controller
                 Reload::deposit()->cancel($deposit);
             }
 
+        } catch (ModelNotFoundException $exception) {
+            logger($exception);
         } catch (Exception $exception) {
-
             Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
-
             logger($exception);
         }
     }
