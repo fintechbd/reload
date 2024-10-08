@@ -63,7 +63,7 @@ class AssignVendorService
         $data['timeline'][] = $verdict->timeline;
         $data['notes'] = $verdict->message;
         $data['order_data'] = $deposit->order_data;
-        $data['order_data']['vendor_data'] = $verdict->toArray();
+        $data['order_data']['vendor_data']['bill_info'] = $verdict->toArray();
 
         if (! $verdict->status) {
             $data['status'] = OrderStatus::AdminVerification->value;

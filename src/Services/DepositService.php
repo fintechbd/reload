@@ -210,6 +210,7 @@ class DepositService
 
         $depositArray = $deposit->toArray();
         $depositArray['status'] = DepositStatus::Accepted->value;
+        $depositArray['order_data']['vendor_data']['payment_info'] = $inputs['vendor_data'] ?? [];
         $depositArray['order_data']['accepted_by'] = $inputs['approver']?->name ?? 'System';
         $depositArray['order_data']['accepted_by_mobile_number'] = $inputs['approver']?->mobile ?? 'N/A';
         $depositArray['order_data']['accepted_at'] = now();
