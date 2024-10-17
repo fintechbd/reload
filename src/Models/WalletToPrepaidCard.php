@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Models;
 
-use Fintech\Core\Traits\AuditableTrait;
 use Fintech\Core\Traits\BlameableTrait;
 use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,8 +9,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class WalletToPrepaidCard extends Order implements Auditable
 {
-    use \OwenIt\Auditing\Auditable;
     use BlameableTrait;
+    use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
     /*

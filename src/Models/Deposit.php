@@ -10,11 +10,11 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Deposit extends Order implements HasMedia, Auditable
+class Deposit extends Order implements Auditable, HasMedia
 {
-    use \OwenIt\Auditing\Auditable;
     use BlameableTrait;
     use InteractsWithMedia;
+    use \OwenIt\Auditing\Auditable;
 
     /*
     |--------------------------------------------------------------------------

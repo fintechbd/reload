@@ -8,8 +8,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class CurrencySwap extends Order implements Auditable
 {
-    use \OwenIt\Auditing\Auditable;
     use BlameableTrait;
+    use \OwenIt\Auditing\Auditable;
 
     /*
     |--------------------------------------------------------------------------
