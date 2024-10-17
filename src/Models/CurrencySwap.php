@@ -2,10 +2,15 @@
 
 namespace Fintech\Reload\Models;
 
+use Fintech\Core\Traits\BlameableTrait;
 use Fintech\Transaction\Models\Order;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class CurrencySwap extends Order
+class CurrencySwap extends Order implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    use BlameableTrait;
+
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES

@@ -3,10 +3,15 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Traits\BlameableTrait;
 use Fintech\Transaction\Models\Order;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class RequestMoney extends Order
+class RequestMoney extends Order implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    use BlameableTrait;
+
     /*
     |--------------------------------------------------------------------------
     | GLOBAL VARIABLES
