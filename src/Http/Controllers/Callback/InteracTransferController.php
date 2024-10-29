@@ -20,12 +20,13 @@ class InteracTransferController extends Controller
         logger("Interaction Transfer Log, Method: {$request->method()}", $request->all());
 
         match ($request->input('Event')) {
-            'PaymentSuccessful' => $this->acceptTheDeposit($request),
+            'PaymentSuccessful' => $this->acceptDeposit($request),
+            'PaymentFailed' => $this->rejectDeposit($request),
             default => logger("Interaction Transfer Unknown Event: {$request->input('Event')}", $request->all()),
         };
     }
 
-    private function acceptTheDeposit(Request $request): void
+    private function acceptDeposit(Request $request): void
     {
         $deposit = Reload::deposit()->findWhere([
             'paginate' => false,
@@ -38,7 +39,7 @@ class InteracTransferController extends Controller
 
         try {
 
-            if (! $deposit) {
+            if (!$deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $request->input('Data.Reference'));
             }
 
@@ -51,13 +52,52 @@ class InteracTransferController extends Controller
                 }
             }
 
-            if (! $exists) {
+            if (!$exists) {
                 throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'SUCCESSFUL') {
                 Reload::deposit()->accept($deposit, ['vendor_data' => $request->all()]);
-            } else {
-                Reload::deposit()->cancel($deposit);
+            }
+
+        } catch (ModelNotFoundException $exception) {
+            logger($exception);
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
+            logger($exception);
+        }
+    }
+
+    private function rejectDeposit(Request $request): void
+    {
+        $deposit = Reload::deposit()->findWhere([
+            'paginate' => false,
+            'purchase_number' => $request->input('Data.Reference'),
+            'status' => [
+                DepositStatus::Processing->value,
+                DepositStatus::AdminVerification->value,
+            ],
+        ]);
+
+        try {
+
+            if (!$deposit) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $request->input('Data.Reference'));
+            }
+
+            $exists = false;
+
+            foreach ([DepositStatus::Processing, DepositStatus::AdminVerification] as $requiredStatus) {
+                if ($deposit->status->value === $requiredStatus->value) {
+                    $exists = true;
+                    break;
+                }
+            }
+
+            if (!$exists) {
+                throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Rejected->label()]));
+            }
+            if ($request->input('Data.PaymentStatus') == 'FAILED') {
+                Reload::deposit()->reject($deposit, ['vendor_data' => $request->all()]);
             }
 
         } catch (ModelNotFoundException $exception) {
