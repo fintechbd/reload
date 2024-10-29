@@ -22,5 +22,7 @@ class DepositAccepted
     public function __construct($deposit)
     {
         $this->deposit = $deposit;
+
+
     }
 }

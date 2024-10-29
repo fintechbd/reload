@@ -16,9 +16,9 @@ class InteracTransferReceived
     /**
      * Create a new event instance.
      */
-    public function __construct($interacTransfer)
+    public function __construct($deposit)
     {
-        $timeline = $interacTransfer->timeline;
+        $timeline = $deposit->timeline;
 
         $timeline[] = [
             'message' => 'Interac-E-Transfer deposit received',
@@ -26,6 +26,6 @@ class InteracTransferReceived
             'timestamp' => now(),
         ];
 
-        $this->deposit = Reload::deposit()->update($interacTransfer->getKey(), ['timeline' => $timeline]);
+        $this->deposit = Reload::deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
     }
 }

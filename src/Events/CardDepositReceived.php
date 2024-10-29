@@ -17,11 +17,11 @@ class CardDepositReceived
     /**
      * Create a new event instance.
      */
-    public function __construct($cardDeposit)
+    public function __construct($deposit)
     {
-        $timeline = $cardDeposit->timeline;
+        $timeline = $deposit->timeline;
 
-        $service = Business::service()->find($cardDeposit->service_id);
+        $service = Business::service()->find($deposit->service_id);
 
         $timeline[] = [
             'message' => ucwords(strtolower($service->service_name)).' card deposit received',
@@ -29,6 +29,6 @@ class CardDepositReceived
             'timestamp' => now(),
         ];
 
-        $this->deposit = Reload::deposit()->update($cardDeposit->getKey(), ['timeline' => $timeline]);
+        $this->deposit = Reload::deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
     }
 }
