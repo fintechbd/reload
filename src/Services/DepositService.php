@@ -22,7 +22,6 @@ use Fintech\MetaData\Facades\MetaData;
 use Fintech\Reload\Events\DepositAccepted;
 use Fintech\Reload\Events\DepositReceived;
 use Fintech\Reload\Events\DepositRejected;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Interfaces\DepositRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -480,7 +479,7 @@ class DepositService
 
         $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'country_id' => $deposit->source_country_id]);
 
-        if (!$depositAccount) {
+        if (! $depositAccount) {
             throw new CurrencyUnavailableException($deposit->source_country_id);
         }
 
@@ -511,7 +510,7 @@ class DepositService
 
         try {
 
-            if (!$this->depositRepository->update($deposit->getKey(), $depositArray)) {
+            if (! $this->depositRepository->update($deposit->getKey(), $depositArray)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->status->label(),
                     'target_status' => DepositStatus::Rejected->label(),
