@@ -485,6 +485,12 @@ class DepositService
             throw new RequestOrderExistsException;
         }
 
+        $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'country_id' => $deposit->source_country_id]);
+
+        if (!$depositAccount) {
+            throw new CurrencyUnavailableException($deposit->source_country_id);
+        }
+
         $depositArray = $deposit->toArray();
         $depositArray['status'] = DepositStatus::Rejected->value;
         $depositArray['order_data']['rejected_by'] = $inputs['rejector']->name ?? 'System';
@@ -510,9 +516,11 @@ class DepositService
 
         DB::beginTransaction();
 
+        var_dump($depositArray); die();
+
         try {
 
-            if (!Reload::deposit()->update($deposit->getKey(), $depositArray)) {
+            if (!$this->depositRepository->update($deposit->getKey(), $depositArray)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->status->label(),
                     'target_status' => DepositStatus::Rejected->label(),
@@ -520,6 +528,7 @@ class DepositService
             }
 
             DB::commit();
+
             Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
 
             $deposit->refresh();

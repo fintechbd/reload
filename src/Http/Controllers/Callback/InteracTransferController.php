@@ -17,12 +17,10 @@ class InteracTransferController extends Controller
      */
     public function __invoke(Request $request): void
     {
-        logger("Interaction Transfer Log, Method: {$request->method()}", $request->all());
-
         match ($request->input('Event')) {
             'PaymentSuccessful' => $this->acceptDeposit($request),
             'PaymentFailed' => $this->rejectDeposit($request),
-            default => logger("Interaction Transfer Unknown Event: {$request->input('Event')}", $request->all()),
+            default => logger("Interact-E-Transfer Unknown Event: {$request->input('Event')}", $request->all()),
         };
     }
 
