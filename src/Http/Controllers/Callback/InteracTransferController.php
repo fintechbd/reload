@@ -94,7 +94,9 @@ class InteracTransferController extends Controller
             }
 
             if (!$exists) {
-                throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Rejected->label()]));
+                throw new Exception(__('reload::messages.deposit.invalid_status', [
+                    'current_status' => $deposit->status->label(),
+                    'target_status' => DepositStatus::Rejected->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'FAILED') {
                 Reload::deposit()->reject($deposit, ['vendor_data' => $request->all()]);

@@ -2,6 +2,7 @@
 
 namespace Fintech\Reload\Events;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Reload\Models\Deposit;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -18,7 +19,7 @@ class DepositRejected
     /**
      * Create a new event instance.
      *
-     * @param  Deposit  $deposit
+     * @param  Deposit|BaseModel|null  $deposit
      */
     public function __construct($deposit)
     {
