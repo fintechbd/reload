@@ -18,7 +18,7 @@ class DepositReceived
     /**
      * Create a new event instance.
      *
-     * @param Deposit|BaseModel|null $deposit
+     * @param  Deposit|BaseModel|null  $deposit
      */
     public function __construct($deposit)
     {

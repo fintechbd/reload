@@ -39,7 +39,7 @@ class InteracTransferController extends Controller
 
         try {
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $request->input('Data.Reference'));
             }
 
@@ -52,7 +52,7 @@ class InteracTransferController extends Controller
                 }
             }
 
-            if (!$exists) {
+            if (! $exists) {
                 throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'SUCCESSFUL') {
@@ -80,7 +80,7 @@ class InteracTransferController extends Controller
 
         try {
 
-            if (!$deposit) {
+            if (! $deposit) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $request->input('Data.Reference'));
             }
 
@@ -93,7 +93,7 @@ class InteracTransferController extends Controller
                 }
             }
 
-            if (!$exists) {
+            if (! $exists) {
                 throw new Exception(__('reload::messages.deposit.invalid_status', [
                     'current_status' => $deposit->status->label(),
                     'target_status' => DepositStatus::Rejected->label()]));
