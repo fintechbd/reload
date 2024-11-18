@@ -151,6 +151,8 @@ class DepositService
             'amount' => $inputs['amount'],
             'service_id' => $inputs['service_id'],
         ]);
+        $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
+        $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['previous_amount'] = $depositAccount->user_account_data['available_amount'] ?? 0;
         $inputs['order_data']['current_amount'] = $inputs['order_data']['previous_amount'] + $inputs['order_data']['service_stat_data']['total_amount'];
         $inputs['order_data']['master_user_name'] = $masterUser->name;
