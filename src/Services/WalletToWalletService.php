@@ -455,7 +455,7 @@ class WalletToWalletService
             'order_detail_currency' => $walletToWallet->currency,
         ]);
 
-        logger("User Account Data", $userAccountData);
+        logger('User Account Data', $userAccountData);
 
         return $userAccountData;
 
