@@ -268,10 +268,10 @@ class WalletToWalletService
         $inputs['order_data']['recipient_mobile'] = $recipient->mobile ?? 'N/A';
         $inputs['order_data']['recipient_email'] = $recipient->email ?? 'N/A';
 
-        $inputs['order_data']['sender_id'] = $recipient->id ?? 'N/A';
-        $inputs['order_data']['sender_by'] = $recipient->name ?? 'N/A';
-        $inputs['order_data']['sender_mobile'] = $recipient->mobile ?? 'N/A';
-        $inputs['order_data']['sender_email'] = $recipient->email ?? 'N/A';
+        $inputs['order_data']['sender_id'] = $sender->id ?? 'N/A';
+        $inputs['order_data']['sender_by'] = $sender->name ?? 'N/A';
+        $inputs['order_data']['sender_mobile'] = $sender->mobile ?? 'N/A';
+        $inputs['order_data']['sender_email'] = $sender->email ?? 'N/A';
         $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
