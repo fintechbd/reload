@@ -307,6 +307,7 @@ class WalletToWalletService
         try {
             $walletToWallet = $this->walletToWalletRepository->create($inputs);
             DB::commit();
+            $inputs = $walletToWallet->toArray();
             //Debit
             $senderUpdatedBalance = $this->debitTransaction($walletToWallet);
             $senderUpdatedAccount = $senderAccount->toArray();
@@ -386,7 +387,7 @@ class WalletToWalletService
         $walletToWallet->order_detail_cause_name = 'cash_withdraw';
         $walletToWallet->order_detail_number = $walletToWallet->order_data['purchase_number'];
         $walletToWallet->order_detail_response_id = $walletToWallet->order_data['purchase_number'];
-        $walletToWallet->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Payment Send to '.$master_user_name;
+        $walletToWallet->notes = 'Wallet To Wallet Payment Send to '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
         $orderDetailStore->order_detail_parent_id = $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -397,7 +398,7 @@ class WalletToWalletService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Payment Receive From'.$user_name;
+        $orderDetailStoreForMaster->notes = 'Wallet To Wallet Payment Receive From'.$user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -405,7 +406,7 @@ class WalletToWalletService
         $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $walletToWallet->order_detail_cause_name = 'charge';
         $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        $walletToWallet->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Send to '.$master_user_name;
+        $walletToWallet->notes = 'Wallet To Wallet Charge Send to '.$master_user_name;
         $walletToWallet->step = 3;
         $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
@@ -415,7 +416,7 @@ class WalletToWalletService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Receive from '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet Charge Receive from '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -423,18 +424,18 @@ class WalletToWalletService
         $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $walletToWallet->order_detail_cause_name = 'discount';
-        $walletToWallet->notes = 'Wallet To Wallet from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount form '.$master_user_name;
+        $walletToWallet->notes = 'Wallet To Wallet Discount form '.$master_user_name;
         $walletToWallet->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
+        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -453,6 +454,8 @@ class WalletToWalletService
             'order_id' => $walletToWallet->getKey(),
             'order_detail_currency' => $walletToWallet->currency,
         ]);
+
+        logger("User Account Data", $userAccountData);
 
         return $userAccountData;
 
