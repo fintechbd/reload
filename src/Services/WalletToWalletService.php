@@ -402,8 +402,8 @@ class WalletToWalletService
         $orderDetailStoreForMaster->save();
 
         //For Charge
-        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $walletToWallet->order_detail_cause_name = 'charge';
         $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
         $walletToWallet->notes = 'Wallet To Wallet Charge Send to '.$master_user_name;
@@ -413,16 +413,16 @@ class WalletToWalletService
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $walletToWallet->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
-        $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
+        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
         $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet Charge Receive from '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
         //For Discount
-        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $walletToWallet->order_detail_cause_name = 'discount';
         $walletToWallet->notes = 'Wallet To Wallet Discount form '.$master_user_name;
         $walletToWallet->step = 5;
@@ -432,8 +432,8 @@ class WalletToWalletService
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
         $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
