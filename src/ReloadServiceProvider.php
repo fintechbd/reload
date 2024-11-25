@@ -2,7 +2,7 @@
 
 namespace Fintech\Reload;
 
-use Fintech\Core\Traits\RegisterPackageTrait;
+use Fintech\Core\Traits\Packages\RegisterPackageTrait;
 use Fintech\Reload\Commands\InstallCommand;
 use Fintech\Reload\Commands\LeatherBackSetupCommand;
 use Fintech\Reload\Providers\EventServiceProvider;

@@ -305,11 +305,15 @@ class WalletToWalletService
         DB::beginTransaction();
 
         try {
-            $walletToWallet = $this->walletToWalletRepository->create($inputs);
+            $senderWalletToWallet = $this->walletToWalletRepository->create($inputs);
+
+            $inputs['user_id'] = $recipient->getKey();
+
+            $recipientWalletToWallet = $this->walletToWalletRepository->create($inputs);
             DB::commit();
-            $inputs = $walletToWallet->toArray();
+            $inputs = $senderWalletToWallet->toArray();
             //Debit
-            $senderUpdatedBalance = $this->debitTransaction($walletToWallet);
+            $senderUpdatedBalance = $this->debitTransaction($senderWalletToWallet);
             $senderUpdatedAccount = $senderAccount->toArray();
             $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $senderUpdatedBalance['spent_amount'];
             $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $senderUpdatedBalance['current_amount'];
@@ -326,7 +330,7 @@ class WalletToWalletService
             }
 
             //Credit
-            $recipientUpdatedBalance = $this->creditTransaction($walletToWallet);
+            $recipientUpdatedBalance = $this->creditTransaction($senderWalletToWallet);
             $recipientUpdatedAccount = $recipientAccount->toArray();
             $recipientUpdatedAccount['user_account_data']['spent_amount'] = (float) $recipientUpdatedAccount['user_account_data']['spent_amount'] + (float) $recipientUpdatedBalance['spent_amount'];
             $recipientUpdatedAccount['user_account_data']['available_amount'] = (float) $recipientUpdatedBalance['current_amount'];
@@ -344,9 +348,9 @@ class WalletToWalletService
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
-            WalletToWalletReceived::dispatch($walletToWallet);
+            WalletToWalletReceived::dispatch($senderWalletToWallet);
 
-            return $walletToWallet;
+            return $senderWalletToWallet;
 
         } catch (Exception $e) {
 
