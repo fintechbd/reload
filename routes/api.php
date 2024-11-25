@@ -1,15 +1,15 @@
 <?php
 
 use Fintech\Reload\Http\Controllers\Callback\InteracTransferController;
-use Fintech\RestApi\Http\Controllers\Reload\Charts\DepositPartnerController;
-use Fintech\RestApi\Http\Controllers\Reload\Charts\WithdrawPartnerController;
-use Fintech\RestApi\Http\Controllers\Reload\CurrencySwapController;
-use Fintech\RestApi\Http\Controllers\Reload\DepositController;
-use Fintech\RestApi\Http\Controllers\Reload\RequestMoneyController;
-use Fintech\RestApi\Http\Controllers\Reload\WalletToAtmController;
-use Fintech\RestApi\Http\Controllers\Reload\WalletToBankController;
-use Fintech\RestApi\Http\Controllers\Reload\WalletToPrepaidCardController;
-use Fintech\RestApi\Http\Controllers\Reload\WalletToWalletController;
+use Fintech\Reload\Http\Controllers\Charts\DepositPartnerController;
+use Fintech\Reload\Http\Controllers\Charts\WithdrawPartnerController;
+use Fintech\Reload\Http\Controllers\CurrencySwapController;
+use Fintech\Reload\Http\Controllers\DepositController;
+use Fintech\Reload\Http\Controllers\RequestMoneyController;
+use Fintech\Reload\Http\Controllers\WalletToAtmController;
+use Fintech\Reload\Http\Controllers\WalletToBankController;
+use Fintech\Reload\Http\Controllers\WalletToPrepaidCardController;
+use Fintech\Reload\Http\Controllers\WalletToWalletController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
