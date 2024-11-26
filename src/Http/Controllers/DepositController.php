@@ -162,7 +162,7 @@ class DepositController extends Controller
         $inputs = $request->validated();
 
         try {
-            $deposit = $this->authenticateDeposit($id, [DepositStatus::Processing, DepositStatus::AdminVerification], DepositStatus::Rejected);
+            $deposit = $this->authenticateDeposit($id, [DepositStatus::Processing, DepositStatus::Pending, DepositStatus::AdminVerification], DepositStatus::Rejected);
 
             $inputs['rejector'] = $request->user('sanctum');
 
@@ -196,7 +196,7 @@ class DepositController extends Controller
         $inputs = $request->validated();
 
         try {
-            $deposit = $this->authenticateDeposit($id, [DepositStatus::Processing, DepositStatus::AdminVerification], DepositStatus::Accepted);
+            $deposit = $this->authenticateDeposit($id, [DepositStatus::Processing, DepositStatus::Pending, DepositStatus::AdminVerification], DepositStatus::Accepted);
 
             $inputs['approver'] = $request->user('sanctum');
 
