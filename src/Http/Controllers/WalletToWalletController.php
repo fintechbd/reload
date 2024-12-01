@@ -49,10 +49,8 @@ class WalletToWalletController extends Controller
     {
         try {
             $inputs = $request->validated();
-            //$inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_transfer'])->getKey();
             $inputs['transaction_form_code'] = 'point_transfer';
-            //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'wallet_to_wallet']);
-            //$inputs['service_type_slug'] = 'wallet_to_wallet';
+            $inputs['parent_id_is_null'] = true;
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
