@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Http\Requests;
 
-use Fintech\Core\Rules\Base64File;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -34,7 +33,7 @@ class StoreDepositRequest extends FormRequest
             'order_data' => ['nullable', 'array'],
             'order_data.request_from' => ['string', 'required'],
             'order_data.interac_email' => ['nullable', 'email:rfc,dns', 'min:5', 'max:255'],
-            'slip' => ['nullable', 'string', new Base64File('image/jpg', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'application/pdf')],
+            'slip' => ['nullable', 'string', 'base64:image/jpg,image/jpeg,image/png,image/svg+xml,image/gif,application/pdf'],
         ];
     }
 
