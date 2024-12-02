@@ -311,11 +311,12 @@ class WalletToWalletService
             $senderInputs = $inputs;
             $recipientInputs = $inputs;
             $senderWalletToWallet = $this->walletToWalletRepository->create($senderInputs);
-            $senderWalletToWalletArray = $senderWalletToWallet->toArray();
             DB::commit();
+            $senderWalletToWalletArray = $senderWalletToWallet->toArray();
+            $senderWalletToWallet->refresh();
+
             $recipientInputs['parent_id'] = $senderWalletToWallet->getKey();
             $recipientInputs['user_id'] = $recipient->getKey();
-            $recipientInputs['sender_receiver_id'] = $sender->getKey();
             $recipientWalletToWallet = $this->walletToWalletRepository->create($recipientInputs);
             $recipientWalletToWalletArray = $recipientWalletToWallet->toArray();
 
@@ -358,6 +359,8 @@ class WalletToWalletService
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             WalletToWalletReceived::dispatch($senderWalletToWallet);
+
+            dd(['sender' => $senderWalletToWalletArray['user_id'], 'receiver' => $recipientWalletToWalletArray['user_id']]);
 
             return $senderWalletToWallet;
 
