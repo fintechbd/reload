@@ -309,16 +309,14 @@ class WalletToWalletService
         try {
 
             $senderInputs = $inputs;
-            $senderWalletToWallet = $this->walletToWalletRepository->create($senderInputs);
-
             $recipientInputs = $inputs;
+            $senderWalletToWallet = $this->walletToWalletRepository->create($senderInputs);
+            $senderWalletToWalletArray = $senderWalletToWallet->toArray();
+            DB::commit();
             $recipientInputs['parent_id'] = $senderWalletToWallet->getKey();
             $recipientInputs['user_id'] = $recipient->getKey();
             $recipientInputs['sender_receiver_id'] = $sender->getKey();
             $recipientWalletToWallet = $this->walletToWalletRepository->create($recipientInputs);
-
-            DB::commit();
-            $senderWalletToWalletArray = $senderWalletToWallet->toArray();
             $recipientWalletToWalletArray = $recipientWalletToWallet->toArray();
 
             //Debit
