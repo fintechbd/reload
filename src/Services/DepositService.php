@@ -22,6 +22,7 @@ use Fintech\MetaData\Facades\MetaData;
 use Fintech\Reload\Events\DepositAccepted;
 use Fintech\Reload\Events\DepositReceived;
 use Fintech\Reload\Events\DepositRejected;
+use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Interfaces\DepositRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -208,39 +209,41 @@ class DepositService
 
         $depositor = $deposit->user;
 
-        $depositArray = $deposit->toArray();
-        $depositArray['status'] = DepositStatus::Accepted->value;
-        $depositArray['order_data']['vendor_data']['payment_info'] = $inputs['vendor_data'] ?? [];
-        $depositArray['order_data']['accepted_by'] = $inputs['approver']?->name ?? 'System';
-        $depositArray['order_data']['accepted_by_mobile_number'] = $inputs['approver']?->mobile ?? 'N/A';
-        $depositArray['order_data']['accepted_at'] = now();
-        $depositArray['order_data']['accepted_number'] = entry_number($depositArray['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
-        $depositArray['order_number'] = entry_number($depositArray['order_data']['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
+        $depositOrderData = $deposit->order_data;
+
+        $depositOrderData['vendor_data']['payment_info'] = $inputs['vendor_data'] ?? [];
+        $depositOrderData['accepted_by'] = $inputs['approver']?->name ?? 'System';
+        $depositOrderData['accepted_by_mobile_number'] = $inputs['approver']?->mobile ?? 'N/A';
+        $depositOrderData['accepted_at'] = now();
+        $depositOrderData['accepted_number'] = entry_number($depositOrderData['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
+        $depositArray['order_number'] = $depositOrderData['accepted_number'];
         $serviceStatData = Business::serviceStat()->serviceStateData([
-            'role_id' => $depositArray['order_data']['role_id'],
-            'reload' => $depositArray['order_data']['is_reload'],
-            'reverse' => $depositArray['order_data']['is_reverse'],
+            'role_id' => $depositOrderData['role_id'],
+            'reload' => $depositOrderData['is_reload'],
+            'reverse' => $depositOrderData['is_reverse'],
             'source_country_id' => $depositArray['source_country_id'],
             'destination_country_id' => $depositArray['destination_country_id'],
             'amount' => $depositArray['amount'],
             'service_id' => $depositArray['service_id'],
         ]);
-        $depositArray['order_data']['service_stat_data'] = $serviceStatData;
-        $depositArray['order_data']['user_name'] = $depositor->name ?? 'N/A';
+        $depositOrderData['service_stat_data'] = $serviceStatData;
+        $depositOrderData['user_name'] = $depositor->name ?? 'N/A';
 
         //Collect Current Balance as Previous Balance
         DB::beginTransaction();
 
         try {
-            Transaction::accounting($deposit)->debitTransaction($depositArray);
 
-            $this->creditTransaction($deposit, $depositArray);
+            $deposit = Reload::deposit()->update($deposit->getKey(), ['status' => DepositStatus::Accepted->value, 'order_data' => $depositOrderData]);
+
+            $deposit = Transaction::accounting($deposit)->debitTransaction();
 
             $depositedAccountData = $depositedAccount->user_account_data;
             $depositedAccountData['deposit_amount'] = (float) $depositedAccountData['deposit_amount'] + (float) $userBalanceData['deposit_amount'];
             $depositedAccountData['available_amount'] = (float) $userBalanceData['current_amount'];
 
             $service = Business::service()->find($depositArray['service_id']);
+
             $message = isset($inputs['approver'])
                 ? ucwords(strtolower($service->service_name))." deposit manually accepted by ({$depositArray['order_data']['accepted_by']})."
                 : ucwords(strtolower($service->service_name)).' deposit automatically accepted by system.';
