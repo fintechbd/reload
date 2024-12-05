@@ -235,7 +235,7 @@ class DepositService
             $deposit = Reload::deposit()->update($deposit->getKey(), [
                 'status' => DepositStatus::Accepted->value,
                 'order_data' => $depositOrderData,
-                'order_number' => $depositOrderData['accepted_number']
+                'order_number' => $depositOrderData['accepted_number'],
             ]);
 
             $accounting = Transaction::accounting($deposit);
