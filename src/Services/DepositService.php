@@ -208,7 +208,6 @@ class DepositService
         }
 
         $depositor = $deposit->user;
-
         $depositOrderData = $deposit->order_data;
 
         $depositOrderData['vendor_data']['payment_info'] = $inputs['vendor_data'] ?? [];
@@ -216,15 +215,14 @@ class DepositService
         $depositOrderData['accepted_by_mobile_number'] = $inputs['approver']?->mobile ?? 'N/A';
         $depositOrderData['accepted_at'] = now();
         $depositOrderData['accepted_number'] = entry_number($depositOrderData['purchase_number'], $deposit->sourceCountry->iso3, OrderStatusConfig::Accepted->value);
-        $depositArray['order_number'] = $depositOrderData['accepted_number'];
         $serviceStatData = Business::serviceStat()->serviceStateData([
             'role_id' => $depositOrderData['role_id'],
             'reload' => $depositOrderData['is_reload'],
             'reverse' => $depositOrderData['is_reverse'],
-            'source_country_id' => $depositArray['source_country_id'],
-            'destination_country_id' => $depositArray['destination_country_id'],
-            'amount' => $depositArray['amount'],
-            'service_id' => $depositArray['service_id'],
+            'source_country_id' => $deposit->source_country_id ?? null,
+            'destination_country_id' => $deposit->destination_country_id ?? null,
+            'amount' => $deposit->amount ?? null,
+            'service_id' => $deposit->service_id ?? null,
         ]);
         $depositOrderData['service_stat_data'] = $serviceStatData;
         $depositOrderData['user_name'] = $depositor->name ?? 'N/A';
@@ -234,13 +232,16 @@ class DepositService
 
         try {
 
-            $deposit = Reload::deposit()->update($deposit->getKey(), ['status' => DepositStatus::Accepted->value, 'order_data' => $depositOrderData]);
+            $deposit = Reload::deposit()->update($deposit->getKey(), [
+                'status' => DepositStatus::Accepted->value,
+                'order_data' => $depositOrderData,
+                'order_number' => $depositOrderData['accepted_number']
+            ]);
 
-            $deposit = Transaction::accounting($deposit)->debitTransaction();
+            $accounting = Transaction::accounting($deposit);
 
-            $depositedAccountData = $depositedAccount->user_account_data;
-            $depositedAccountData['deposit_amount'] = (float) $depositedAccountData['deposit_amount'] + (float) $userBalanceData['deposit_amount'];
-            $depositedAccountData['available_amount'] = (float) $userBalanceData['current_amount'];
+            $deposit = $accounting->debitTransaction();
+            $accounting->creditBalanceToUserAccount();
 
             $service = Business::service()->find($depositArray['service_id']);
 
@@ -254,8 +255,7 @@ class DepositService
                 'timestamp' => now(),
             ];
 
-            if (! Transaction::userAccount()->update($depositedAccount->getKey(), ['user_account_data' => $depositedAccountData])
-                || ! $this->depositRepository->update($deposit->getKey(), $depositArray)) {
+            if (! $this->depositRepository->update($deposit->getKey(), $depositArray)) {
                 throw new UpdateOperationException(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
 
