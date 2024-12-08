@@ -76,105 +76,6 @@ class WalletToWalletService
         return $this->walletToWalletRepository->create($filters);
     }
 
-    private function oldCreate()
-    {
-        //        DB::beginTransaction();
-        //        try {
-        //                //set pre defined conditions of deposit
-        //                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_transfer'])->getKey();
-        //                $inputs['user_id'] = $user_id ?? $depositor->getKey();
-        //                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-        //                if ($delayCheck['countValue'] > 0) {
-        //                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-        //                }
-        //                $inputs['sender_receiver_id'] = $masterUser->getKey();
-        //                $inputs['is_refunded'] = false;
-        //                $inputs['status'] = OrderStatus::Successful->value;
-        //                $inputs['risk'] = RiskProfile::Low->value;
-        //                //$inputs['reverse'] = true;
-        //                $inputs['converted_currency'] = $inputs['currency'];
-        //                $inputs['order_data']['sender_receiver_name'] = $receiver->name;
-        //                $inputs['order_data']['sender_receiver_mobile_number'] = $receiver->mobile;
-        //                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
-        //                unset($inputs['reverse']);
-        //                $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
-        //                $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-        //                $inputs['notes'] = 'Wallet to wallet transfer to '.$receiver->name;
-        //                $inputs['order_data']['sender_id'] = $depositor->getKey();
-        //                $inputs['order_data']['sender_name'] = $depositor->name;
-        //                $inputs['order_data']['created_by'] = $depositor->name;
-        //                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
-        //                $inputs['order_data']['created_at'] = now();
-        //                $inputs['order_data']['master_user_name'] = $masterUser['name'];
-        //                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
-        //                $inputs['order_data']['system_notification_variable_success'] = 'currency_swap_success';
-        //                $inputs['order_data']['system_notification_variable_failed'] = 'currency_swap_failed';
-        //                $inputs['order_data']['source_country_id'] = $inputs['source_country_id'];
-        //                $inputs['order_data']['destination_country_id'] = $inputs['destination_country_id'];
-        //
-        //                //new concept add
-        //                $inputs['source_country_id'] = $inputs['order_data']['serving_country_id'];
-        //                $inputs['destination_country_id'] = $inputs['order_data']['serving_country_id'];
-        //                $inputs['order_data']['order_type'] = OrderType::WalletToWallet;
-        //
-        //                unset($inputs['pin'], $inputs['password']);
-        //                $walletToWallet = Reload::walletToWallet()->create($inputs);
-        //
-        //                if (! $walletToWallet) {
-        //                    throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'));
-        //                }
-        //
-        //                $order_data = $walletToWallet->order_data;
-        //                $order_data['purchase_number'] = entry_number($walletToWallet->getKey(), $walletToWallet->sourceCountry->iso3, OrderStatus::Successful->value);
-        //
-        //                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletToWallet);
-        //                $order_data['user_name'] = $walletToWallet->user->name;
-        //                $walletToWallet->order_data = $order_data;
-        //                $userUpdatedBalance = Reload::walletToWallet()->debitTransaction($walletToWallet);
-        //                //source country or destination country change to currency name
-        //                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'currency' => $walletToWallet->converted_currency]);
-        //
-        //                //update User Account
-        //                $depositedUpdatedAccount = $depositedAccount->toArray();
-        //                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-        //                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-        //
-        //                if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
-        //                    throw new Exception(__('Insufficient balance!', [
-        //                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
-        //                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
-        //                    ]));
-        //                }
-        //                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-        //                $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-        //                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
-        //                    throw new Exception(__('User Account Balance does not update', [
-        //                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
-        //                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
-        //                    ]));
-        //                }
-        //
-        //                Reload::walletToWallet()->update($walletToWallet->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-        //                $this->__receiverStore($walletToWallet->getKey());
-        //                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-        //                DB::commit();
-        //
-        //                return response()->created([
-        //                    'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
-        //                    'id' => $walletToWallet->id,
-        //                    'spent' => $userUpdatedBalance['spent_amount'],
-        //                ]);
-        //            } else {
-        //                throw new Exception('Your another order is in process...!');
-        //            }
-        //        } catch (Exception $exception) {
-        //            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-        //            DB::rollBack();
-        //
-        //            return response()->failed($exception);
-        //        }
-    }
-
     /**
      * @throws ModelNotFoundException
      * @throws CurrencyUnavailableException
@@ -231,6 +132,7 @@ class WalletToWalletService
         $inputs['order_data']['role_id'] = $role->id;
         $inputs['order_data']['order_type'] = OrderType::WalletToWallet;
         $inputs['description'] = "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
+        $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
         $inputs['status'] = OrderStatus::Success;
         $inputs['sender_receiver_id'] = $senderMasterUser->getKey();
         $inputs['is_refunded'] = false;
@@ -313,6 +215,8 @@ class WalletToWalletService
 
             $inputs['parent_id'] = $senderWalletToWallet->getKey();
             $inputs['user_id'] = $recipient->getKey();
+            $inputs['description'] = "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
+            $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
             $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
             $inputs['order_data']['master_user_name'] = $recipientMasterUser->name;
             $inputs['order_data']['user_name'] = $recipient->name;
