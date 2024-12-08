@@ -200,32 +200,32 @@ class WalletToWalletService
             'flag' => 'create',
             'timestamp' => now(),
         ];
+        $inputs['parent_id'] = null;
 
         DB::beginTransaction();
 
         try {
-            $receiverInputs = $inputs;
             $senderWalletToWallet = $this->walletToWalletRepository->create($inputs);
             DB::commit();
-
             $senderAccounting = Transaction::accounting($senderWalletToWallet, $sender->getKey());
             $senderWalletToWallet = $senderAccounting->debitTransaction();
             $senderAccounting->debitBalanceFromUserAccount();
+            logger("senderInputs", $inputs);
+            $receiverInputs = $inputs;
             unset($inputs);
             $receiverInputs['parent_id'] = $senderWalletToWallet->getKey();
             $receiverInputs['user_id'] = $recipient->getKey();
             $receiverInputs['description'] = "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
-            $receiverInputs['notes'] = $receiverInputs['notes'] ?? "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
+            $receiverInputs['notes'] = "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
             $receiverInputs['sender_receiver_id'] = $recipientMasterUser->getKey();
             $receiverInputs['order_data']['master_user_name'] = $recipientMasterUser->name;
             $receiverInputs['order_data']['user_name'] = $recipient->name;
-            logger("receiver inputs", $receiverInputs);
+            logger("receiverInputs", $receiverInputs);
             $recipientWalletToWallet = $this->walletToWalletRepository->create($receiverInputs);
 
             $recipientAccounting = Transaction::accounting($recipientWalletToWallet, $recipient->getKey());
             $recipientWalletToWallet = $recipientAccounting->creditTransaction();
             $recipientAccounting->creditBalanceToUserAccount();
-            logger("receiver wallet", [$recipientWalletToWallet]);
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
             WalletToWalletReceived::dispatch($senderWalletToWallet);
