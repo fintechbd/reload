@@ -236,7 +236,7 @@ class DepositService
 
         try {
 
-            $deposit = Reload::deposit()->update($deposit->getKey(), [
+            $deposit = $this->depositRepository->update($deposit->getKey(), [
                 'status' => DepositStatus::Accepted->value,
                 'order_data' => $depositOrderData,
                 'order_number' => $depositOrderData['accepted_number'],
@@ -245,21 +245,19 @@ class DepositService
             $accounting = Transaction::accounting($deposit);
 
             $deposit = $accounting->debitTransaction();
+
             $accounting->creditBalanceToUserAccount();
 
-            $service = Business::service()->find($depositArray['service_id']);
+            $service = Business::service()->find($deposit->service_id);
 
             $message = isset($inputs['approver'])
-                ? ucwords(strtolower($service->service_name)) . " deposit manually accepted by ({$depositArray['order_data']['accepted_by']})."
+                ? ucwords(strtolower($service->service_name)) . " deposit manually accepted by ({$deposit->order_data['accepted_by']})."
                 : ucwords(strtolower($service->service_name)) . ' deposit automatically accepted by system.';
 
-            $depositArray['timeline'][] = [
-                'message' => $message,
-                'flag' => 'success',
-                'timestamp' => now(),
-            ];
+            $timeline = $deposit->timeline ?? [];
+            $timeline[] = entry_timeline($message,'success');
 
-            if (!$this->depositRepository->update($deposit->getKey(), $depositArray)) {
+            if (!$this->depositRepository->update($deposit->getKey(), ['timeline' => $timeline])) {
                 throw new UpdateOperationException(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
 
