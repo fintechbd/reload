@@ -246,6 +246,8 @@ class DepositService
 
             $accounting->creditBalanceToUserAccount();
 
+            DB::commit();
+
             $service = Business::service()->find($deposit->service_id);
 
             $message = isset($inputs['approver'])
@@ -253,13 +255,12 @@ class DepositService
                 : ucwords(strtolower($service->service_name)).' deposit automatically accepted by system.';
 
             $timeline = $deposit->timeline ?? [];
+
             $timeline[] = entry_timeline($message, 'success');
 
             if (! $this->depositRepository->update($deposit->getKey(), ['timeline' => $timeline])) {
                 throw new UpdateOperationException(__('reload::messages.status_change_failed', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
-
-            DB::commit();
 
             Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
 
