@@ -34,7 +34,9 @@ class WalletToWalletService
     /**
      * WalletToWalletService constructor.
      */
-    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository) {}
+    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository)
+    {
+    }
 
     public function find($id, $onlyTrashed = false): ?BaseModel
     {
@@ -81,39 +83,42 @@ class WalletToWalletService
      */
     public function create(array $inputs = []): BaseModel
     {
-        $sender = Auth::user()->find($inputs['user_id']);
-        if (! $sender) {
-            throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
+        $user_id = $inputs['user_id'] ?? null;
+        $orderType = OrderType::WalletToWallet;
+
+        $sender = Auth::user()->find($user_id);
+        if (!$sender) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $user_id);
         }
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
-        if (! $senderAccount) {
+        if (!$senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
         //Receiver
         $recipient = Auth::user()->find($inputs['order_data']['recipient_id']);
-        if (! $recipient) {
+        if (!$recipient) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['order_data']['recipient_id']);
         }
         $recipientAccount = Transaction::userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
-        if (! $recipientAccount) {
+        if (!$recipientAccount) {
             throw new CurrencyUnavailableException($inputs['destination_country_id']);
         }
 
         // Sender System User
         $senderMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
-        if (! $senderMasterUser) {
+        if (!$senderMasterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
         // Recipient System User
         $recipientMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['destination_country_id']]);
-        if (! $recipientMasterUser) {
+        if (!$recipientMasterUser) {
             throw new MasterCurrencyUnavailableException($inputs['destination_country_id']);
         }
 
-        if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
+        if (Transaction::orderQueue()->addToQueueUserWise($user_id) == 0) {
             throw new RequestOrderExistsException;
         }
 
@@ -125,7 +130,7 @@ class WalletToWalletService
 
         $role = $sender->roles?->first() ?? null;
         $inputs['order_data']['role_id'] = $role->id;
-        $inputs['order_data']['order_type'] = OrderType::WalletToWallet;
+        $inputs['order_data']['order_type'] = $orderType;
         $inputs['description'] = "Wallet To Wallet transfer sent to {$recipient->name} [{$recipientAccount->account_no}]";
         $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer sent to {$recipient->name} [{$recipientAccount->account_no}]";
         $inputs['status'] = OrderStatus::Success;
@@ -201,27 +206,28 @@ class WalletToWalletService
         DB::beginTransaction();
 
         try {
+            $receiverInputs = $inputs;
             $senderWalletToWallet = $this->walletToWalletRepository->create($inputs);
             DB::commit();
 
             $senderAccounting = Transaction::accounting($senderWalletToWallet, $sender->getKey());
             $senderWalletToWallet = $senderAccounting->debitTransaction();
             $senderAccounting->debitBalanceFromUserAccount();
-
-            $inputs['parent_id'] = $senderWalletToWallet->getKey();
-            $inputs['user_id'] = $recipient->getKey();
-            $inputs['description'] = "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
-            $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
-            $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
-            $inputs['order_data']['master_user_name'] = $recipientMasterUser->name;
-            $inputs['order_data']['user_name'] = $recipient->name;
-            $recipientWalletToWallet = $this->walletToWalletRepository->create($inputs);
+            unset($inputs);
+            $receiverInputs['parent_id'] = $senderWalletToWallet->getKey();
+            $receiverInputs['user_id'] = $recipient->getKey();
+            $receiverInputs['description'] = "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
+            $receiverInputs['notes'] = $receiverInputs['notes'] ?? "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
+            $receiverInputs['sender_receiver_id'] = $recipientMasterUser->getKey();
+            $receiverInputs['order_data']['master_user_name'] = $recipientMasterUser->name;
+            $receiverInputs['order_data']['user_name'] = $recipient->name;
+            $recipientWalletToWallet = $this->walletToWalletRepository->create($receiverInputs);
 
             $recipientAccounting = Transaction::accounting($recipientWalletToWallet, $recipient->getKey());
             $recipientWalletToWallet = $recipientAccounting->creditTransaction();
             $recipientAccounting->creditBalanceToUserAccount();
 
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
             WalletToWalletReceived::dispatch($senderWalletToWallet);
 
@@ -231,9 +237,9 @@ class WalletToWalletService
 
             DB::rollBack();
 
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
-            throw new OrderRequestFailedException($inputs['order_data']['order_type']->value, 0, $e);
+            throw new OrderRequestFailedException($orderType->value, 0, $e);
         }
     }
 
@@ -464,7 +470,7 @@ class WalletToWalletService
         $deposit->order_detail_cause_name = 'cash_deposit';
         //$deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
-        $deposit->notes = 'Wallet To Wallet receive from '.$master_user_name;
+        $deposit->notes = 'Wallet To Wallet receive from ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -477,7 +483,7 @@ class WalletToWalletService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet To Wallet send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Wallet To Wallet send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -503,7 +509,7 @@ class WalletToWalletService
         $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
-        $deposit->notes = 'Wallet to Wallet Discount form '.$master_user_name;
+        $deposit->notes = 'Wallet to Wallet Discount form ' . $master_user_name;
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -514,7 +520,7 @@ class WalletToWalletService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet to Wallet Deposit Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Wallet to Wallet Deposit Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -523,7 +529,7 @@ class WalletToWalletService
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $deposit->order_detail_cause_name = 'commission';
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $deposit->notes = 'Wallet to Wallet Deposit Commission Receive from '.$master_user_name;
+        $deposit->notes = 'Wallet to Wallet Deposit Commission Receive from ' . $master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
@@ -533,7 +539,7 @@ class WalletToWalletService
         $orderDetailStoreForCommissionForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->order_detail_cause_name = 'commission';
-        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to '.$user_name;
+        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to ' . $user_name;
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
 
