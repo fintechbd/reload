@@ -50,9 +50,9 @@ class RequestMoney extends Order implements Auditable
         $primaryKey = $this->getKey();
 
         $links = [
-            'show' => action_link(route('reload.request-moneys.show', $primaryKey), __('restapi::messages.action.show'), 'get'),
-            'reject' => action_link(route('reload.request-moneys.reject', $primaryKey), __('restapi::messages.action.reject'), 'post'),
-            'accept' => action_link(route('reload.request-moneys.accept', $primaryKey), __('restapi::messages.action.accept'), 'post'),
+            'show' => action_link(route('reload.request-moneys.show', $primaryKey), __('core::messages.action.show'), 'get'),
+            'reject' => action_link(route('reload.request-moneys.reject', $primaryKey), __('core::messages.action.reject'), 'post'),
+            'accept' => action_link(route('reload.request-moneys.accept', $primaryKey), __('core::messages.action.accept'), 'post'),
         ];
 
         if (! empty($this->parent_id)) {

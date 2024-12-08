@@ -51,10 +51,10 @@ class WalletToAtm extends Order implements Auditable
         $primaryKey = $this->getKey();
 
         $links = [
-            'show' => action_link(route('reload.wallet-to-atms.show', $primaryKey), __('restapi::messages.action.show'), 'get'),
-            'update' => action_link(route('reload.wallet-to-atms.update', $primaryKey), __('restapi::messages.action.update'), 'put'),
-            'destroy' => action_link(route('reload.wallet-to-atms.destroy', $primaryKey), __('restapi::messages.action.destroy'), 'delete'),
-            'restore' => action_link(route('reload.wallet-to-atms.restore', $primaryKey), __('restapi::messages.action.restore'), 'post'),
+            'show' => action_link(route('reload.wallet-to-atms.show', $primaryKey), __('core::messages.action.show'), 'get'),
+            'update' => action_link(route('reload.wallet-to-atms.update', $primaryKey), __('core::messages.action.update'), 'put'),
+            'destroy' => action_link(route('reload.wallet-to-atms.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
+            'restore' => action_link(route('reload.wallet-to-atms.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
         ];
 
         if ($this->getAttribute('deleted_at') == null) {

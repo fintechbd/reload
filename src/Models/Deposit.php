@@ -52,7 +52,7 @@ class Deposit extends Order implements Auditable, HasMedia
         $primaryKey = $this->getKey();
 
         $links = [
-            'show' => action_link(route('reload.deposits.show', $primaryKey), __('restapi::messages.action.show'), 'get'),
+            'show' => action_link(route('reload.deposits.show', $primaryKey), __('core::messages.action.show'), 'get'),
             'reject' => action_link(route('reload.deposits.reject', $primaryKey), __('reload::messages.action.reject'), 'post'),
             'accept' => action_link(route('reload.deposits.accept', $primaryKey), __('reload::messages.action.accept'), 'post'),
             'cancel' => action_link(route('reload.deposits.cancel', $primaryKey), __('reload::messages.action.cancel'), 'post'),

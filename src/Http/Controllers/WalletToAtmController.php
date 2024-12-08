@@ -180,7 +180,7 @@ class WalletToAtmController extends Controller
                 DB::commit();
 
                 return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Wallet To ATM']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Wallet To ATM']),
                     'id' => $walletToAtm->id,
                 ]);
 
@@ -222,7 +222,7 @@ class WalletToAtmController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet To Atm']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet To Atm']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -290,7 +290,7 @@ class WalletToAtmController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet To Atm']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet To Atm']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -326,7 +326,7 @@ class WalletToAtmController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet To Atm']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet To Atm']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -352,7 +352,7 @@ class WalletToAtmController extends Controller
 
             $walletToAtmPaginate = Reload::walletToAtm()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet To Atm']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Wallet To Atm']));
 
         } catch (Exception $exception) {
 

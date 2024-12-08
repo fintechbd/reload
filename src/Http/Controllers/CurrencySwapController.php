@@ -182,7 +182,7 @@ class CurrencySwapController extends Controller
                 DB::commit();
 
                 return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Currency Swap']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
                     'id' => $currencySwap->id,
                     'spent' => $userUpdatedBalance['spent_amount'],
                 ]);
@@ -222,7 +222,7 @@ class CurrencySwapController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Currency Swap']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Currency Swap']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -344,7 +344,7 @@ class CurrencySwapController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Currency Swap']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Currency Swap']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -378,7 +378,7 @@ class CurrencySwapController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Currency Swap']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Currency Swap']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -404,7 +404,7 @@ class CurrencySwapController extends Controller
 
             $currencySwapPaginate = Reload::currencySwap()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Currency Swap']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Currency Swap']));
 
         } catch (Exception $exception) {
 

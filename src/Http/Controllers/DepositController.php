@@ -312,7 +312,7 @@ class DepositController extends Controller
 
             $depositPaginate = Reload::deposit()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Deposit']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Deposit']));
 
         } catch (Exception $exception) {
 

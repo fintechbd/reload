@@ -158,7 +158,7 @@ class WalletToWalletService
         //                DB::commit();
         //
         //                return response()->created([
-        //                    'message' => __('restapi::messages.resource.created', ['model' => 'Currency Swap']),
+        //                    'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
         //                    'id' => $walletToWallet->id,
         //                    'spent' => $userUpdatedBalance['spent_amount'],
         //                ]);

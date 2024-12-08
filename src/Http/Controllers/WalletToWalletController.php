@@ -120,7 +120,7 @@ class WalletToWalletController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet To Wallet']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet To Wallet']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -240,7 +240,7 @@ class WalletToWalletController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet To Wallet']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet To Wallet']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -274,7 +274,7 @@ class WalletToWalletController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_wallet_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet To Wallet']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet To Wallet']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -300,7 +300,7 @@ class WalletToWalletController extends Controller
 
             $walletToWalletPaginate = Reload::walletToWallet()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet To Wallet']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Wallet To Wallet']));
 
         } catch (Exception $exception) {
 
