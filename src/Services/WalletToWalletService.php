@@ -36,7 +36,9 @@ class WalletToWalletService
     /**
      * WalletToWalletService constructor.
      */
-    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository) {}
+    public function __construct(private readonly WalletToWalletRepository $walletToWalletRepository)
+    {
+    }
 
     public function find($id, $onlyTrashed = false): ?BaseModel
     {
@@ -183,40 +185,37 @@ class WalletToWalletService
     public function create(array $inputs = []): BaseModel
     {
         $sender = Auth::user()->find($inputs['user_id']);
-
-        if (! $sender) {
+        if (!$sender) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
-
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
-
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
-
-        if (! $senderAccount) {
+        if (!$senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
         //Receiver
-
         $recipient = Auth::user()->find($inputs['order_data']['recipient_id']);
-
-        if (! $recipient) {
+        if (!$recipient) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['order_data']['recipient_id']);
         }
-
         $recipientAccount = Transaction::userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
-
-        if (! $recipientAccount) {
+        if (!$recipientAccount) {
             throw new CurrencyUnavailableException($inputs['destination_country_id']);
         }
 
-        // System User
-
-        $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
-
-        if (! $masterUser) {
+        // Sender System User
+        $senderMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
+        if (!$senderMasterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
+
+        // Recipient System User
+        $recipientMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['destination_country_id']]);
+        if (!$recipientMasterUser) {
+            throw new MasterCurrencyUnavailableException($inputs['destination_country_id']);
+        }
+
 
         if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
             throw new RequestOrderExistsException;
@@ -233,7 +232,7 @@ class WalletToWalletService
         $inputs['order_data']['order_type'] = OrderType::WalletToWallet;
         $inputs['description'] = "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
         $inputs['status'] = OrderStatus::Success;
-        $inputs['sender_receiver_id'] = $masterUser->getKey();
+        $inputs['sender_receiver_id'] = $senderMasterUser->getKey();
         $inputs['is_refunded'] = false;
         $inputs['risk'] = RiskProfile::Low;
         $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
@@ -285,7 +284,7 @@ class WalletToWalletService
         ]);
         $inputs['order_data']['previous_amount'] = $senderAccount->user_account_data['available_amount'] ?? 0;
         $inputs['order_data']['current_amount'] = $inputs['order_data']['previous_amount'] - $inputs['order_data']['service_stat_data']['total_amount'];
-        $inputs['order_data']['master_user_name'] = $masterUser->name;
+        $inputs['order_data']['master_user_name'] = $senderMasterUser->name;
         $inputs['order_data']['system_notification_variable_success'] = 'wallet_to_wallet_success';
         $inputs['order_data']['system_notification_variable_failed'] = 'wallet_to_wallet_failed';
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
@@ -305,60 +304,27 @@ class WalletToWalletService
         DB::beginTransaction();
 
         try {
-
-            $senderInputs = $inputs;
-            $recipientInputs = $inputs;
-            $senderWalletToWallet = $this->walletToWalletRepository->create($senderInputs);
+            $senderWalletToWallet = $this->walletToWalletRepository->create($inputs);
             DB::commit();
-            $senderWalletToWalletArray = $senderWalletToWallet->toArray();
-            $senderWalletToWallet->refresh();
 
-            $recipientInputs['parent_id'] = $senderWalletToWallet->getKey();
-            $recipientInputs['user_id'] = $recipient->getKey();
-            $recipientWalletToWallet = $this->walletToWalletRepository->create($recipientInputs);
-            $recipientWalletToWalletArray = $recipientWalletToWallet->toArray();
+            $senderAccounting = Transaction::accounting($senderWalletToWallet, $sender->getKey());
+            $senderWalletToWallet = $senderAccounting->debitTransaction();
+            $senderAccounting->debitBalanceFromUserAccount();
 
-            //Debit
-            $senderUpdatedBalance = $this->debitTransaction($senderWalletToWallet);
-            $senderUpdatedAccount = $senderAccount->toArray();
-            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $senderUpdatedBalance['spent_amount'];
-            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $senderUpdatedBalance['current_amount'];
-            $senderWalletToWalletArray['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
-            $senderWalletToWalletArray['order_data']['current_amount'] = ((float) $senderWalletToWalletArray['order_data']['previous_amount'] - (float) $senderWalletToWalletArray['converted_amount']);
-            $senderWalletToWalletArray['timeline'][] = [
-                'message' => 'Debited '.currency($senderUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
-                'flag' => 'info',
-                'timestamp' => now(),
-            ];
+            $inputs['parent_id'] = $senderWalletToWallet->getKey();
+            $inputs['user_id'] = $recipient->getKey();
+            $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
+            $inputs['order_data']['master_user_name'] = $recipientMasterUser->name;
+            $inputs['order_data']['user_name'] = $recipient->name;
+            $recipientWalletToWallet = $this->walletToWalletRepository->create($inputs);
 
-            if (! $this->walletToWalletRepository->update($senderWalletToWallet->getKey(), $senderWalletToWalletArray)
-                || ! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
-                throw new \Exception('Failed to update user account balance.');
-            }
-
-            //Credit
-            $recipientUpdatedBalance = $this->creditTransaction($recipientWalletToWallet);
-            $recipientUpdatedAccount = $recipientAccount->toArray();
-            $recipientUpdatedAccount['user_account_data']['spent_amount'] = (float) $recipientUpdatedAccount['user_account_data']['spent_amount'] + (float) $recipientUpdatedBalance['spent_amount'];
-            $recipientUpdatedAccount['user_account_data']['available_amount'] = (float) $recipientUpdatedBalance['current_amount'];
-            $recipientWalletToWalletArray['order_data']['previous_amount'] = (float) $recipientAccount->user_account_data['available_amount'];
-            $recipientWalletToWalletArray['order_data']['current_amount'] = ((float) $recipientWalletToWalletArray['order_data']['previous_amount'] + (float) $recipientWalletToWalletArray['converted_amount']);
-            $recipientWalletToWalletArray['timeline'][] = [
-                'message' => 'Credited '.currency($recipientUpdatedBalance['spent_amount'], $recipientWalletToWalletArray['currency']).' to user account successfully',
-                'flag' => 'info',
-                'timestamp' => now(),
-            ];
-
-            if (! $this->walletToWalletRepository->update($recipientWalletToWallet->getKey(), $recipientWalletToWalletArray)
-                || ! Transaction::userAccount()->update($recipientAccount->getKey(), $recipientUpdatedAccount)) {
-                throw new \Exception('Failed to update user account balance.');
-            }
+            $recipientAccounting = Transaction::accounting($recipientWalletToWallet, $recipient->getKey());
+            $recipientWalletToWallet = $recipientAccounting->creditTransaction();
+            $recipientAccounting->creditBalanceToUserAccount();
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             WalletToWalletReceived::dispatch($senderWalletToWallet);
-
-            dd(['sender' => $senderWalletToWalletArray['user_id'], 'receiver' => $recipientWalletToWalletArray['user_id']]);
 
             return $senderWalletToWallet;
 
@@ -372,207 +338,207 @@ class WalletToWalletService
         }
     }
 
-    /**
-     * @return int[]
-     */
-    public function debitTransaction($walletToWallet): array
-    {
-        $userAccountData = [
-            'previous_amount' => null,
-            'current_amount' => null,
-            'spent_amount' => null,
-        ];
-
-        //Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'order_detail_currency' => $walletToWallet->currency,
-        ]);
-
-        $serviceStatData = $walletToWallet->order_data['service_stat_data'];
-        $master_user_name = $walletToWallet->order_data['master_user_name'];
-        $user_name = $walletToWallet->order_data['user_name'];
-
-        $amount = $walletToWallet->amount;
-        $converted_amount = $walletToWallet->converted_amount;
-        $walletToWallet->amount = -$amount;
-        $walletToWallet->converted_amount = -$converted_amount;
-        $walletToWallet->order_detail_cause_name = 'cash_withdraw';
-        $walletToWallet->order_detail_number = $walletToWallet->order_data['purchase_number'];
-        $walletToWallet->order_detail_response_id = $walletToWallet->order_data['purchase_number'];
-        $walletToWallet->notes = 'Wallet To Wallet Payment Send to '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        $orderDetailStore->order_detail_parent_id = $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStore->save();
-        $orderDetailStore->fresh();
-        $orderDetailStoreForMaster = $orderDetailStore->replicate();
-        $orderDetailStoreForMaster->user_id = $walletToWallet->sender_receiver_id;
-        $orderDetailStoreForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForMaster->order_detail_amount = $amount;
-        $orderDetailStoreForMaster->converted_amount = $converted_amount;
-        $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet To Wallet Payment Receive From'.$user_name;
-        $orderDetailStoreForMaster->save();
-
-        //For Charge
-        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
-        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
-        $walletToWallet->order_detail_cause_name = 'charge';
-        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        $walletToWallet->notes = 'Wallet To Wallet Charge Send to '.$master_user_name;
-        $walletToWallet->step = 3;
-        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
-        $orderDetailStoreForChargeForMaster->user_id = $walletToWallet->sender_receiver_id;
-        $orderDetailStoreForChargeForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
-        $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet Charge Receive from '.$user_name;
-        $orderDetailStoreForChargeForMaster->step = 4;
-        $orderDetailStoreForChargeForMaster->save();
-
-        //For Discount
-        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        $walletToWallet->order_detail_cause_name = 'discount';
-        $walletToWallet->notes = 'Wallet To Wallet Discount form '.$master_user_name;
-        $walletToWallet->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
-        $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
-        $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet Discount to '.$user_name;
-        $orderDetailStoreForDiscountForMaster->step = 6;
-        $orderDetailStoreForDiscountForMaster->save();
-
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
-
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'order_detail_currency' => $walletToWallet->currency,
-        ]);
-
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'order_id' => $walletToWallet->getKey(),
-            'order_detail_currency' => $walletToWallet->currency,
-        ]);
-
-        logger('User Account Data', $userAccountData);
-
-        return $userAccountData;
-
-    }
-
-    /**
-     * @return int[]
-     */
-    public function creditTransaction($walletToWallet): array
-    {
-        $userAccountData = [
-            'previous_amount' => null,
-            'current_amount' => null,
-            'spent_amount' => null,
-        ];
-
-        //Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'converted_currency' => $walletToWallet->converted_currency,
-        ]);
-
-        $serviceStatData = $walletToWallet->order_data['service_stat_data'];
-        $master_user_name = $walletToWallet->order_data['master_user_name'];
-        $user_name = $walletToWallet->order_data['user_name'];
-
-        $walletToWallet->order_detail_cause_name = 'cash_withdraw';
-        //$data->order_detail_number = $data->order_data['accepted_number'];
-        $walletToWallet->order_detail_response_id = $walletToWallet->order_data['purchase_number'];
-        $walletToWallet->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Refund From '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        $orderDetailStore->order_detail_parent_id = $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStore->save();
-        $orderDetailStore->fresh();
-        $amount = $walletToWallet->amount;
-        $converted_amount = $walletToWallet->converted_amount;
-        $orderDetailStoreForMaster = $orderDetailStore->replicate();
-        $orderDetailStoreForMaster->user_id = $walletToWallet->sender_receiver_id;
-        $orderDetailStoreForMaster->sender_receiver_id = $walletToWallet->user_id;
-        $orderDetailStoreForMaster->order_detail_amount = -$amount;
-        $orderDetailStoreForMaster->converted_amount = -$converted_amount;
-        $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Send to '.$user_name;
-        $orderDetailStoreForMaster->save();
-
-        //For Charge
-        //        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
-        //        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
-        //        $walletToWallet->order_detail_cause_name = 'charge';
-        //        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        //        $walletToWallet->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Receive from '.$master_user_name;
-        //        $walletToWallet->step = 3;
-        //        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
-        //        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        //        $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
-        //        $orderDetailStoreForChargeForMaster->user_id = $walletToWallet->sender_receiver_id;
-        //        $orderDetailStoreForChargeForMaster->sender_receiver_id = $walletToWallet->user_id;
-        //        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
-        //        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
-        //        $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        //        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Send to '.$user_name;
-        //        $orderDetailStoreForChargeForMaster->step = 4;
-        //        $orderDetailStoreForChargeForMaster->save();
-
-        //For Discount
-        //        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
-        //        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        //        $walletToWallet->order_detail_cause_name = 'discount';
-        //        $walletToWallet->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount form '.$master_user_name;
-        //        $walletToWallet->step = 5;
-        //        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //        $updateData['order_data']['previous_amount'] = 0;
-        //        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
-        //        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
-        //        $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
-        //        $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
-        //        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
-        //        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
-        //        $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        //        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount to '.$user_name;
-        //        $orderDetailStoreForDiscountForMaster->step = 6;
-        //        $orderDetailStoreForDiscountForMaster->save();
-
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
-
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'converted_currency' => $walletToWallet->converted_currency,
-        ]);
-
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
-            'get_order_detail_amount_sum' => true,
-            'user_id' => $walletToWallet->user_id,
-            'order_id' => $walletToWallet->getKey(),
-            'converted_currency' => $walletToWallet->converted_currency,
-        ]);
-
-        return $userAccountData;
-
-    }
+//    /**
+//     * @return int[]
+//     */
+//    public function debitTransaction($walletToWallet): array
+//    {
+//        $userAccountData = [
+//            'previous_amount' => null,
+//            'current_amount' => null,
+//            'spent_amount' => null,
+//        ];
+//
+//        //Collect Current Balance as Previous Balance
+//        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'order_detail_currency' => $walletToWallet->currency,
+//        ]);
+//
+//        $serviceStatData = $walletToWallet->order_data['service_stat_data'];
+//        $master_user_name = $walletToWallet->order_data['master_user_name'];
+//        $user_name = $walletToWallet->order_data['user_name'];
+//
+//        $amount = $walletToWallet->amount;
+//        $converted_amount = $walletToWallet->converted_amount;
+//        $walletToWallet->amount = -$amount;
+//        $walletToWallet->converted_amount = -$converted_amount;
+//        $walletToWallet->order_detail_cause_name = 'cash_withdraw';
+//        $walletToWallet->order_detail_number = $walletToWallet->order_data['purchase_number'];
+//        $walletToWallet->order_detail_response_id = $walletToWallet->order_data['purchase_number'];
+//        $walletToWallet->notes = 'Wallet To Wallet Payment Send to ' . $master_user_name;
+//        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        $orderDetailStore->order_detail_parent_id = $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        $orderDetailStore->save();
+//        $orderDetailStore->fresh();
+//        $orderDetailStoreForMaster = $orderDetailStore->replicate();
+//        $orderDetailStoreForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        $orderDetailStoreForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        $orderDetailStoreForMaster->order_detail_amount = $amount;
+//        $orderDetailStoreForMaster->converted_amount = $converted_amount;
+//        $orderDetailStoreForMaster->step = 2;
+//        $orderDetailStoreForMaster->notes = 'Wallet To Wallet Payment Receive From' . $user_name;
+//        $orderDetailStoreForMaster->save();
+//
+//        //For Charge
+//        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+//        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+//        $walletToWallet->order_detail_cause_name = 'charge';
+//        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        $walletToWallet->notes = 'Wallet To Wallet Charge Send to ' . $master_user_name;
+//        $walletToWallet->step = 3;
+//        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
+//        $orderDetailStoreForChargeForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        $orderDetailStoreForChargeForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
+//        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+//        $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
+//        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet Charge Receive from ' . $user_name;
+//        $orderDetailStoreForChargeForMaster->step = 4;
+//        $orderDetailStoreForChargeForMaster->save();
+//
+//        //For Discount
+//        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+//        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+//        $walletToWallet->order_detail_cause_name = 'discount';
+//        $walletToWallet->notes = 'Wallet To Wallet Discount form ' . $master_user_name;
+//        $walletToWallet->step = 5;
+//        //$data->order_detail_parent_id = $orderDetailStore->getKey();
+//        //$updateData['order_data']['previous_amount'] = 0;
+//        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
+//        $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+//        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+//        $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
+//        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet Discount to ' . $user_name;
+//        $orderDetailStoreForDiscountForMaster->step = 6;
+//        $orderDetailStoreForDiscountForMaster->save();
+//
+//        //'Point Transfer Commission Send to ' . $masterUser->name;
+//        //'Point Transfer Commission Receive from ' . $receiver->name;
+//
+//        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'order_detail_currency' => $walletToWallet->currency,
+//        ]);
+//
+//        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'order_id' => $walletToWallet->getKey(),
+//            'order_detail_currency' => $walletToWallet->currency,
+//        ]);
+//
+//        logger('User Account Data', $userAccountData);
+//
+//        return $userAccountData;
+//
+//    }
+//
+//    /**
+//     * @return int[]
+//     */
+//    public function creditTransaction($walletToWallet): array
+//    {
+//        $userAccountData = [
+//            'previous_amount' => null,
+//            'current_amount' => null,
+//            'spent_amount' => null,
+//        ];
+//
+//        //Collect Current Balance as Previous Balance
+//        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'converted_currency' => $walletToWallet->converted_currency,
+//        ]);
+//
+//        $serviceStatData = $walletToWallet->order_data['service_stat_data'];
+//        $master_user_name = $walletToWallet->order_data['master_user_name'];
+//        $user_name = $walletToWallet->order_data['user_name'];
+//
+//        $walletToWallet->order_detail_cause_name = 'cash_withdraw';
+//        //$data->order_detail_number = $data->order_data['accepted_number'];
+//        $walletToWallet->order_detail_response_id = $walletToWallet->order_data['purchase_number'];
+//        $walletToWallet->notes = 'Wallet To Wallet send to ' . $walletToWallet->amount . ' ' . $walletToWallet->currency . ' to ' . $walletToWallet->converted_amount . ' ' . $walletToWallet->converted_currency . ' Refund From ' . $master_user_name;
+//        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        $orderDetailStore->order_detail_parent_id = $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        $orderDetailStore->save();
+//        $orderDetailStore->fresh();
+//        $amount = $walletToWallet->amount;
+//        $converted_amount = $walletToWallet->converted_amount;
+//        $orderDetailStoreForMaster = $orderDetailStore->replicate();
+//        $orderDetailStoreForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        $orderDetailStoreForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        $orderDetailStoreForMaster->order_detail_amount = -$amount;
+//        $orderDetailStoreForMaster->converted_amount = -$converted_amount;
+//        $orderDetailStoreForMaster->step = 2;
+//        $orderDetailStoreForMaster->notes = 'Wallet To Wallet receive from ' . $walletToWallet->amount . ' ' . $walletToWallet->currency . ' to ' . $walletToWallet->converted_amount . ' ' . $walletToWallet->converted_currency . ' Send to ' . $user_name;
+//        $orderDetailStoreForMaster->save();
+//
+//        //For Charge
+//        //        $walletToWallet->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
+//        //        $walletToWallet->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+//        //        $walletToWallet->order_detail_cause_name = 'charge';
+//        //        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        //        $walletToWallet->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Receive from '.$master_user_name;
+//        //        $walletToWallet->step = 3;
+//        //        $walletToWallet->order_detail_parent_id = $orderDetailStore->getKey();
+//        //        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        //        $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
+//        //        $orderDetailStoreForChargeForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        //        $orderDetailStoreForChargeForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        //        $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
+//        //        $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
+//        //        $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
+//        //        $orderDetailStoreForChargeForMaster->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Charge Send to '.$user_name;
+//        //        $orderDetailStoreForChargeForMaster->step = 4;
+//        //        $orderDetailStoreForChargeForMaster->save();
+//
+//        //For Discount
+//        //        $walletToWallet->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
+//        //        $walletToWallet->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+//        //        $walletToWallet->order_detail_cause_name = 'discount';
+//        //        $walletToWallet->notes = 'Wallet To Wallet receive from '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount form '.$master_user_name;
+//        //        $walletToWallet->step = 5;
+//        //        //$data->order_detail_parent_id = $orderDetailStore->getKey();
+//        //        $updateData['order_data']['previous_amount'] = 0;
+//        //        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($walletToWallet));
+//        //        $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
+//        //        $orderDetailStoreForDiscountForMaster->user_id = $walletToWallet->sender_receiver_id;
+//        //        $orderDetailStoreForDiscountForMaster->sender_receiver_id = $walletToWallet->user_id;
+//        //        $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
+//        //        $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
+//        //        $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
+//        //        $orderDetailStoreForDiscountForMaster->notes = 'Wallet To Wallet send to '.$walletToWallet->amount.' '.$walletToWallet->currency.' to '.$walletToWallet->converted_amount.' '.$walletToWallet->converted_currency.' Discount to '.$user_name;
+//        //        $orderDetailStoreForDiscountForMaster->step = 6;
+//        //        $orderDetailStoreForDiscountForMaster->save();
+//
+//        //'Point Transfer Commission Send to ' . $masterUser->name;
+//        //'Point Transfer Commission Receive from ' . $receiver->name;
+//
+//        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'converted_currency' => $walletToWallet->converted_currency,
+//        ]);
+//
+//        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+//            'get_order_detail_amount_sum' => true,
+//            'user_id' => $walletToWallet->user_id,
+//            'order_id' => $walletToWallet->getKey(),
+//            'converted_currency' => $walletToWallet->converted_currency,
+//        ]);
+//
+//        return $userAccountData;
+//
+//    }
 
     /**
      * @return int[]
@@ -599,7 +565,7 @@ class WalletToWalletService
         $deposit->order_detail_cause_name = 'cash_deposit';
         //$deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
-        $deposit->notes = 'Wallet To Wallet receive from '.$master_user_name;
+        $deposit->notes = 'Wallet To Wallet receive from ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -612,7 +578,7 @@ class WalletToWalletService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet To Wallet send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Wallet To Wallet send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -638,7 +604,7 @@ class WalletToWalletService
         $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
-        $deposit->notes = 'Wallet to Wallet Discount form '.$master_user_name;
+        $deposit->notes = 'Wallet to Wallet Discount form ' . $master_user_name;
         $deposit->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -649,7 +615,7 @@ class WalletToWalletService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet to Wallet Deposit Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Wallet to Wallet Deposit Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -658,7 +624,7 @@ class WalletToWalletService
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $deposit->order_detail_cause_name = 'commission';
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $deposit->notes = 'Wallet to Wallet Deposit Commission Receive from '.$master_user_name;
+        $deposit->notes = 'Wallet to Wallet Deposit Commission Receive from ' . $master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
@@ -668,7 +634,7 @@ class WalletToWalletService
         $orderDetailStoreForCommissionForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $orderDetailStoreForCommissionForMaster->order_detail_cause_name = 'commission';
-        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to '.$user_name;
+        $orderDetailStoreForCommissionForMaster->notes = 'Wallet to Wallet Deposit Commission Send to ' . $user_name;
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
 
