@@ -128,8 +128,8 @@ class WalletToWalletService
         $role = $sender->roles?->first() ?? null;
         $inputs['order_data']['role_id'] = $role->id;
         $inputs['order_data']['order_type'] = OrderType::WalletToWallet;
-        $inputs['description'] = "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
-        $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
+        $inputs['description'] = "Wallet To Wallet transfer sent to {$recipient->name} [{$recipientAccount->account_no}]";
+        $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer sent to {$recipient->name} [{$recipientAccount->account_no}]";
         $inputs['status'] = OrderStatus::Success;
         $inputs['sender_receiver_id'] = $senderMasterUser->getKey();
         $inputs['is_refunded'] = false;
@@ -212,8 +212,8 @@ class WalletToWalletService
 
             $inputs['parent_id'] = $senderWalletToWallet->getKey();
             $inputs['user_id'] = $recipient->getKey();
-            $inputs['description'] = "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
-            $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer from #{$sender->mobile} to #{$recipient->mobile} [{$recipient->name}]";
+            $inputs['description'] = "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
+            $inputs['notes'] = $inputs['notes'] ?? "Wallet To Wallet transfer received from {$sender->name} [{$senderAccount->account_no}]";
             $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
             $inputs['order_data']['master_user_name'] = $recipientMasterUser->name;
             $inputs['order_data']['user_name'] = $recipient->name;
