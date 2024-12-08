@@ -221,12 +221,13 @@ class WalletToWalletService
             $receiverInputs['sender_receiver_id'] = $recipientMasterUser->getKey();
             $receiverInputs['order_data']['master_user_name'] = $recipientMasterUser->name;
             $receiverInputs['order_data']['user_name'] = $recipient->name;
+            logger("receiver inputs", $receiverInputs);
             $recipientWalletToWallet = $this->walletToWalletRepository->create($receiverInputs);
 
             $recipientAccounting = Transaction::accounting($recipientWalletToWallet, $recipient->getKey());
             $recipientWalletToWallet = $recipientAccounting->creditTransaction();
             $recipientAccounting->creditBalanceToUserAccount();
-
+            logger("receiver wallet", [$recipientWalletToWallet]);
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
             WalletToWalletReceived::dispatch($senderWalletToWallet);
