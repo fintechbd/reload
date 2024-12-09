@@ -104,119 +104,119 @@ class CurrencySwapController extends Controller
             return response()->failed($exception);
         }
     }
-/*{
-        DB::beginTransaction();
-        try {
-            $inputs = $request->validated();
-            if ($request->input('user_id') > 0) {
-                $user_id = $request->input('user_id');
-                $depositor = Auth::user()->find($request->input('user_id'));
-            } else {
-                $depositor = $request->user('sanctum');
-            }
-            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
-
-                $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'currency' => $request->input('converted_currency', $depositor->profile?->presentCountry?->currency)]);
-
-                if (! $depositAccount) {
-                    throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
+    /*{
+            DB::beginTransaction();
+            try {
+                $inputs = $request->validated();
+                if ($request->input('user_id') > 0) {
+                    $user_id = $request->input('user_id');
+                    $depositor = Auth::user()->find($request->input('user_id'));
+                } else {
+                    $depositor = $request->user('sanctum');
                 }
+                if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
-                $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $request->input('source_country_id', $depositor->profile?->present_country_id)]);
+                    $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'currency' => $request->input('converted_currency', $depositor->profile?->presentCountry?->currency)]);
 
-                if (! $masterUser) {
-                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+                    if (! $depositAccount) {
+                        throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
+                    }
+
+                    $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $request->input('source_country_id', $depositor->profile?->present_country_id)]);
+
+                    if (! $masterUser) {
+                        throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+                    }
+
+                    //set pre-defined conditions of deposit
+                    $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
+                    $inputs['user_id'] = $user_id ?? $depositor->getKey();
+                    $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                    if ($delayCheck['countValue'] > 0) {
+                        throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+                    }
+                    $inputs['sender_receiver_id'] = $masterUser->getKey();
+                    $inputs['is_refunded'] = false;
+                    $inputs['status'] = OrderStatus::Successful->value;
+                    $inputs['risk'] = RiskProfile::Low->value;
+                    //$inputs['reverse'] = true;
+
+                    $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                    unset($inputs['reverse']);
+                    $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
+                    $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
+                    $inputs['notes'] = 'Currency Swap transfer '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
+                    $inputs['order_data']['created_by'] = $depositor->name;
+                    $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
+                    $inputs['order_data']['created_at'] = now();
+                    $inputs['order_data']['master_user_name'] = $masterUser['name'];
+                    //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                    $inputs['order_data']['system_notification_variable_success'] = 'currency_swap_success';
+                    $inputs['order_data']['system_notification_variable_failed'] = 'currency_swap_failed';
+                    $inputs['order_data']['source_country_id'] = $inputs['source_country_id'];
+                    $inputs['order_data']['destination_country_id'] = $inputs['destination_country_id'];
+                    $inputs['order_data']['order_type'] = OrderType::CurrencySwap;
+                    //new concept add
+                    $inputs['source_country_id'] = $inputs['order_data']['serving_country_id'];
+                    $inputs['destination_country_id'] = $inputs['order_data']['serving_country_id'];
+
+                    unset($inputs['pin'], $inputs['password']);
+                    $currencySwap = Reload::currencySwap()->create($inputs);
+
+                    if (! $currencySwap) {
+                        throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
+                    }
+
+                    $order_data = $currencySwap->order_data;
+                    $order_data['purchase_number'] = entry_number($currencySwap->getKey(), $currencySwap->sourceCountry->iso3, OrderStatus::Successful->value);
+
+                    $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($currencySwap);
+                    $order_data['user_name'] = $currencySwap->user->name;
+                    $currencySwap->order_data = $order_data;
+                    $userUpdatedBalance = Reload::currencySwap()->debitTransaction($currencySwap);
+                    //source country or destination country change to currency name
+                    $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'currency' => $currencySwap->converted_currency]);
+
+                    //update User Account
+                    $depositedUpdatedAccount = $depositedAccount->toArray();
+                    $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+                    $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+                    if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
+                        throw new Exception(__('Insufficient balance!', [
+                            'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                            'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
+                        ]));
+                    }
+                    $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                    $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
+                    if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                        throw new Exception(__('User Account Balance does not update', [
+                            'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                            'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
+                        ]));
+                    }
+
+                    Reload::currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                    $this->__receiverStore($currencySwap->getKey());
+                    Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+                    DB::commit();
+
+                    return response()->created([
+                        'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
+                        'id' => $currencySwap->id,
+                        'spent' => $userUpdatedBalance['spent_amount'],
+                    ]);
+                } else {
+                    throw new Exception('Your another order is in process...!');
                 }
-
-                //set pre-defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
-                $inputs['user_id'] = $user_id ?? $depositor->getKey();
-                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-                if ($delayCheck['countValue'] > 0) {
-                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-                }
-                $inputs['sender_receiver_id'] = $masterUser->getKey();
-                $inputs['is_refunded'] = false;
-                $inputs['status'] = OrderStatus::Successful->value;
-                $inputs['risk'] = RiskProfile::Low->value;
-                //$inputs['reverse'] = true;
-
-                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
-                unset($inputs['reverse']);
-                $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
-                $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-                $inputs['notes'] = 'Currency Swap transfer '.$inputs['amount'].' '.$inputs['currency'].' to '.$inputs['converted_amount'].' '.$inputs['converted_currency'];
-                $inputs['order_data']['created_by'] = $depositor->name;
-                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
-                $inputs['order_data']['created_at'] = now();
-                $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
-                $inputs['order_data']['system_notification_variable_success'] = 'currency_swap_success';
-                $inputs['order_data']['system_notification_variable_failed'] = 'currency_swap_failed';
-                $inputs['order_data']['source_country_id'] = $inputs['source_country_id'];
-                $inputs['order_data']['destination_country_id'] = $inputs['destination_country_id'];
-                $inputs['order_data']['order_type'] = OrderType::CurrencySwap;
-                //new concept add
-                $inputs['source_country_id'] = $inputs['order_data']['serving_country_id'];
-                $inputs['destination_country_id'] = $inputs['order_data']['serving_country_id'];
-
-                unset($inputs['pin'], $inputs['password']);
-                $currencySwap = Reload::currencySwap()->create($inputs);
-
-                if (! $currencySwap) {
-                    throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
-                }
-
-                $order_data = $currencySwap->order_data;
-                $order_data['purchase_number'] = entry_number($currencySwap->getKey(), $currencySwap->sourceCountry->iso3, OrderStatus::Successful->value);
-
-                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($currencySwap);
-                $order_data['user_name'] = $currencySwap->user->name;
-                $currencySwap->order_data = $order_data;
-                $userUpdatedBalance = Reload::currencySwap()->debitTransaction($currencySwap);
-                //source country or destination country change to currency name
-                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'currency' => $currencySwap->converted_currency]);
-
-                //update User Account
-                $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-
-                if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
-                    throw new Exception(__('Insufficient balance!', [
-                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
-                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
-                    ]));
-                }
-                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
-                    throw new Exception(__('User Account Balance does not update', [
-                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
-                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
-                    ]));
-                }
-
-                Reload::currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-                $this->__receiverStore($currencySwap->getKey());
+            } catch (Exception $exception) {
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-                DB::commit();
+                DB::rollBack();
 
-                return response()->created([
-                    'message' => __('core::messages.resource.created', ['model' => 'Currency Swap']),
-                    'id' => $currencySwap->id,
-                    'spent' => $userUpdatedBalance['spent_amount'],
-                ]);
-            } else {
-                throw new Exception('Your another order is in process...!');
+                return response()->failed($exception);
             }
-        } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-            DB::rollBack();
-
-            return response()->failed($exception);
-        }
-    }*/
+        }*/
 
     /**
      * @lrd:start
