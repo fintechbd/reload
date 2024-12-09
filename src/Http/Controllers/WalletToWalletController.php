@@ -79,13 +79,13 @@ class WalletToWalletController extends Controller
         $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
 
         try {
-            $deposit = Reload::walletToWallet()->create($inputs);
+            $walletToWallet = Reload::walletToWallet()->create($inputs);
 
-            $service = $deposit->service;
+            $service = $walletToWallet->service;
 
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
-                'id' => $deposit->getKey(),
+                'id' => $walletToWallet->getKey(),
             ]);
 
         } catch (Exception $exception) {
