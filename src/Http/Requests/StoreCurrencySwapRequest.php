@@ -25,16 +25,25 @@ class StoreCurrencySwapRequest extends FormRequest
         return [
             'user_id' => ['nullable', 'integer', 'min:1'],
             'source_country_id' => ['required', 'integer', 'min:1'],
-            'destination_country_id' => ['required', 'integer', 'min:1', 'different:source_country_id'],
+            'destination_country_id' => ['required', 'integer', 'min:1'],
             'service_id' => ['required', 'integer', 'min:1'],
             'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s', strtotime('+3 seconds'))],
             'amount' => ['required', 'numeric'],
+            'reverse' => ['nullable', 'boolean'],
             'currency' => ['required', 'string', 'size:3'],
             'converted_currency' => ['required', 'string', 'size:3'],
             'order_data' => ['nullable', 'array'],
             'order_data.request_from' => ['string', 'required'],
             'order_data.serving_country_id' => ['required', 'integer', 'min:1'],
+            'order_data.receiving_country_id' => ['required', 'integer', 'min:1']
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $order_data = $this->input('order_data');
+        $order_data['request_from'] = request()->platform()->value;
+        $this->merge(['order_data' => $order_data]);
     }
 
     /**

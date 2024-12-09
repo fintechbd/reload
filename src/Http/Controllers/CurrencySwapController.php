@@ -84,6 +84,27 @@ class CurrencySwapController extends Controller
      */
     public function store(StoreCurrencySwapRequest $request): JsonResponse
     {
+        $inputs = $request->validated();
+
+        $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
+
+        try {
+            $currencySwap = Reload::currencySwap()->create($inputs);
+
+            $service = $currencySwap->service;
+
+            return response()->created([
+                'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
+                'id' => $currencySwap->getKey(),
+            ]);
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+
+            return response()->failed($exception);
+        }
+    }
+/*{
         DB::beginTransaction();
         try {
             $inputs = $request->validated();
@@ -107,7 +128,7 @@ class CurrencySwapController extends Controller
                     throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
-                //set pre defined conditions of deposit
+                //set pre-defined conditions of deposit
                 $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
@@ -195,7 +216,7 @@ class CurrencySwapController extends Controller
 
             return response()->failed($exception);
         }
-    }
+    }*/
 
     /**
      * @lrd:start
