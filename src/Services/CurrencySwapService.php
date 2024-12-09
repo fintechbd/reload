@@ -220,9 +220,8 @@ class CurrencySwapService
             $recipientCurrencySwap = $recipientAccounting->setStepIndex($senderAccounting->currentIndex())->creditTransaction();
             $recipientAccounting->creditBalanceToUserAccount();
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
-            $senderCurrencySwap->refresh();
-
-            $this->currencySwapRepository->update($senderCurrencySwap->getKey(), ['timeline' => $recipientAccounting->timeline]);
+            $senderCurrencySwap->timeline = $recipientAccounting->timeline;
+            $senderCurrencySwap->save();
 
             //@TODO not working on double entry need fix ;-(
             //            event(new WalletToWalletReceived($senderWalletToWallet));
