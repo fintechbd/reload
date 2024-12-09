@@ -90,36 +90,35 @@ class CurrencySwapService
     public function create(array $inputs = []): ?BaseModel
     {
         $user_id = $inputs['user_id'] ?? null;
-
         $orderType = OrderType::CurrencySwap;
 
         $user = Auth::user()->find($user_id);
-        if (!$user) {
+        if (! $user) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $user_id);
         }
-        $inputs['source_country_id'] = $inputs['source_country_id'] ?? $user->profile?->present_country_id;
 
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $user->getKey(), 'country_id' => $inputs['source_country_id']]);
-        if (!$senderAccount) {
+        $inputs['source_country_id'] = $inputs['source_country_id'] ?? $user->profile?->present_country_id;
+        $sendingAccount = Transaction::userAccount()->findWhere(['user_id' => $user->getKey(), 'country_id' => $inputs['source_country_id']]);
+        if (! $sendingAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
-        $recipientAccount = Transaction::userAccount()->findWhere(['user_id' => $user->getKey(), 'country_id' => $inputs['destination_country_id']]);
-        if (!$recipientAccount) {
+        $receivingAccount = Transaction::userAccount()->findWhere(['user_id' => $user->getKey(), 'country_id' => $inputs['destination_country_id']]);
+        if (! $receivingAccount) {
             throw new CurrencyUnavailableException($inputs['destination_country_id']);
         }
 
-        // Sender System User
+        // Sending System User
         $senderMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
-        if (!$senderMasterUser) {
+        if (! $senderMasterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
-//        // Recipient System User
-//        $recipientMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['destination_country_id']]);
-//        if (! $recipientMasterUser) {
-//            throw new MasterCurrencyUnavailableException($inputs['destination_country_id']);
-//        }
+        // Receiving System User
+        $recipientMasterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['destination_country_id']]);
+        if (! $recipientMasterUser) {
+            throw new MasterCurrencyUnavailableException($inputs['destination_country_id']);
+        }
 
         if (Transaction::orderQueue()->addToQueueUserWise($user_id) == 0) {
             throw new RequestOrderExistsException;
@@ -140,7 +139,7 @@ class CurrencySwapService
         $inputs['sender_receiver_id'] = $senderMasterUser->getKey();
         $inputs['is_refunded'] = false;
         $inputs['risk'] = RiskProfile::Low;
-        $inputs['order_data']['is_reverse'] = boolval($inputs['reverse'] ?? 0);
+        $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['order_data']['is_reload'] = false;
         $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
@@ -153,7 +152,8 @@ class CurrencySwapService
         if ($inputs['order_data']['is_reverse']) {
             $inputs['amount'] = $currencyConversion['converted'];
             $inputs['converted_amount'] = $currencyConversion['amount'];
-        } else {
+        }
+        else {
             $inputs['amount'] = $currencyConversion['amount'];
             $inputs['converted_amount'] = $currencyConversion['converted'];
         }
@@ -166,10 +166,6 @@ class CurrencySwapService
         $inputs['order_data']['created_by_mobile_number'] = $user->mobile ?? 'N/A';
         $inputs['order_data']['created_by_email'] = $user->email ?? 'N/A';
         $inputs['order_data']['created_at'] = now();
-        $inputs['order_data']['sender_id'] = $user->id ?? 'N/A';
-        $inputs['order_data']['sender_by'] = $user->name ?? 'N/A';
-        $inputs['order_data']['sender_mobile'] = $user->mobile ?? 'N/A';
-        $inputs['order_data']['sender_email'] = $user->email ?? 'N/A';
         $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
@@ -181,7 +177,7 @@ class CurrencySwapService
             'amount' => $inputs['amount'],
             'service_id' => $inputs['service_id'],
         ]);
-        $inputs['order_data']['previous_amount'] = $senderAccount->user_account_data['available_amount'] ?? 0;
+        $inputs['order_data']['previous_amount'] = $sendingAccount->user_account_data['available_amount'] ?? 0;
         $inputs['order_data']['current_amount'] = $inputs['order_data']['previous_amount'] - $inputs['order_data']['service_stat_data']['total_amount'];
         $inputs['order_data']['master_user_name'] = $senderMasterUser->name;
         $inputs['order_data']['system_notification_variable_success'] = 'currency_swap_success';
@@ -204,23 +200,34 @@ class CurrencySwapService
         DB::beginTransaction();
 
         try {
-            $currencySwap = $this->currencySwapRepository->create($inputs);
+            $senderCurrencySwap = $this->currencySwapRepository->create($inputs);
             DB::commit();
-            $senderAccounting = Transaction::accounting($currencySwap, $user->getKey());
-            $currencySwap = $senderAccounting->debitTransaction();
+            $senderAccounting = Transaction::accounting($senderCurrencySwap, $user->getKey());
+            $senderCurrencySwap = $senderAccounting->debitTransaction();
             $senderAccounting->debitBalanceFromUserAccount();
-
-            $recipientAccounting = Transaction::accounting($currencySwap, $user->getKey());
-            $currencySwap = $recipientAccounting->creditTransaction();
+            $inputs['parent_id'] = $senderCurrencySwap->getKey();
+            $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
+            $inputs['amount'] = $inputs['converted_amount'];
+            $inputs['currency'] = $inputs['converted_currency'];
+            $inputs['sender_receiver_id'] = $recipientMasterUser->getKey();
+            $inputs['order_data']['master_user_name'] = $recipientMasterUser->name;
+            $inputs['order_data']['parent_purchase_number'] = $inputs['order_data']['purchase_number'];
+            $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
+            $inputs['order_number'] = $inputs['order_data']['purchase_number'];
+            $inputs['timeline'] = $senderCurrencySwap->timeline ?? [];
+            $recipientCurrencySwap = $this->currencySwapRepository->create($inputs);
+            $recipientAccounting = Transaction::accounting($recipientCurrencySwap);
+            $recipientCurrencySwap = $recipientAccounting->setStepIndex($senderAccounting->currentIndex())->creditTransaction();
             $recipientAccounting->creditBalanceToUserAccount();
-
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+            $senderCurrencySwap->refresh();
 
-            $currencySwap->refresh();
+            $this->currencySwapRepository->update($senderCurrencySwap->getKey(), ['timeline' => $recipientAccounting->timeline]);
+
             //@TODO not working on double entry need fix ;-(
             //            event(new WalletToWalletReceived($senderWalletToWallet));
 
-            return $currencySwap;
+            return $senderCurrencySwap;
 
         } catch (Exception $e) {
 
