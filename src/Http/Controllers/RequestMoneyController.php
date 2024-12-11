@@ -82,6 +82,7 @@ class RequestMoneyController extends Controller
      */
     public function store(StoreRequestMoneyRequest $request): JsonResponse
     {
+        dd();
         try {
             $inputs = $request->validated();
             if ($request->input('user_id') > 0) {
