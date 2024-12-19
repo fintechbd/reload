@@ -83,90 +83,22 @@ class RequestMoneyController extends Controller
      */
     public function store(StoreRequestMoneyRequest $request): JsonResponse
     {
-        dd();
+        $inputs = $request->validated();
+
+        $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
+
         try {
-            $inputs = $request->validated();
-            if ($request->input('user_id') > 0) {
-                $user_id = $request->input('user_id');
-                $depositor = Auth::user()->find($request->input('user_id'));
-            } else {
-                $depositor = $request->user('sanctum');
-            }
+            $requestMoney = Reload::requestMoney()->create($inputs);
 
-            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
+            $service = $requestMoney->service;
 
-                $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'currency' => $request->input('currency', $depositor->profile?->presentCountry?->currency)]);
+            return response()->created([
+                'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
+                'id' => $requestMoney->getKey(),
+            ]);
 
-                if (! $depositAccount) {
-                    throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
-                }
-
-                $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $request->input('source_country_id', $depositor->profile?->present_country_id)]);
-
-                if (! $masterUser) {
-                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
-                }
-
-                $receiver = Auth::user()->find($inputs['sender_receiver_id']);
-                $receiverDepositAccount = Transaction::userAccount()->findWhere(['user_id' => $inputs['sender_receiver_id'], 'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency)]);
-
-                if (! $receiverDepositAccount) {
-                    throw new Exception("Receiver don't have account deposit balance");
-                }
-
-                //set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
-                $inputs['user_id'] = $receiver ?? $receiverDepositAccount->getKey();
-                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-                if ($delayCheck['countValue'] > 0) {
-                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-                }
-
-                $inputs['user_id'] = $receiver->getKey();
-                $inputs['sender_receiver_id'] = $user_id ?? $depositor->getKey(); //$masterUser->getKey();
-                $inputs['order_data']['sender_receiver_id'] = $user_id ?? $depositor->getKey();
-                $inputs['is_refunded'] = false;
-                $inputs['status'] = DepositStatus::Processing->value;
-                $inputs['risk'] = RiskProfile::Low->value;
-                $inputs['converted_currency'] = $inputs['currency'];
-                $inputs['notes'] = 'Request Money for wallet to wallet transfer to '.$depositor->name;
-                $inputs['order_data']['created_by'] = $depositor->name;
-                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
-                $inputs['order_data']['created_at'] = now();
-                $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
-                $inputs['order_data']['system_notification_variable_success'] = 'request_money_success';
-                $inputs['order_data']['system_notification_variable_failed'] = 'request_money_failed';
-                $inputs['order_data']['source_country_id'] = $inputs['source_country_id'];
-                $inputs['order_data']['destination_country_id'] = $inputs['destination_country_id'];
-                $inputs['converted_amount'] = $inputs['amount'];
-                $inputs['converted_currency'] = $inputs['currency'];
-                $inputs['order_data']['order_type'] = OrderType::RequestMoney;
-                unset($inputs['pin'], $inputs['password']);
-                $requestMoney = Reload::requestMoney()->create($inputs);
-
-                if (! $requestMoney) {
-                    throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
-                }
-                $order_data = $requestMoney->order_data;
-                $order_data['purchase_number'] = entry_number($requestMoney->getKey(), $requestMoney->sourceCountry->iso3, OrderStatus::Successful->value);
-                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($requestMoney);
-                $order_data['user_name'] = $requestMoney->user->name;
-                Reload::requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-                $this->__receiverStore($requestMoney->getKey());
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-                DB::commit();
-
-                return response()->created([
-                    'message' => __('core::messages.resource.created', ['model' => 'Request Money']),
-                    'id' => $requestMoney->id,
-                ]);
-            } else {
-                throw new Exception('Your another order is in process...!');
-            }
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-            DB::rollBack();
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
         }
