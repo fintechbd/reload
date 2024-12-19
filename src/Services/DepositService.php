@@ -135,7 +135,7 @@ class DepositService
         $inputs['order_data']['role_id'] = $role->id;
         $inputs['order_data']['is_reload'] = true;
         $inputs['order_data']['is_reverse'] = false;
-        $inputs['sender_receiver_id'] = $masterUser->getKey();
+        $inputs['sender_receiver_id'] = $inputs['user_id'];
         $inputs['is_refunded'] = false;
         $inputs['risk'] = RiskProfile::Low;
         $inputs['converted_amount'] = $inputs['amount'];
@@ -475,7 +475,6 @@ class DepositService
             'converted_currency' => $data->converted_currency,
         ]);
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
         return $userAccountData;
 
