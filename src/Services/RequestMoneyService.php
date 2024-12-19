@@ -153,8 +153,7 @@ class RequestMoneyService
             } else {
                 throw new Exception('Your another order is in process...!');
             }
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
 
