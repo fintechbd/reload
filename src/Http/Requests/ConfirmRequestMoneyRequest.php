@@ -25,7 +25,7 @@ class ConfirmRequestMoneyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => ['required', 'string', Rule::in(RequestMoneyConfirm::values())]
+            'action' => ['required', 'string', Rule::in(RequestMoneyConfirm::values())],
         ];
     }
 
