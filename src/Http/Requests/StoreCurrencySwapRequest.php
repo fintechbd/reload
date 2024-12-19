@@ -24,8 +24,8 @@ class StoreCurrencySwapRequest extends FormRequest
     {
         return [
             'user_id' => ['nullable', 'integer', 'min:1'],
-            'source_country_id' => ['required', 'integer', 'min:1', 'master_currency', 'master_currency'],
-            'destination_country_id' => ['required', 'integer', 'min:1', 'master_currency', 'master_currency'],
+            'source_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
+            'destination_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
             'service_id' => ['required', 'integer', 'min:1'],
             'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s', strtotime('+3 seconds'))],
             'amount' => ['required', 'numeric'],
