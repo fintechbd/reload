@@ -20,6 +20,7 @@ use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\CheckDepositRequest;
+use Fintech\Reload\Http\Requests\ConfirmRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\ImportRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\IndexRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\StoreRequestMoneyRequest;
@@ -180,6 +181,43 @@ class RequestMoneyController extends Controller
      * @throws ModelNotFoundException
      */
     public function update(UpdateRequestMoneyRequest $request, string|int $id): JsonResponse
+    {
+        try {
+
+            $requestMoney = Reload::requestMoney()->find($id);
+
+            if (! $requestMoney) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
+            }
+
+            $inputs = $request->validated();
+
+            if (! Reload::requestMoney()->update($id, $inputs)) {
+
+                throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
+            }
+
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Request Money']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Confirm a specified *RequestMoney* resource using id.
+     *
+     * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     */
+    public function confirm(ConfirmRequestMoneyRequest $request, string|int $id): JsonResponse
     {
         try {
 

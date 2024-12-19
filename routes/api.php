@@ -56,6 +56,9 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('request-moneys', RequestMoneyController::class)
                     ->only(['index', 'store', 'show']);
 
+                Route::post('request-moneys/{request_money}/confirm', [RequestMoneyController::class, 'confirm'])
+                    ->name('request-moneys.confirm');
+
                 Route::apiResource('wallet-to-banks', WalletToBankController::class)
                     ->only(['index', 'store', 'show']);
                 //             Route::post('wallet-to-banks/{wallet_to_bank}/restore', [WalletToBankController::class, 'restore'])->name('wallet-to-banks.restore');
