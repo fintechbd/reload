@@ -46,11 +46,10 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('wallet-to-wallets', WalletToWalletController::class)
                     ->only(['index', 'store', 'show']);
 
-
                 //             Route::post('request-moneys/{request_money}/restore', [RequestMoneyController::class, 'restore'])->name('request-moneys.restore');
                 Route::apiResource('request-moneys', RequestMoneyController::class)
                     ->only(['index', 'store', 'show']);
-                
+
                 Route::post('request-moneys/{request_money}/accept', [RequestMoneyController::class, 'accept'])
                     ->name('request-moneys.accept');
 
