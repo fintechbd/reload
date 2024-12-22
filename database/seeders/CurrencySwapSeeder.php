@@ -20,6 +20,7 @@ class CurrencySwapSeeder extends Seeder
 
             Business::serviceTypeManager($this->data())
                 ->hasService()
+                ->enabled()
                 ->distCountries($servingCountries)
                 ->hasTransactionForm()
                 ->execute();
