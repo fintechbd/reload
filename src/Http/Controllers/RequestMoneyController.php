@@ -42,6 +42,11 @@ use Illuminate\Routing\Controller;
  */
 class RequestMoneyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('imposter', ['only' => ['store', 'reject', 'accept']]);
+    }
+
     /**
      * @lrd:start
      * Return a listing of the *RequestMoney* resource as collection.
