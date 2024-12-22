@@ -9,6 +9,7 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Reload\DepositStatus;
+use Fintech\Core\Enums\Reload\RequestMoneyStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Enums\Transaction\OrderStatusConfig;
 use Fintech\Core\Exceptions\DeleteOperationException;
@@ -158,9 +159,16 @@ class RequestMoneyController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Reload::requestMoney()->update($id, $inputs)) {
+            if ($inputs['action'] == RequestMoneyStatus::Accepted->value) {
+                if (! Reload::requestMoney()->accept($requestMoney, $inputs)) {
+                    throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
+                }
+            }
 
-                throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
+            if ($inputs['action'] == RequestMoneyStatus::Rejected->value) {
+                if (! Reload::requestMoney()->reject($requestMoney, $inputs)) {
+                    throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
+                }
             }
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Request Money']));
