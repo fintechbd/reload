@@ -109,6 +109,7 @@ class DepositController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
                 'id' => $deposit->getKey(),
+                'order_number' => $deposit->order_number ?? $deposit->order_data['purchase_number']
             ]);
 
         } catch (Exception $exception) {

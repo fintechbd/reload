@@ -182,6 +182,7 @@ class WalletToAtmController extends Controller
                 return response()->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet To ATM']),
                     'id' => $walletToAtm->id,
+                    'order_number' => $walletToAtm->order_number ?? $walletToAtm->order_data['purchase_number']
                 ]);
 
             } else {

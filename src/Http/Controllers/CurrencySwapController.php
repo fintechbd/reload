@@ -96,6 +96,7 @@ class CurrencySwapController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
                 'id' => $currencySwap->getKey(),
+                'order_number' => $currencySwap->order_number ?? $currencySwap->order_data['purchase_number']
             ]);
 
         } catch (Exception $exception) {

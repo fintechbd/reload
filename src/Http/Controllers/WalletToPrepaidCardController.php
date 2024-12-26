@@ -152,6 +152,7 @@ class WalletToPrepaidCardController extends Controller
                 return response()->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet To Prepaid Card']),
                     'id' => $walletToPrepaidCard->id,
+                    'order_number' => $walletToPrepaidCard->order_number ?? $walletToPrepaidCard->order_data['purchase_number']
                 ]);
 
             } else {

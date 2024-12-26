@@ -86,6 +86,7 @@ class WalletToWalletController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
                 'id' => $walletToWallet->getKey(),
+                'order_number' => $walletToWallet->order_number ?? $walletToWallet->order_data['purchase_number']
             ]);
 
         } catch (Exception $exception) {

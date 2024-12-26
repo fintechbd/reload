@@ -98,6 +98,7 @@ class RequestMoneyController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => ucwords(strtolower($service->service_name))]),
                 'id' => $requestMoney->getKey(),
+                'order_number' => $requestMoney->order_number ?? $requestMoney->order_data['purchase_number']
             ]);
 
         } catch (Exception $exception) {
