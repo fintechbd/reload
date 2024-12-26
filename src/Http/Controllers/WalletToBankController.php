@@ -182,7 +182,7 @@ class WalletToBankController extends Controller
                 return response()->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet To Bank']),
                     'id' => $walletToBank->id,
-                    'order_number' => $walletToBank->order_number ?? $walletToBank->order_data['purchase_number']
+                    'order_number' => $walletToBank->order_number ?? $walletToBank->order_data['purchase_number'],
                 ]);
 
             } else {
