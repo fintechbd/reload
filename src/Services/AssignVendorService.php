@@ -26,17 +26,17 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.reload.providers', []);
 
-        if (!isset($availableVendors[$slug])) {
+        if (! isset($availableVendors[$slug])) {
             throw new VendorNotFoundException(ucfirst($slug));
         }
 
         $this->serviceVendorModel = Business::serviceVendor()->findWhere([
             'service_vendor_slug' => $slug,
             'enabled' => true,
-            'paginate' => false
+            'paginate' => false,
         ]);
 
-        if (!$this->serviceVendorModel) {
+        if (! $this->serviceVendorModel) {
             throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
         }
 
@@ -44,7 +44,7 @@ class AssignVendorService
     }
 
     /**
-     * @param BaseModel $deposit
+     * @param  BaseModel  $deposit
      *
      * @throws VendorNotFoundException|ErrorException
      */
@@ -57,7 +57,7 @@ class AssignVendorService
         $service = Business::service()->find($deposit->service_id);
 
         $data['timeline'][] = [
-            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for " . ucwords(strtolower($service->service_name)) . ' payment request',
+            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for ".ucwords(strtolower($service->service_name)).' payment request',
             'flag' => 'info',
             'timestamp' => now(),
         ];
@@ -69,23 +69,23 @@ class AssignVendorService
         $data['order_data'] = $deposit->order_data;
         $data['order_data']['vendor_data']['bill_info'] = $verdict->toArray();
 
-        if (!$verdict->status) {
+        if (! $verdict->status) {
             $data['status'] = OrderStatus::AdminVerification->value;
             $data['timeline'][] = [
-                'message' => "Updating {$service->service_name} payment request status. Requires " . OrderStatus::AdminVerification->label() . ' confirmation',
+                'message' => "Updating {$service->service_name} payment request status. Requires ".OrderStatus::AdminVerification->label().' confirmation',
                 'flag' => 'warn',
                 'timestamp' => now(),
             ];
         } else {
             $data['status'] = OrderStatus::Processing->value;
             $data['timeline'][] = [
-                'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve " . ucwords(strtolower($service->service_name)) . ' payment request.',
+                'message' => "Waiting for ({$this->serviceVendorModel->service_vendor_name}/Customer) to approve ".ucwords(strtolower($service->service_name)).' payment request.',
                 'flag' => 'info',
                 'timestamp' => now(),
             ];
         }
 
-        if (!Transaction::order()->update($deposit->getKey(), $data)) {
+        if (! Transaction::order()->update($deposit->getKey(), $data)) {
             throw new \ErrorException(__('remit::messages.assign_vendor.failed', [
                 'slug' => $deposit->vendor,
             ]));
