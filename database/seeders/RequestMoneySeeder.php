@@ -20,7 +20,7 @@ class RequestMoneySeeder extends Seeder
 
             Business::serviceTypeManager($this->data())
                 ->hasService()
-                ->enabled()
+                ->disabled()
                 ->distCountries($servingCountries)
                 ->hasTransactionForm()
                 ->execute();

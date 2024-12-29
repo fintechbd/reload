@@ -47,8 +47,7 @@ class InstallCommand extends Command
                     'logo_png' => $this->image_png.'fund_deposit.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
-                    'service_type_step' => '1',
-                    'enabled' => true,
+                    'service_type_step' => '1'
                 ],
                 [
                     'service_type_name' => 'Withdraw',
@@ -57,12 +56,13 @@ class InstallCommand extends Command
                     'logo_png' => $this->image_png.'withdraw.png',
                     'service_type_is_parent' => 'yes',
                     'service_type_is_description' => 'no',
-                    'service_type_step' => 1,
-                    'enabled' => true,
+                    'service_type_step' => '1'
                 ],
             ];
             foreach ($serviceTypes as $entry) {
-                Business::serviceTypeManager($entry)->execute();
+                Business::serviceTypeManager($entry)
+                    ->disabled()
+                    ->execute();
             }
         });
     }
