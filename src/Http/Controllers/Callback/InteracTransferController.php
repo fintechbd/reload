@@ -18,13 +18,13 @@ class InteracTransferController extends Controller
     public function __invoke(Request $request): void
     {
         match ($request->input('Event')) {
-            'PaymentSuccessful' => $this->acceptDeposit($request),
-            'PaymentFailed' => $this->rejectDeposit($request),
+            'PaymentSuccessful' => $this->acceptOrder($request),
+            'PaymentFailed' => $this->cancelOrder($request),
             default => logger("Interact-E-Transfer Unknown Event: {$request->input('Event')}", $request->all()),
         };
     }
 
-    private function acceptDeposit(Request $request): void
+    private function acceptOrder(Request $request): void
     {
         $deposit = Reload::deposit()->findWhere([
             'paginate' => false,
@@ -65,7 +65,7 @@ class InteracTransferController extends Controller
         }
     }
 
-    private function rejectDeposit(Request $request): void
+    private function cancelOrder(Request $request): void
     {
         $deposit = Reload::deposit()->findWhere([
             'paginate' => false,
