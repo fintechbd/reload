@@ -58,6 +58,7 @@ class OrderPaymentController extends Controller
 
             $payout = [
                 "user_id" => $order->user_id,
+                "parent_id" => $order->getKey(),
                 "source_country_id" => $order->source_country_id,
                 "destination_country_id" => $order->source_country_id,
                 "service_id" => $payoutService->getKey(),
