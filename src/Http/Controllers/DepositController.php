@@ -265,7 +265,7 @@ class DepositController extends Controller
                 $transactionOrder = Reload::deposit()->find($deposit->getKey());
                 $updatedUserBalance = Reload::deposit()->cancel($transactionOrder);
 
-                //update User Account
+                // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
                 $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $updatedUserBalance['deposit_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $updatedUserBalance['current_amount'];

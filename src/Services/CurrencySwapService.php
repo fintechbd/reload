@@ -222,7 +222,7 @@ class CurrencySwapService
             $senderCurrencySwap->timeline = $recipientAccounting->timeline;
             $senderCurrencySwap->save();
 
-            //@TODO not working on double entry need fix ;-(
+            // @TODO not working on double entry need fix ;-(
             //            event(new WalletToWalletReceived($senderWalletToWallet));
 
             return $senderCurrencySwap;
@@ -248,7 +248,7 @@ class CurrencySwapService
             'spent_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
@@ -280,7 +280,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Receive From'.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $data->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
@@ -299,14 +299,14 @@ class CurrencySwapService
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        //For Discount
+        // For Discount
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
         $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
         $data->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
@@ -318,8 +318,8 @@ class CurrencySwapService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
 
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
@@ -349,7 +349,7 @@ class CurrencySwapService
             'spent_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
@@ -361,7 +361,7 @@ class CurrencySwapService
         $user_name = $data->order_data['user_name'];
 
         $data->order_detail_cause_name = 'cash_withdraw';
-        //$data->order_detail_number = $data->order_data['accepted_number'];
+        // $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Refund From '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -379,7 +379,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
@@ -398,13 +398,13 @@ class CurrencySwapService
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        //For Discount
+        // For Discount
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
         $data->notes = 'Currency Swap '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Discount form '.$master_user_name;
         $data->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
@@ -417,8 +417,8 @@ class CurrencySwapService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
 
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
@@ -448,7 +448,7 @@ class CurrencySwapService
             'deposit_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
@@ -460,7 +460,7 @@ class CurrencySwapService
         $user_name = $deposit->order_data['user_name'];
 
         $deposit->order_detail_cause_name = 'cash_deposit';
-        //$deposit->order_detail_number = $deposit->order_data['accepted_number'];
+        // $deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
         $deposit->notes = 'Currency Swap receive from '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
@@ -478,7 +478,7 @@ class CurrencySwapService
         $orderDetailStoreForMaster->notes = 'Currency Swap send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         /*$deposit->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $deposit->order_detail_cause_name = 'charge';
@@ -502,8 +502,8 @@ class CurrencySwapService
         $deposit->order_detail_cause_name = 'discount';
         $deposit->notes = 'Currency Swap Discount form '.$master_user_name;
         $deposit->step = 5;*/
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $updateData['order_data']['previous_amount'] = 0;
         /*$orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
@@ -528,8 +528,8 @@ class CurrencySwapService
             'converted_currency' => $deposit->converted_currency,
         ]);
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
         return $userAccountData;
 
     }

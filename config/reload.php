@@ -118,7 +118,7 @@ return [
     */
     'wallet_to_prepaid_card_model' => WalletToPrepaidCard::class,
 
-    //** Model Config Point Do not Remove **//
+    // ** Model Config Point Do not Remove **//
 
     /*
     |--------------------------------------------------------------------------
@@ -140,7 +140,7 @@ return [
 
         \Fintech\Reload\Interfaces\WalletToPrepaidCardRepository::class => WalletToPrepaidCardRepository::class,
 
-        //** Repository Binding Config Point Do not Remove **//
+        // ** Repository Binding Config Point Do not Remove **//
     ],
 
 ];

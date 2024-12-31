@@ -55,10 +55,10 @@ class CurrencySwapController extends Controller
     {
         try {
             $inputs = $request->validated();
-            //$inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
+            // $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
             $inputs['transaction_form_code'] = 'currency_swap';
-            //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'currency_swap']);
-            //$inputs['service_type_slug'] = 'currency_swap';
+            // $inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'currency_swap']);
+            // $inputs['service_type_slug'] = 'currency_swap';
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
@@ -276,7 +276,7 @@ class CurrencySwapController extends Controller
             throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
         }
 
-        //set pre defined conditions of deposit
+        // set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_reload'])->getKey();
         $receiverInputs['notes'] = 'Currency Swap receive from '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
         $receiverInputs['parent_id'] = $id;
@@ -294,10 +294,10 @@ class CurrencySwapController extends Controller
         $order_data['user_name'] = $currencySwap->user->name;
         $currencySwap->order_data = $order_data;
         $userUpdatedBalance = Reload::currencySwap()->currencySwapAccept($currencySwap);
-        //source country or destination country change to currency name
+        // source country or destination country change to currency name
         $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $currencySwap->user_id, 'currency' => $currencySwap->converted_currency]);
 
-        //update User Account
+        // update User Account
         $depositedUpdatedAccount = $depositedAccount->toArray();
         $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $userUpdatedBalance['deposit_amount'];
         $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];

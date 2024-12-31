@@ -94,7 +94,7 @@ class WalletToWalletService
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
-        //Receiver
+        // Receiver
         $recipient = Auth::user()->find($inputs['order_data']['recipient_id']);
         if (! $recipient) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['order_data']['recipient_id']);
@@ -226,7 +226,7 @@ class WalletToWalletService
             Transaction::orderQueue()->removeFromQueueUserWise($user_id);
 
             $senderWalletToWallet->refresh();
-            //@TODO not working on double entry need fix ;-(
+            // @TODO not working on double entry need fix ;-(
             //            event(new WalletToWalletReceived($senderWalletToWallet));
 
             return $senderWalletToWallet;
@@ -454,7 +454,7 @@ class WalletToWalletService
             'deposit_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
@@ -466,7 +466,7 @@ class WalletToWalletService
         $user_name = $deposit->order_data['user_name'];
 
         $deposit->order_detail_cause_name = 'cash_deposit';
-        //$deposit->order_detail_number = $deposit->order_data['accepted_number'];
+        // $deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
         $deposit->notes = 'Wallet To Wallet receive from '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
@@ -484,7 +484,7 @@ class WalletToWalletService
         $orderDetailStoreForMaster->notes = 'Wallet To Wallet send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         /*$deposit->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $deposit->order_detail_cause_name = 'charge';
@@ -503,14 +503,14 @@ class WalletToWalletService
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();*/
 
-        //discount
+        // discount
         $deposit->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $deposit->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $deposit->order_detail_cause_name = 'discount';
         $deposit->notes = 'Wallet to Wallet Discount form '.$master_user_name;
         $deposit->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
@@ -522,7 +522,7 @@ class WalletToWalletService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        //For commission
+        // For commission
         $deposit->amount = -calculate_flat_percent($amount, $serviceStatData['commission']);
         $deposit->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['commission']);
         $deposit->order_detail_cause_name = 'commission';
@@ -554,8 +554,8 @@ class WalletToWalletService
             'converted_currency' => $deposit->converted_currency,
         ]);
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
         return $userAccountData;
 
     }

@@ -59,10 +59,10 @@ class RequestMoneyController extends Controller
     {
         try {
             $inputs = $request->validated();
-            //$inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+            // $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
             $inputs['transaction_form_code'] = 'request_money';
-            //$inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'request_money']);
-            //$inputs['service_type_slug'] = 'request_money';
+            // $inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'request_money']);
+            // $inputs['service_type_slug'] = 'request_money';
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
@@ -207,7 +207,7 @@ class RequestMoneyController extends Controller
             throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
         }
 
-        //set pre defined conditions of deposit
+        // set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
         $receiverInputs['notes'] = 'Wallet to Wallet receive request from '.$requestMoney['order_data']['user_name'];
         $receiverInputs['parent_id'] = $id;
@@ -338,7 +338,7 @@ class RequestMoneyController extends Controller
         try {
             $inputs = $request->validated();
 
-            //$requestMoneyPaginate = Reload::requestMoney()->export($inputs);
+            // $requestMoneyPaginate = Reload::requestMoney()->export($inputs);
             Reload::requestMoney()->export($inputs);
 
             return response()->exported(__('core::messages.resource.exported', ['model' => 'Request Money']));
@@ -531,10 +531,10 @@ class RequestMoneyController extends Controller
                 $withdraw['sender_receiver_id'] = $masterUser->getKey();
 
                 $userUpdatedBalance = Reload::requestMoney()->debitTransaction($withdraw);
-                //source country or destination country change to currency name
+                // source country or destination country change to currency name
                 $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $withdraw->user_id, 'currency' => $withdraw->converted_currency]);
 
-                //update User Account
+                // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
@@ -587,7 +587,7 @@ class RequestMoneyController extends Controller
 
             $receiver = Auth::user()->find($deposit->sender_receiver_id);
             $receiverDepositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->sender_receiver_id, 'currency' => $receiver->profile?->presentCountry?->currency]);
-            //print_r($receiverDepositAccount);exit();
+            // print_r($receiverDepositAccount);exit();
             if (! $receiverDepositAccount) {
                 throw new Exception("Receiver don't have account deposit balance");
             }
@@ -607,10 +607,10 @@ class RequestMoneyController extends Controller
             }
             $deposit['sender_receiver_id'] = $masterUser->getKey();
             $userUpdatedBalance = Reload::requestMoney()->creditTransaction($deposit);
-            //source country or destination country change to currency name
+            // source country or destination country change to currency name
             $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $deposit->converted_currency]);
 
-            //update User Account
+            // update User Account
             $depositedUpdatedAccount = $depositedAccount->toArray();
             $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $userUpdatedBalance['deposit_amount'];
             $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];

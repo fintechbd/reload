@@ -229,7 +229,7 @@ class DepositService
         $depositOrderData['service_stat_data'] = $serviceStatData;
         $depositOrderData['user_name'] = $depositor->name ?? 'N/A';
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         DB::beginTransaction();
 
         try {
@@ -294,7 +294,7 @@ class DepositService
 
         $orderData['previous_amount'] = $updatedBalance['previous_amount'] ?? 0;
 
-        //For Balance
+        // For Balance
         $master_user_name = $orderData['master_user_name'];
         $user_name = $orderData['user_name'];
         $order->order_detail_cause_name = 'cash_deposit';
@@ -320,7 +320,7 @@ class DepositService
         $orderDetailStoreForMaster->step = $stepIndex++;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $order->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $order->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $order->order_detail_cause_name = 'charge';
@@ -342,7 +342,7 @@ class DepositService
         $orderDetailStoreForChargeForMaster->step = $stepIndex++;
         $orderDetailStoreForChargeForMaster->save();
 
-        //For Discount
+        // For Discount
         if (calculate_flat_percent($amount, $serviceStatData['discount']) > 0) {
             $order->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
             $order->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
@@ -350,8 +350,8 @@ class DepositService
             $order->notes = 'Deposit Discount form '.$master_user_name;
             $timeline[] = ['message' => '(System) Step 5: Deposit Discount '.currency($serviceStatData['discount_amount'], $order->converted_currency).' received from system user ('.$master_user_name.').', 'flag' => 'info', 'timestamp' => now()];
             $order->step = $stepIndex++;
-            //$data->order_detail_parent_id = $orderDetailStore->getKey();
-            //$updateData['order_data']['previous_amount'] = 0;
+            // $data->order_detail_parent_id = $orderDetailStore->getKey();
+            // $updateData['order_data']['previous_amount'] = 0;
             $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($order));
             $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
             $orderDetailStoreForDiscountForMaster->user_id = $order->sender_receiver_id;
@@ -392,7 +392,7 @@ class DepositService
             'deposit_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
@@ -424,7 +424,7 @@ class DepositService
         $orderDetailStoreForMaster->notes = 'Point Refund to'.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
@@ -448,7 +448,7 @@ class DepositService
         $data->order_detail_cause_name = 'discount';
         $data->notes = 'Deposit Discount form '.$master_user_name;
         $data->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
 
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -475,7 +475,7 @@ class DepositService
             'converted_currency' => $data->converted_currency,
         ]);
 
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
         return $userAccountData;
 
     }

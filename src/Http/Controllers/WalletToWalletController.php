@@ -151,7 +151,7 @@ class WalletToWalletController extends Controller
             throw new Exception("User don't have account deposit balance");
         }
 
-        //set pre defined conditions of deposit
+        // set pre defined conditions of deposit
         $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_reload'])->getKey();
         $receiverInputs['notes'] = 'Wallet to Wallet receive from '.$deposit['order_data']['sender_name'];
         $receiverInputs['parent_id'] = $id;
@@ -169,10 +169,10 @@ class WalletToWalletController extends Controller
         $order_data['user_name'] = $walletToWallet->user->name;
         $walletToWallet->order_data = $order_data;
         $userUpdatedBalance = Reload::walletToWallet()->walletToWalletAccept($walletToWallet);
-        //source country or destination country change to currency name
+        // source country or destination country change to currency name
         $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $walletToWallet->user_id, 'currency' => $walletToWallet->converted_currency]);
 
-        //update User Account
+        // update User Account
         $depositedUpdatedAccount = $depositedAccount->toArray();
         $depositedUpdatedAccount['user_account_data']['deposit_amount'] = (float) $depositedUpdatedAccount['user_account_data']['deposit_amount'] + (float) $userUpdatedBalance['deposit_amount'];
         $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];

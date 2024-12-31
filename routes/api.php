@@ -75,7 +75,7 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::post('order/{order}/payment', OrderPaymentController::class)->name('order-payment')
                     ->middleware('imposter');
 
-                //DO NOT REMOVE THIS LINE//
+                // DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {
                     Route::get('deposit-partner-summary',
