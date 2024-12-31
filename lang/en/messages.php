@@ -22,5 +22,6 @@ return [
         'status_change_success' => 'Deposit moved to :status status successfully.',
         'failed' => 'Your transaction for Bank Deposit Request is Failed',
         'created' => 'Your transaction for :service Request is Successfully Submitted',
+        'service_unavailable' => 'Payout service unavailable or does not exists.'
     ],
 ];

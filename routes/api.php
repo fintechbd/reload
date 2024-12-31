@@ -5,6 +5,7 @@ use Fintech\Reload\Http\Controllers\Charts\DepositPartnerController;
 use Fintech\Reload\Http\Controllers\Charts\WithdrawPartnerController;
 use Fintech\Reload\Http\Controllers\CurrencySwapController;
 use Fintech\Reload\Http\Controllers\DepositController;
+use Fintech\Reload\Http\Controllers\OrderPaymentController;
 use Fintech\Reload\Http\Controllers\RequestMoneyController;
 use Fintech\Reload\Http\Controllers\WalletToAtmController;
 use Fintech\Reload\Http\Controllers\WalletToBankController;
@@ -70,6 +71,9 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('wallet-to-prepaid-cards', WalletToPrepaidCardController::class)
                     ->only(['index', 'store', 'show']);
                 //             Route::post('wallet-to-prepaid-cards/{wallet_to_prepaid_card}/restore', [WalletToPrepaidCardController::class, 'restore'])->name('wallet-to-prepaid-cards.restore');
+
+                Route::post('order/{order}/payment', OrderPaymentController::class)->name('order-payment')
+                    ->middleware('imposter');
 
                 //DO NOT REMOVE THIS LINE//
 
