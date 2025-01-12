@@ -86,7 +86,7 @@ class AssignVendorService
         }
 
         if (! Transaction::order()->update($deposit->getKey(), $data)) {
-            throw new \ErrorException(__('remit::messages.assign_vendor.failed', [
+            throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $deposit->vendor,
             ]));
         }
@@ -100,7 +100,7 @@ class AssignVendorService
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
+            throw new RemitException(__('core::messages.assign_vendor.not_assigned'));
         }
 
         $this->initVendor($order->vendor);
@@ -125,7 +125,7 @@ class AssignVendorService
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
+            throw new RemitException(__('core::messages.assign_vendor.not_assigned'));
         }
 
         $this->initVendor($order->vendor);
