@@ -3,6 +3,7 @@
 namespace Fintech\Reload\Models;
 
 use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Traits\Audits\BlameableTrait;
 use Fintech\Transaction\Models\Order;
@@ -28,7 +29,7 @@ class Deposit extends Order implements Auditable, HasMedia
         'restored_at' => 'datetime',
         'enabled' => 'bool',
         'risk_profile' => RiskProfile::class,
-        'status' => OrderStatus::class,
+        'status' => DepositStatus::class,
     ];
 
     /*
