@@ -21,24 +21,20 @@ class CurrencySwapCollection extends ResourceCollection
         return $this->collection->map(function ($currencySwap) {
             $data = [
                 'id' => $currencySwap->getKey(),
-                'source_country_id' => $currencySwap->source_country_id ?? null,
+//                 'source_country_id' => $currencySwap->source_country_id ?? null,
                 'source_country_name' => null,
-                'destination_country_id' => $currencySwap->destination_country_id ?? null,
+//                 'destination_country_id' => $currencySwap->destination_country_id ?? null,
                 'destination_country_name' => null,
-                'parent_id' => $currencySwap->parent_id ?? null,
-                'sender_receiver_id' => $currencySwap->sender_receiver_id ?? null,
+//                 'parent_id' => $currencySwap->parent_id ?? null,
+//                 'sender_receiver_id' => $currencySwap->sender_receiver_id ?? null,
                 'sender_receiver_name' => null,
-                'user_id' => $currencySwap->user_id ?? null,
+//                 'user_id' => $currencySwap->user_id ?? null,
                 'user_name' => null,
-                'service_id' => $currencySwap->service_id ?? null,
+//                 'service_id' => $currencySwap->service_id ?? null,
                 'service_name' => null,
-                'transaction_form_id' => $currencySwap->transaction_form_id ?? null,
+//                 'transaction_form_id' => $currencySwap->transaction_form_id ?? null,
                 'transaction_form_name' => $currencySwap->transaction_form_name ?? null,
                 'ordered_at' => $currencySwap->ordered_at ?? null,
-                'amount' => $currencySwap->amount ?? null,
-                'currency' => $currencySwap->currency ?? null,
-                'converted_amount' => $currencySwap->converted_amount ?? null,
-                'converted_currency' => $currencySwap->converted_currency ?? null,
                 'order_number' => $currencySwap->order_number ?? null,
                 'risk_profile' => $currencySwap->risk_profile ?? null,
                 'notes' => $currencySwap->notes ?? null,
@@ -47,7 +43,7 @@ class CurrencySwapCollection extends ResourceCollection
                 'status' => $currencySwap->status ?? null,
                 'created_at' => $currencySwap->created_at ?? null,
                 'updated_at' => $currencySwap->updated_at ?? null,
-            ];
+            ] + $currencySwap->commonAttributes();
 
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $currencySwap->sourceCountry?->name ?? null;
