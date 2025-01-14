@@ -39,30 +39,26 @@ class DepositCollection extends ResourceCollection
                 'slip' => $deposit->getFirstMediaUrl('slip') ?? null,
                 'currency' => $deposit->currency ?? null,
                 'amount' => (string) ($deposit->amount ?? null),
-                'amount_formatted' => (string) \currency($deposit->amount, $deposit->currency),
-
                 'converted_currency' => $deposit->converted_currency ?? null,
                 'converted_amount' => (string) ($deposit->converted_amount ?? null),
-                'converted_amount_formatted' => (string) \currency($deposit->converted_amount ?? null, $deposit->converted_currency ?? null),
-
-                'charge_amount' => $deposit->order_data['service_stat_data']['charge_amount'] ?? null,
-                'charge_amount_formatted' => (string) \currency($deposit->order_data['service_stat_data']['charge_amount'] ?? null, $deposit->currency ?? null),
-
-                'discount_amount' => $deposit->order_data['service_stat_data']['discount_amount'] ?? null,
-                'discount_amount_formatted' => (string) \currency($deposit->order_data['service_stat_data']['discount_amount'] ?? null, $deposit->currency ?? null),
-
-                'commission_amount' => $deposit->order_data['service_stat_data']['commission_amount'] ?? null,
-                'commission_amount_formatted' => (string) \currency($deposit->order_data['service_stat_data']['commission_amount'] ?? null, $deposit->currency ?? null),
-
-                'cost_amount' => $deposit->order_data['service_stat_data']['cost_amount'] ?? null,
-                'cost_amount_formatted' => (string) \currency($deposit->order_data['service_stat_data']['cost_amount'] ?? null, $deposit->currency ?? null),
-
-                'interac_charge' => $deposit->order_data['service_stat_data']['interac_charge_amount'] ?? null,
-                'interac_charge_formatted' => (string) \currency($deposit->order_data['service_stat_data']['interac_charge_amount'] ?? null, $deposit->currency ?? null),
-
-                'total_amount' => $deposit->order_data['service_stat_data']['total_amount'] ?? null,
-                'total_amount_formatted' => (string) \currency($deposit->order_data['service_stat_data']['total_amount'] ?? null, $deposit->currency ?? null),
-
+                'amount_formatted' => $deposit->amount_formatted,
+                'converted_amount_formatted' => $deposit->converted_amount_formatted,
+                'charge_amount' => $deposit->charge_amount,
+                'charge_amount_formatted' => $deposit->charge_amount_formatted,
+                'discount_amount' => $deposit->discount_amount,
+                'discount_amount_formatted' => $deposit->discount_amount_formatted,
+                'commission_amount' => $deposit->commission_amount,
+                'commission_amount_formatted' => $deposit->commission_amount_formatted,
+                'cost_amount' => $deposit->cost_amount,
+                'cost_amount_formatted' => $deposit->cost_amount_formatted,
+                'interac_charge' => $deposit->interac_charge,
+                'interac_charge_formatted' => $deposit->interac_charge_formatted,
+                'total_amount' => $deposit->total_amount,
+                'total_amount_formatted' => $deposit->total_amount_formatted,
+                'previous_amount' => $deposit->previous_amount,
+                'previous_amount_formatted' => $deposit->previous_amount_formatted,
+                'current_amount' => $deposit->previous_amount,
+                'current_amount_formatted' => $deposit->previous_amount_formatted,
                 'order_number' => $deposit->order_number ?? null,
                 'risk_profile' => $deposit->risk_profile ?? null,
                 'notes' => $deposit->notes ?? null,

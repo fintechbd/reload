@@ -35,11 +35,11 @@ class DepositResource extends JsonResource
             'slip' => $this->getFirstMediaUrl('slip') ?? null,
             'currency' => $this->currency ?? null,
             'amount' => (string) ($this->amount ?? null),
-            'amount_formatted' => (string) \currency($this->amount, $this->currency),
+            'amount_formatted' => $this->amount_formatted,
 
             'converted_currency' => $this->converted_currency ?? null,
             'converted_amount' => (string) ($this->converted_amount ?? null),
-            'converted_amount_formatted' => (string) \currency($this->converted_amount ?? null, $this->converted_currency ?? null),
+            'converted_amount_formatted' => $this->converted_amount_formatted,
 
             'charge_amount' => $this->order_data['service_stat_data']['charge_amount'] ?? null,
             'charge_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['charge_amount'] ?? null, $this->currency ?? null),
