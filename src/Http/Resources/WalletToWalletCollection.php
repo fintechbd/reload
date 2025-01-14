@@ -22,18 +22,18 @@ class WalletToWalletCollection extends ResourceCollection
             $data = [
                 'id' => $walletToWallet->getKey(),
                 'description' => $deposit->description ?? null,
-                'source_country_id' => $walletToWallet->source_country_id ?? null,
+//                 'source_country_id' => $walletToWallet->source_country_id ?? null,
                 'source_country_name' => null,
-                'destination_country_id' => $walletToWallet->destination_country_id ?? null,
+//                 'destination_country_id' => $walletToWallet->destination_country_id ?? null,
                 'destination_country_name' => null,
-                'parent_id' => $walletToWallet->parent_id ?? null,
-                'sender_receiver_id' => $walletToWallet->sender_receiver_id ?? null,
+//                 'parent_id' => $walletToWallet->parent_id ?? null,
+//                 'sender_receiver_id' => $walletToWallet->sender_receiver_id ?? null,
                 'sender_receiver_name' => null,
-                'user_id' => $walletToWallet->user_id ?? null,
+//                 'user_id' => $walletToWallet->user_id ?? null,
                 'user_name' => null,
-                'service_id' => $walletToWallet->service_id ?? null,
+//                 'service_id' => $walletToWallet->service_id ?? null,
                 'service_name' => null,
-                'transaction_form_id' => $walletToWallet->transaction_form_id ?? null,
+//                 'transaction_form_id' => $walletToWallet->transaction_form_id ?? null,
                 'transaction_form_name' => $walletToWallet->transaction_form_name ?? null,
                 'ordered_at' => $walletToWallet->ordered_at ?? null,
                 'amount' => $walletToWallet->amount ?? null,
@@ -50,7 +50,7 @@ class WalletToWalletCollection extends ResourceCollection
                 'status' => $walletToWallet->status ?? null,
                 'created_at' => $walletToWallet->created_at ?? null,
                 'updated_at' => $walletToWallet->updated_at ?? null,
-            ];
+            ] + $walletToWallet->commonAttributes();
 
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $walletToWallet->sourceCountry?->name ?? null;
