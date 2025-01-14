@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
 
+/**
+ * @method array commonAttributes()
+ */
 class DepositResource extends JsonResource
 {
     /**
@@ -33,31 +36,6 @@ class DepositResource extends JsonResource
             //            'transaction_form_id' => $this->transaction_form_id ?? null,
             'ordered_at' => $this->ordered_at ?? null,
             'slip' => $this->getFirstMediaUrl('slip') ?? null,
-            'currency' => $this->currency ?? null,
-            'amount' => (string) ($this->amount ?? null),
-            'amount_formatted' => $this->amount_formatted,
-
-            'converted_currency' => $this->converted_currency ?? null,
-            'converted_amount' => (string) ($this->converted_amount ?? null),
-            'converted_amount_formatted' => $this->converted_amount_formatted,
-
-            'charge_amount' => $this->order_data['service_stat_data']['charge_amount'] ?? null,
-            'charge_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['charge_amount'] ?? null, $this->currency ?? null),
-
-            'discount_amount' => $this->order_data['service_stat_data']['discount_amount'] ?? null,
-            'discount_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['discount_amount'] ?? null, $this->currency ?? null),
-
-            'commission_amount' => $this->order_data['service_stat_data']['commission_amount'] ?? null,
-            'commission_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['commission_amount'] ?? null, $this->currency ?? null),
-
-            'cost_amount' => $this->order_data['service_stat_data']['cost_amount'] ?? null,
-            'cost_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['cost_amount'] ?? null, $this->currency ?? null),
-
-            'interac_charge' => $this->order_data['service_stat_data']['interac_charge_amount'] ?? null,
-            'interac_charge_formatted' => (string) \currency($this->order_data['service_stat_data']['interac_charge_amount'] ?? null, $this->currency ?? null),
-
-            'total_amount' => $this->order_data['service_stat_data']['total_amount'] ?? null,
-            'total_amount_formatted' => (string) \currency($this->order_data['service_stat_data']['total_amount'] ?? null, $this->currency ?? null),
             'order_number' => $this->order_number ?? null,
             'risk_profile' => $this->risk_profile ?? null,
             'notes' => $this->notes ?? null,
@@ -67,7 +45,7 @@ class DepositResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at ?? null,
             'updated_at' => $this->updated_at ?? null,
-        ];
+        ] + $this->commonAttributes();
 
         if (Core::packageExists('MetaData')) {
             $data['source_country_name'] = $this->sourceCountry?->name ?? null;

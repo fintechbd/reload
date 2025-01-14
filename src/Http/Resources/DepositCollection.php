@@ -37,28 +37,6 @@ class DepositCollection extends ResourceCollection
                 'transaction_form_name' => $deposit->transaction_form_name ?? null,
                 'ordered_at' => $deposit->ordered_at ?? null,
                 'slip' => $deposit->getFirstMediaUrl('slip') ?? null,
-                'currency' => $deposit->currency ?? null,
-                'amount' => (string) ($deposit->amount ?? null),
-                'converted_currency' => $deposit->converted_currency ?? null,
-                'converted_amount' => (string) ($deposit->converted_amount ?? null),
-                'amount_formatted' => $deposit->amount_formatted,
-                'converted_amount_formatted' => $deposit->converted_amount_formatted,
-                'charge_amount' => $deposit->charge_amount,
-                'charge_amount_formatted' => $deposit->charge_amount_formatted,
-                'discount_amount' => $deposit->discount_amount,
-                'discount_amount_formatted' => $deposit->discount_amount_formatted,
-                'commission_amount' => $deposit->commission_amount,
-                'commission_amount_formatted' => $deposit->commission_amount_formatted,
-                'cost_amount' => $deposit->cost_amount,
-                'cost_amount_formatted' => $deposit->cost_amount_formatted,
-                'interac_charge' => $deposit->interac_charge,
-                'interac_charge_formatted' => $deposit->interac_charge_formatted,
-                'total_amount' => $deposit->total_amount,
-                'total_amount_formatted' => $deposit->total_amount_formatted,
-                'previous_amount' => $deposit->previous_amount,
-                'previous_amount_formatted' => $deposit->previous_amount_formatted,
-                'current_amount' => $deposit->previous_amount,
-                'current_amount_formatted' => $deposit->previous_amount_formatted,
                 'order_number' => $deposit->order_number ?? null,
                 'risk_profile' => $deposit->risk_profile ?? null,
                 'notes' => $deposit->notes ?? null,
@@ -67,7 +45,7 @@ class DepositCollection extends ResourceCollection
                 'status' => $deposit->status ?? null,
                 'created_at' => $deposit->created_at ?? null,
                 'updated_at' => $deposit->updated_at ?? null,
-            ];
+            ] + $deposit->commonAttributes();
 
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $deposit->sourceCountry?->name ?? null;
