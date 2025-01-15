@@ -43,8 +43,8 @@ class EventServiceProvider extends ServiceProvider
             TriggerListener::class,
         ],
         InteracTransferReceived::class => [
-            TriggerListener::class,
             InitInteracPayment::class,
+            TriggerListener::class,
         ],
         WalletTransferred::class => [
             TriggerListener::class,
