@@ -2,11 +2,9 @@
 
 namespace Fintech\Reload\Http\Resources;
 
-use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use stdClass;
 
 class CurrencySwapCollection extends ResourceCollection
 {
@@ -20,10 +18,10 @@ class CurrencySwapCollection extends ResourceCollection
     {
         return $this->collection->map(function ($item) {
             return [
-                    'risk' => $item->risk ?? null,
-                    'is_refunded' => $item->is_refunded ?? null,
-                    'order_data' => $item->order_data ?? null,
-                ] + $item->commonAttributes();
+                'risk' => $item->risk ?? null,
+                'is_refunded' => $item->is_refunded ?? null,
+                'order_data' => $item->order_data ?? null,
+            ] + $item->commonAttributes();
         })->toArray();
     }
 

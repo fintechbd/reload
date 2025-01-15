@@ -2,29 +2,27 @@
 
 namespace Fintech\Reload\Http\Resources;
 
-use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use stdClass;
 
 class DepositCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)
     {
         return $this->collection->map(function ($item) {
             return [
-                    'slip' => $item->getFirstMediaUrl('slip') ?? null,
-                    'risk' => $item->risk ?? null,
-                    'is_refunded' => $item->is_refunded ?? null,
-                    'order_data' => $item->order_data ?? null,
-                ] + $item->commonAttributes();
+                'slip' => $item->getFirstMediaUrl('slip') ?? null,
+                'risk' => $item->risk ?? null,
+                'is_refunded' => $item->is_refunded ?? null,
+                'order_data' => $item->order_data ?? null,
+            ] + $item->commonAttributes();
         })->toArray();
     }
 
