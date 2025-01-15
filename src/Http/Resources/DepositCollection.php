@@ -13,59 +13,18 @@ class DepositCollection extends ResourceCollection
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($deposit) {
-            $data = [
-                'id' => $deposit->getKey(),
-                'description' => $deposit->description ?? null,
-                //                'source_country_id' => $deposit->source_country_id ?? null,
-                'source_country_name' => null,
-                //                'destination_country_id' => $deposit->destination_country_id ?? null,
-                'destination_country_name' => null,
-                //                'parent_id' => $deposit->parent_id ?? null,
-                //                'sender_receiver_id' => $deposit->sender_receiver_id ?? null,
-                'sender_receiver_name' => null,
-                //                'user_id' => $deposit->user_id ?? null,
-                'user_name' => null,
-                //                'service_id' => $deposit->service_id ?? null,
-                'service_name' => null,
-                //                'transaction_form_id' => $deposit->transaction_form_id ?? null,
-                'transaction_form_name' => $deposit->transaction_form_name ?? null,
-                'ordered_at' => $deposit->ordered_at ?? null,
-                'slip' => $deposit->getFirstMediaUrl('slip') ?? null,
-                'order_number' => $deposit->order_number ?? null,
-                'risk_profile' => $deposit->risk_profile ?? null,
-                'notes' => $deposit->notes ?? null,
-                'is_refunded' => $deposit->is_refunded ?? null,
-                'order_data' => $deposit->order_data ?? new stdClass,
-                'status' => $deposit->status ?? null,
-                'created_at' => $deposit->created_at ?? null,
-                'updated_at' => $deposit->updated_at ?? null,
-            ] + $deposit->commonAttributes();
-
-            if (Core::packageExists('MetaData')) {
-                $data['source_country_name'] = $deposit->sourceCountry?->name ?? null;
-                $data['destination_country_name'] = $deposit->destinationCountry?->name ?? null;
-            }
-            if (Core::packageExists('Auth')) {
-                $data['user_name'] = $deposit->user?->name ?? null;
-                $data['sender_receiver_name'] = $deposit->senderReceiver?->name ?? null;
-            }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->service_name ?? null;
-            }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->service_name ?? null;
-            }
-            if (Core::packageExists('Transaction')) {
-                $data['transaction_form_name'] = $deposit->transactionForm?->name ?? null;
-            }
-
-            return $data;
+        return $this->collection->map(function ($item) {
+            return [
+                    'slip' => $item->getFirstMediaUrl('slip') ?? null,
+                    'risk' => $item->risk ?? null,
+                    'is_refunded' => $item->is_refunded ?? null,
+                    'order_data' => $item->order_data ?? null,
+                ] + $item->commonAttributes();
         })->toArray();
     }
 

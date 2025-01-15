@@ -15,6 +15,10 @@ class WalletToAtmResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+                'risk' => $this->risk ?? null,
+                'is_refunded' => $this->is_refunded ?? null,
+                'order_data' => $this->order_data ?? null,
+            ] + $this->commonAttributes();
     }
 }
