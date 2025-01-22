@@ -2,7 +2,7 @@
 
 namespace Fintech\Reload\Providers;
 
-use Fintech\Core\Listeners\TriggerNotification;
+use Fintech\Core\Listeners\TriggerListener;
 use Fintech\Reload\Events\BankDepositReceived;
 use Fintech\Reload\Events\CardDepositReceived;
 use Fintech\Reload\Events\CurrencySwapped;
@@ -24,33 +24,33 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         DepositRejected::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         DepositReceived::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         DepositAccepted::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         DepositCancelled::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
 
         ],
         BankDepositReceived::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         CardDepositReceived::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         InteracTransferReceived::class => [
             InitInteracPayment::class,
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         WalletTransferred::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
         CurrencySwapped::class => [
-            TriggerNotification::class,
+            TriggerListener::class,
         ],
     ];
 }
