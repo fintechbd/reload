@@ -25,7 +25,7 @@ return [
     |--------------------------------------------------------------------------
     | this setting enable the api will be available or not
     */
-    'enabled' => env('PACKAGE_RELOAD_ENABLED', true),
+    'enabled' => env('RELOAD_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,15 +42,15 @@ return [
 
     'providers' => [
         'leatherback' => [
-            'mode' => env('PACKAGE_RELOAD_LEATHER_BACK_MODE', 'sandbox'),
+            'mode' => env('RELOAD_LEATHER_BACK_MODE', 'sandbox'),
             'driver' => Fintech\Reload\Vendors\LeatherBack::class,
             'live' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
-                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
+                'api_key' => env('RELOAD_LEATHER_BACK_KEY'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://laas.leatherback.co/api',
-                'api_key' => env('PACKAGE_RELOAD_LEATHER_BACK_API_KEY'),
+                'api_key' => env('RELOAD_LEATHER_BACK_KEY'),
             ],
         ],
     ],
