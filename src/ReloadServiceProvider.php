@@ -39,7 +39,7 @@ class ReloadServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../config/reload.php' => config_path('fintech/reload.php'),
-        ]);
+        ], 'fintech-reload-config');
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
@@ -47,7 +47,7 @@ class ReloadServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../lang' => $this->app->langPath('vendor/reload'),
-        ]);
+        ], 'fintech-reload-lang');
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'reload');
 
@@ -55,7 +55,7 @@ class ReloadServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/reload'),
-        ]);
+        ], 'fintech-reload-views');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
