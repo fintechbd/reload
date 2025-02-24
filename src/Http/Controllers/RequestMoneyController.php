@@ -135,7 +135,7 @@ class RequestMoneyController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Request Money']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -175,7 +175,7 @@ class RequestMoneyController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Request Money']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -241,7 +241,7 @@ class RequestMoneyController extends Controller
 
             return new RequestMoneyResource($requestMoney);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -270,7 +270,7 @@ class RequestMoneyController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Request Money']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -300,7 +300,7 @@ class RequestMoneyController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Request Money']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }

@@ -225,7 +225,7 @@ class WalletToAtmController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet To Atm']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -251,7 +251,7 @@ class WalletToAtmController extends Controller
 
             return new WalletToAtmResource($walletToAtm);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -285,7 +285,7 @@ class WalletToAtmController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet To Atm']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -317,7 +317,7 @@ class WalletToAtmController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet To Atm']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }

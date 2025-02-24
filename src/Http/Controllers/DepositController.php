@@ -139,7 +139,7 @@ class DepositController extends Controller
 
             return new DepositResource($deposit);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
