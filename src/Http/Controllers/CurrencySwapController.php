@@ -246,11 +246,7 @@ class CurrencySwapController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Currency Swap']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -335,11 +331,7 @@ class CurrencySwapController extends Controller
 
             return new CurrencySwapResource($currencySwap);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -368,11 +360,7 @@ class CurrencySwapController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Currency Swap']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -402,11 +390,7 @@ class CurrencySwapController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Currency Swap']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }

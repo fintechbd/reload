@@ -225,11 +225,7 @@ class WalletToBankController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet To Bank']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -255,11 +251,7 @@ class WalletToBankController extends Controller
 
             return new WalletToBankResource($walletToBank);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -293,11 +285,7 @@ class WalletToBankController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet To Bank']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -329,11 +317,7 @@ class WalletToBankController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet To Bank']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }

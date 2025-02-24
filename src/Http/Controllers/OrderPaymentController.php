@@ -79,11 +79,7 @@ class OrderPaymentController extends Controller
 
             return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($orderService->service_name).' Payment']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }

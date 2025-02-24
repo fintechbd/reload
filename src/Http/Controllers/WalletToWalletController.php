@@ -123,11 +123,7 @@ class WalletToWalletController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet To Wallet']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -210,11 +206,7 @@ class WalletToWalletController extends Controller
 
             return new WalletToWalletResource($walletToWallet);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -243,11 +235,7 @@ class WalletToWalletController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet To Wallet']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -277,11 +265,7 @@ class WalletToWalletController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet To Wallet']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
