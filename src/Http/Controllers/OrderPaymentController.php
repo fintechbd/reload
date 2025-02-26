@@ -63,7 +63,7 @@ class OrderPaymentController extends Controller
                 'destination_country_id' => $order->source_country_id,
                 'service_id' => $payoutService->getKey(),
                 'ordered_at' => now()->format('Y-m-d H:i:s'),
-                'amount' => $order->amount,
+                'amount' => $order->total_amount,
                 'currency' => $order->currency,
                 'order_data' => [
                     'request_from' => request()->platform()->value,
