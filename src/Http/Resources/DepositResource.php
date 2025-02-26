@@ -19,6 +19,7 @@ class DepositResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'parent_order_number' => $this->parentOrder?->order_number ?? null,
             'slip' => $this->getFirstMediaUrl('slip') ?? null,
             'risk' => $this->risk ?? null,
             'is_refunded' => $this->is_refunded ?? null,
