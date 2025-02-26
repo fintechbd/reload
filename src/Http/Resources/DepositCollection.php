@@ -18,7 +18,7 @@ class DepositCollection extends ResourceCollection
     {
         return $this->collection->map(function ($item) {
             return [
-                'parent_order_number' => $item->parent_order?->order_number ?? null,
+                'parent_order_number' => $item->parent_order ?? null,
                 'slip' => $item->getFirstMediaUrl('slip') ?? null,
                 'risk' => $item->risk ?? null,
                 'is_refunded' => $item->is_refunded ?? null,
