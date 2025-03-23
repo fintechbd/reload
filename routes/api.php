@@ -102,7 +102,6 @@ if (Config::get('fintech.reload.enabled')) {
                 Route::apiResource('wallet-to-prepaid-cards', WalletToPrepaidCardController::class)
                     ->only(['index', 'store', 'show']);
 
-
                 Route::post('wallet-to-prepaid-cards', [WalletToPrepaidCardController::class, 'store'])
                     ->middleware('imposter')
                     ->name('wallet-to-prepaid-cards.store');
