@@ -40,11 +40,6 @@ use Illuminate\Support\Facades\DB;
  */
 class WalletToBankController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('imposter', ['only' => ['store']]);
-    }
-
     /**
      * @lrd:start
      * Return a listing of the *WalletToBank* resource as collection.

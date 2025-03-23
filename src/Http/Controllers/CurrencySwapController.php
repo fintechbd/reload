@@ -38,11 +38,6 @@ use Illuminate\Support\Facades\DB;
  */
 class CurrencySwapController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('imposter', ['only' => ['store']]);
-    }
-
     /**
      * @lrd:start
      * Return a listing of the *CurrencySwap* resource as collection.

@@ -31,11 +31,6 @@ use Illuminate\Routing\Controller;
  */
 class DepositController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('imposter', ['only' => ['store', 'reject', 'accept', 'cancel']]);
-    }
-
     /**
      * @throws ModelNotFoundException
      * @throws Exception

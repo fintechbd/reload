@@ -32,11 +32,6 @@ use Illuminate\Routing\Controller;
  */
 class WalletToWalletController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('imposter', ['only' => ['store']]);
-    }
-
     /**
      * @lrd:start
      * Return a listing of the *WalletToWallet* resource as collection.
