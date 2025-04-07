@@ -47,7 +47,7 @@ class IndexWalletToAtmRequest extends FormRequest
             'user_id_sender_receiver_id' => ['integer', 'nullable'],
             'service_type_slug' => ['string', 'nullable'],
             'status' => ['string', 'array', 'nullable'],
-			'status_not_equal' => ['string', 'array', 'nullable'],
+            'status_not_equal' => ['string', 'array', 'nullable'],
             'service_slug' => ['string', 'nullable'],
             'transaction_form_code' => ['string', 'nullable'],
             'transaction_form_id' => ['integer', 'nullable'],
