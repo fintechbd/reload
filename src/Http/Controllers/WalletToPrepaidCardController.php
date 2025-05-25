@@ -181,7 +181,7 @@ class WalletToPrepaidCardController extends Controller
 
             $inputs = $request->validated();
 
-            if (!reload()->walletToPrepaidCard()->update($id, $inputs)) {
+            if (! reload()->walletToPrepaidCard()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
@@ -241,7 +241,7 @@ class WalletToPrepaidCardController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
 
-            if (!reload()->walletToPrepaidCard()->destroy($id)) {
+            if (! reload()->walletToPrepaidCard()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
@@ -273,7 +273,7 @@ class WalletToPrepaidCardController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
 
-            if (!reload()->walletToPrepaidCard()->restore($id)) {
+            if (! reload()->walletToPrepaidCard()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }

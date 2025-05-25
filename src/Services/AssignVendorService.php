@@ -83,7 +83,7 @@ class AssignVendorService
             ];
         }
 
-        if (!transaction()->order()->update($deposit->getKey(), $data)) {
+        if (! transaction()->order()->update($deposit->getKey(), $data)) {
             throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $deposit->vendor,
             ]));

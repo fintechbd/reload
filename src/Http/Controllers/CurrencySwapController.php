@@ -226,7 +226,7 @@ class CurrencySwapController extends Controller
 
             $inputs = $request->validated();
 
-            if (!reload()->currencySwap()->update($id, $inputs)) {
+            if (! reload()->currencySwap()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -287,7 +287,7 @@ class CurrencySwapController extends Controller
 
         $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
         $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-        if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+        if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
             throw new Exception(__('User Account Balance does not update', [
                 'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                 'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
@@ -340,7 +340,7 @@ class CurrencySwapController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (!reload()->currencySwap()->destroy($id)) {
+            if (! reload()->currencySwap()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -370,7 +370,7 @@ class CurrencySwapController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (!reload()->currencySwap()->restore($id)) {
+            if (! reload()->currencySwap()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }

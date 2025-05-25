@@ -153,7 +153,7 @@ class WalletToBankController extends Controller
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
 
-                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletToBank->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
@@ -209,7 +209,7 @@ class WalletToBankController extends Controller
 
             $inputs = $request->validated();
 
-            if (!reload()->walletToBank()->update($id, $inputs)) {
+            if (! reload()->walletToBank()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
@@ -269,7 +269,7 @@ class WalletToBankController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
-            if (!reload()->walletToBank()->destroy($id)) {
+            if (! reload()->walletToBank()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
@@ -301,7 +301,7 @@ class WalletToBankController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }
 
-            if (!reload()->walletToBank()->restore($id)) {
+            if (! reload()->walletToBank()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_bank_model'), $id);
             }

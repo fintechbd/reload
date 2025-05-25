@@ -68,7 +68,7 @@ class OrderPaymentController extends Controller
                 ],
             ];
 
-            if (!transaction()->order()->update($id, $data) || !reload()->deposit()->create($payout)) {
+            if (! transaction()->order()->update($id, $data) || ! reload()->deposit()->create($payout)) {
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 

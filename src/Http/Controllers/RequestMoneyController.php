@@ -121,7 +121,7 @@ class RequestMoneyController extends Controller
 
             $inputs = $request->validated();
 
-            if (!reload()->requestMoney()->update($id, $inputs)) {
+            if (! reload()->requestMoney()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -155,13 +155,13 @@ class RequestMoneyController extends Controller
             $inputs = $request->validated();
 
             if ($inputs['action'] == RequestMoneyStatus::Accepted->value) {
-                if (!reload()->requestMoney()->accept($requestMoney, $inputs)) {
+                if (! reload()->requestMoney()->accept($requestMoney, $inputs)) {
                     throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
                 }
             }
 
             if ($inputs['action'] == RequestMoneyStatus::Rejected->value) {
-                if (!reload()->requestMoney()->reject($requestMoney, $inputs)) {
+                if (! reload()->requestMoney()->reject($requestMoney, $inputs)) {
                     throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
                 }
             }
@@ -256,7 +256,7 @@ class RequestMoneyController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!reload()->requestMoney()->destroy($id)) {
+            if (! reload()->requestMoney()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -286,7 +286,7 @@ class RequestMoneyController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (!reload()->requestMoney()->restore($id)) {
+            if (! reload()->requestMoney()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -369,7 +369,7 @@ class RequestMoneyController extends Controller
                 $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
                 $updateData['order_data']['rejected_by_mobile_number'] = $approver->mobile;
 
-                if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
+                if (! reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $deposit->currentStatus(),
                         'target_status' => DepositStatus::Rejected->name,
@@ -437,7 +437,7 @@ class RequestMoneyController extends Controller
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
             $updateData['order_data']['rejected_by_mobile_number'] = $requestMoneyActual['order_data']['rejected_by_mobile_number'];
 
-            if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
+            if (! reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Rejected->name,
@@ -495,7 +495,7 @@ class RequestMoneyController extends Controller
                 }
 
                 $updateData['status'] = DepositStatus::Accepted->value;
-                if (!reload()->requestMoney()->update($withdraw->getKey(), $updateData)) {
+                if (! reload()->requestMoney()->update($withdraw->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $withdraw->currentStatus(),
                         'target_status' => DepositStatus::Accepted->name,
@@ -515,7 +515,7 @@ class RequestMoneyController extends Controller
                 $order_data = $withdraw->order_data;
                 $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                         'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
@@ -572,7 +572,7 @@ class RequestMoneyController extends Controller
             }
 
             $updateData['status'] = DepositStatus::Accepted->value;
-            if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
+            if (! reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Accepted->name,
@@ -591,7 +591,7 @@ class RequestMoneyController extends Controller
             $order_data = $deposit->order_data;
             $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
             $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-            if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+            if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                 throw new Exception(__('User Account Balance does not update', [
                     'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                     'current_amount' => ((float) $userUpdatedBalance['spent_amount']),

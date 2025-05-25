@@ -153,7 +153,7 @@ class WalletToAtmController extends Controller
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
 
-                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletToAtm->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
@@ -209,7 +209,7 @@ class WalletToAtmController extends Controller
 
             $inputs = $request->validated();
 
-            if (!reload()->walletToAtm()->update($id, $inputs)) {
+            if (! reload()->walletToAtm()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
@@ -269,7 +269,7 @@ class WalletToAtmController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            if (!reload()->walletToAtm()->destroy($id)) {
+            if (! reload()->walletToAtm()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
@@ -301,7 +301,7 @@ class WalletToAtmController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            if (!reload()->walletToAtm()->restore($id)) {
+            if (! reload()->walletToAtm()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
