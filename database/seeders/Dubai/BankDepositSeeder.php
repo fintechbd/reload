@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders\Dubai;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
@@ -16,7 +15,7 @@ class BankDepositSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'bank_deposit']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'bank_deposit']);
 
             $servingCountries = MetaData::country()->servingIds(['iso2' => 'AE']);
 
@@ -27,7 +26,7 @@ class BankDepositSeeder extends Seeder
                     'commission' => '0',
                 ];
 
-                Business::serviceTypeManager($entry, $parent)
+                business()->serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->srcCountries($servingCountries)
                     ->enabled()

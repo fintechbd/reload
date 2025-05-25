@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Commands;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Traits\HasCoreSetting;
 use Illuminate\Console\Command;
 
@@ -60,7 +59,7 @@ class InstallCommand extends Command
                 ],
             ];
             foreach ($serviceTypes as $entry) {
-                Business::serviceTypeManager($entry)
+                business()->serviceTypeManager($entry)
                     ->disabled()
                     ->execute();
             }
@@ -70,7 +69,7 @@ class InstallCommand extends Command
     private function addBankCardDeposit(): void
     {
         $this->task('Populating Fund Deposit (Bank & Card) Service Types', function () {
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
             $types = [
                 [
                     'service_type_name' => 'Bank Deposit',
@@ -83,7 +82,7 @@ class InstallCommand extends Command
                     'enabled' => true,
                 ],
                 [
-                    'service_type_parent_id' => Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit'])->id,
+                    'service_type_parent_id' => business()->serviceType()->findWhere(['service_type_slug' => 'fund_deposit'])->id,
                     'service_type_name' => 'Card Deposit',
                     'service_type_slug' => 'card_deposit',
                     'logo_svg' => $this->image_svg.'card_deposit.svg',
@@ -95,7 +94,7 @@ class InstallCommand extends Command
                 ],
             ];
             foreach ($types as $entry) {
-                Business::serviceTypeManager($entry, $parent)->execute();
+                business()->serviceTypeManager($entry, $parent)->execute();
             }
         });
     }

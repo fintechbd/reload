@@ -4,7 +4,6 @@ namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
 use Fintech\Auth\Facades\Auth;
-use Fintech\Card\Facades\Card;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Transaction\OrderStatus;
@@ -16,7 +15,6 @@ use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Reload\Events\BankDepositReceived;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportWalletToPrepaidCardRequest;
 use Fintech\Reload\Http\Requests\IndexWalletToPrepaidCardRequest;
 use Fintech\Reload\Http\Requests\StoreWalletToPrepaidCardRequest;
@@ -59,7 +57,7 @@ class WalletToPrepaidCardController extends Controller
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
             }
 
-            $walletToPrepaidCardPaginate = Reload::walletToPrepaidCard()->list($inputs);
+            $walletToPrepaidCardPaginate = reload()->walletToPrepaidCard()->list($inputs);
 
             return new WalletToPrepaidCardCollection($walletToPrepaidCardPaginate);
 
@@ -89,7 +87,7 @@ class WalletToPrepaidCardController extends Controller
 
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $walletUser->getKey())) > 0) {
 
-                $walletUserAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $walletUser->getKey(), 'country_id' => $request->input('source_country_id', $walletUser->profile?->country_id)]);
+                $walletUserAccount = transaction()->userAccount()->findWhere(['user_id' => $user_id ?? $walletUser->getKey(), 'country_id' => $request->input('source_country_id', $walletUser->profile?->country_id)]);
 
                 if (! $walletUserAccount) {
                     throw new CurrencyUnavailableException($request->input('source_country_id', $walletUser->profile?->present_country_id));
@@ -102,9 +100,9 @@ class WalletToPrepaidCardController extends Controller
                 }
 
                 // set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'wallet_prepaid_card'])->getKey();
+                $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'wallet_prepaid_card'])->getKey();
                 $inputs['user_id'] = $user_id ?? $walletUser->getKey();
-                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                $delayCheck = transaction()->order()->transactionDelayCheck($inputs);
                 if ($delayCheck['countValue'] > 0) {
                     throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
                 }
@@ -123,7 +121,7 @@ class WalletToPrepaidCardController extends Controller
                 $inputs['order_data']['order_type'] = OrderType::WalletToPrepaidCard;
                 unset($inputs['pin'], $inputs['password']);
 
-                $walletToPrepaidCard = Reload::walletToPrepaidCard()->create($inputs);
+                $walletToPrepaidCard = reload()->walletToPrepaidCard()->create($inputs);
 
                 if (! $walletToPrepaidCard) {
                     throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'));
@@ -132,11 +130,11 @@ class WalletToPrepaidCardController extends Controller
                 $order_data = $walletToPrepaidCard->order_data;
                 $order_data['purchase_number'] = entry_number($walletToPrepaidCard->getKey(), $walletToPrepaidCard->sourceCountry->iso3, OrderStatusConfig::Purchased->value);
 
-                Reload::walletToPrepaidCard()->update($walletToPrepaidCard->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                reload()->walletToPrepaidCard()->update($walletToPrepaidCard->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+                transaction()->orderQueue()->removeFromQueueUserWise($user_id);
 
-                $prepaidCard = Card::prepaidCard()->find($request->input('instant_card_id'));
+                $prepaidCard = card()->prepaidCard()->find($request->input('instant_card_id'));
 
                 $prepaidCard->balance = $prepaidCard->balance + $inputs['converted_amount'];
 
@@ -156,7 +154,7 @@ class WalletToPrepaidCardController extends Controller
 
         } catch (Exception $exception) {
 
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+            transaction()->orderQueue()->removeFromQueueUserWise($user_id);
 
             return response()->failed($exception);
         }
@@ -175,7 +173,7 @@ class WalletToPrepaidCardController extends Controller
     {
         try {
 
-            $walletToPrepaidCard = Reload::walletToPrepaidCard()->find($id);
+            $walletToPrepaidCard = reload()->walletToPrepaidCard()->find($id);
 
             if (! $walletToPrepaidCard) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
@@ -183,7 +181,7 @@ class WalletToPrepaidCardController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Reload::walletToPrepaidCard()->update($id, $inputs)) {
+            if (!reload()->walletToPrepaidCard()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
@@ -208,7 +206,7 @@ class WalletToPrepaidCardController extends Controller
     {
         try {
 
-            $walletToPrepaidCard = Reload::walletToPrepaidCard()->find($id);
+            $walletToPrepaidCard = reload()->walletToPrepaidCard()->find($id);
 
             if (! $walletToPrepaidCard) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
@@ -237,13 +235,13 @@ class WalletToPrepaidCardController extends Controller
     {
         try {
 
-            $walletToPrepaidCard = Reload::walletToPrepaidCard()->find($id);
+            $walletToPrepaidCard = reload()->walletToPrepaidCard()->find($id);
 
             if (! $walletToPrepaidCard) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
 
-            if (! Reload::walletToPrepaidCard()->destroy($id)) {
+            if (!reload()->walletToPrepaidCard()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
@@ -269,13 +267,13 @@ class WalletToPrepaidCardController extends Controller
     {
         try {
 
-            $walletToPrepaidCard = Reload::walletToPrepaidCard()->find($id, true);
+            $walletToPrepaidCard = reload()->walletToPrepaidCard()->find($id, true);
 
             if (! $walletToPrepaidCard) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
 
-            if (! Reload::walletToPrepaidCard()->restore($id)) {
+            if (!reload()->walletToPrepaidCard()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_prepaid_card_model'), $id);
             }
@@ -300,7 +298,7 @@ class WalletToPrepaidCardController extends Controller
         try {
             $inputs = $request->validated();
 
-            $walletToPrepaidCardPaginate = Reload::walletToPrepaidCard()->export($inputs);
+            $walletToPrepaidCardPaginate = reload()->walletToPrepaidCard()->export($inputs);
 
             return response()->exported(__('core::messages.resource.exported', ['model' => 'Wallet To Prepaid Card']));
 
@@ -324,7 +322,7 @@ class WalletToPrepaidCardController extends Controller
         try {
             $inputs = $request->validated();
 
-            $walletToPrepaidCardPaginate = Reload::walletToPrepaidCard()->list($inputs);
+            $walletToPrepaidCardPaginate = reload()->walletToPrepaidCard()->list($inputs);
 
             return new WalletToPrepaidCardCollection($walletToPrepaidCardPaginate);
 

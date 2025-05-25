@@ -4,21 +4,17 @@ namespace Fintech\Reload\Services;
 
 use Exception;
 use Fintech\Auth\Facades\Auth;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
-use Fintech\Core\Enums\Reload\DepositStatus;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Enums\Transaction\OrderType;
-use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\OrderRequestFailedException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\MetaData\Facades\MetaData;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Interfaces\RequestMoneyRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -88,7 +84,7 @@ class RequestMoneyService
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $user_id);
         }
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $senderAccount = transaction()->userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
         if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
@@ -98,7 +94,7 @@ class RequestMoneyService
         if (! $recipient) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['order_data']['recipient_id']);
         }
-        $recipientAccount = Transaction::userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
+        $recipientAccount = transaction()->userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
         if (! $recipientAccount) {
             throw new CurrencyUnavailableException($inputs['destination_country_id']);
         }
@@ -119,7 +115,7 @@ class RequestMoneyService
             throw new RequestOrderExistsException;
         }
 
-        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+        $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'request_money'])->getKey();
 
         if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
             throw new RequestAmountExistsException;
@@ -136,7 +132,7 @@ class RequestMoneyService
         $inputs['risk'] = RiskProfile::Low;
         $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['order_data']['is_reload'] = false;
-        $currencyConversion = Business::currencyRate()->convert([
+        $currencyConversion = business()->currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
             'source_country_id' => $inputs['source_country_id'],
@@ -172,7 +168,7 @@ class RequestMoneyService
         $inputs['order_data']['sender_email'] = $sender->email ?? 'N/A';
         $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+        $inputs['order_data']['service_stat_data'] = business()->serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reload' => $inputs['order_data']['is_reload'],
             'reverse' => $inputs['order_data']['is_reverse'],
@@ -189,7 +185,7 @@ class RequestMoneyService
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
 
-        $service = Business::service()->find($inputs['service_id']);
+        $service = business()->service()->find($inputs['service_id']);
         $vendor = $service->serviceVendor;
         $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
         $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
@@ -206,7 +202,7 @@ class RequestMoneyService
         try {
             $senderRequestMoney = $this->requestMoneyRepository->create($inputs);
             DB::commit();
-            $senderAccounting = Transaction::accounting($senderRequestMoney, $sender->getKey());
+            $senderAccounting = transaction()->accounting($senderRequestMoney, $sender->getKey());
             $senderRequestMoney = $senderAccounting->debitTransaction();
             $senderAccounting->debitBalanceFromUserAccount();
             //            $receiverInputs = $inputs;
@@ -219,10 +215,10 @@ class RequestMoneyService
             //            $receiverInputs['order_data']['master_user_name'] = $recipientMasterUser->name;
             //            $receiverInputs['order_data']['user_name'] = $recipient->name;
             //            $recipientRequestMoney = $this->requestMoneyRepository->create($receiverInputs);
-            //            $recipientAccounting = Transaction::accounting($recipientRequestMoney, $recipient->getKey());
+            //            $recipientAccounting =transaction()->accounting($recipientRequestMoney, $recipient->getKey());
             //            $recipientRequestMoney = $recipientAccounting->creditTransaction();
             //            $recipientAccounting->creditBalanceToUserAccount();
-            //            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+            //           transaction()->orderQueue()->removeFromQueueUserWise($user_id);
 
             $senderRequestMoney->refresh();
             // @TODO not working on double entry need fix ;-(
@@ -234,7 +230,7 @@ class RequestMoneyService
 
             DB::rollBack();
 
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id);
+            transaction()->orderQueue()->removeFromQueueUserWise($user_id);
 
             throw new OrderRequestFailedException($orderType->value, 0, $e);
         }
@@ -257,7 +253,7 @@ class RequestMoneyService
 
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $senderAccount = transaction()->userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
         if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
@@ -270,7 +266,7 @@ class RequestMoneyService
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['order_data']['recipient_id']);
         }
 
-        $recipientAccount = Transaction::userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
+        $recipientAccount = transaction()->userAccount()->findWhere(['user_id' => $recipient->getKey(), 'country_id' => $inputs['destination_country_id']]);
 
         if (! $recipientAccount) {
             throw new CurrencyUnavailableException($inputs['destination_country_id']);
@@ -292,7 +288,7 @@ class RequestMoneyService
             throw new RequestOrderExistsException;
         }
 
-        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+        $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'request_money'])->getKey();
 
         if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
             throw new RequestAmountExistsException;
@@ -300,7 +296,7 @@ class RequestMoneyService
 
         //            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $sender->getKey())) > 0) {
         //
-        //                $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $sender->getKey(), 'currency' => $request->input('currency', $sender->profile?->presentCountry?->currency)]);
+        //                $senderAccount =transaction()->userAccount()->findWhere(['user_id' => $user_id ?? $sender->getKey(), 'currency' => $request->input('currency', $sender->profile?->presentCountry?->currency)]);
         //
         //                if (! $senderAccount) {
         //                    throw new CurrencyUnavailableException($request->input('source_country_id', $sender->profile?->present_country_id));
@@ -313,16 +309,16 @@ class RequestMoneyService
         //                }
         //
         //                $receiver = Auth::user()->find($inputs['sender_receiver_id']);
-        //                $receiverDepositAccount = Transaction::userAccount()->findWhere(['user_id' => $inputs['sender_receiver_id'], 'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency)]);
+        //                $receiverDepositAccount =transaction()->userAccount()->findWhere(['user_id' => $inputs['sender_receiver_id'], 'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency)]);
         //
         //                if (! $receiverDepositAccount) {
         //                    throw new Exception("Receiver don't have account deposit balance");
         //                }
         //
         //                //set pre defined conditions of deposit
-        //                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+        //                $inputs['transaction_form_id'] =transaction()->transactionForm()->findWhere(['code' => 'request_money'])->getKey();
         //                $inputs['user_id'] = $receiver ?? $receiverDepositAccount->getKey();
-        //                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+        //                $delayCheck =transaction()->order()->transactionDelayCheck($inputs);
         //                if ($delayCheck['countValue'] > 0) {
         //                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
         //                }
@@ -349,18 +345,18 @@ class RequestMoneyService
         //                $inputs['converted_currency'] = $inputs['currency'];
         //                $inputs['order_data']['order_type'] = OrderType::RequestMoney;
         //                unset($inputs['pin'], $inputs['password']);
-        //                $requestMoney = Reload::requestMoney()->create($inputs);
+        //                $requestMoney =reload()->requestMoney()->create($inputs);
         //
         //                if (! $requestMoney) {
         //                    throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
         //                }
         //                $order_data = $requestMoney->order_data;
         //                $order_data['purchase_number'] = entry_number($requestMoney->getKey(), $requestMoney->sourceCountry->iso3, OrderStatus::Successful->value);
-        //                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($requestMoney);
+        //                $order_data['service_stat_data'] = business()->serviceStat()->serviceStateData($requestMoney);
         //                $order_data['user_name'] = $requestMoney->user->name;
-        //                Reload::requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+        //               reload()->requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
         //                $this->__receiverStore($requestMoney->getKey());
-        //                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $sender->getKey());
+        //               transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $sender->getKey());
         //                DB::commit();
         //
         //                return response()->created([
@@ -370,7 +366,7 @@ class RequestMoneyService
         //            }
         //
         //        } catch (Exception $exception) {
-        //            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $sender->getKey());
+        //           transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $sender->getKey());
         //            DB::rollBack();
         //
         //            return response()->failed($exception);
@@ -387,7 +383,7 @@ class RequestMoneyService
             'spent_amount' => null,
         ];
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->converted_currency,
@@ -405,7 +401,7 @@ class RequestMoneyService
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Request Money send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Payment Send to '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -426,7 +422,7 @@ class RequestMoneyService
         $data->notes = 'Request Money send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Send to '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCharge = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $data->user_id;
@@ -445,7 +441,7 @@ class RequestMoneyService
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
@@ -459,13 +455,13 @@ class RequestMoneyService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'converted_currency' => $data->converted_currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
@@ -487,7 +483,7 @@ class RequestMoneyService
             'deposit_amount' => null,
         ];
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'converted_currency' => $data->converted_currency,
@@ -501,7 +497,7 @@ class RequestMoneyService
         // $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Request Money send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Refund From '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -524,7 +520,7 @@ class RequestMoneyService
         $data->notes = 'Request Money send to '.$data->amount.' '.$data->currency.' to '.$data->converted_amount.' '.$data->converted_currency.' Charge Receive from '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCharge =transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $data->user_id;
@@ -543,7 +539,7 @@ class RequestMoneyService
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
@@ -562,7 +558,7 @@ class RequestMoneyService
         $data->notes = 'Request Money Deposit Commission Receive from '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCommission = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForCommissionForMaster = $orderDetailStoreForCommission->replicate();
         $orderDetailStoreForCommissionForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForCommissionForMaster->sender_receiver_id = $data->user_id;
@@ -576,13 +572,13 @@ class RequestMoneyService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'converted_currency' => $data->converted_currency,
         ]);
 
-        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['deposit_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
@@ -605,7 +601,7 @@ class RequestMoneyService
         ];
 
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
             'converted_currency' => $deposit->converted_currency,
@@ -619,7 +615,7 @@ class RequestMoneyService
         // $deposit->order_detail_number = $deposit->order_data['accepted_number'];
         $deposit->order_detail_response_id = $deposit->order_data['purchase_number'];
         $deposit->notes = 'Request Money receive from '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStore->order_detail_parent_id = $deposit->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -642,7 +638,7 @@ class RequestMoneyService
         $deposit->notes = 'Request Money Deposit Charge Receive from '.$master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
+        $orderDetailStoreForCharge =transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $deposit->user_id;
@@ -661,7 +657,7 @@ class RequestMoneyService
         $deposit->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForDiscount->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $deposit->user_id;
@@ -680,7 +676,7 @@ class RequestMoneyService
         $deposit->notes = 'Request Money Deposit Commission Receive from '.$master_user_name;
         $deposit->step = 3;
         $deposit->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCommission = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
+        $orderDetailStoreForCommission = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($deposit));
         $orderDetailStoreForCommissionForMaster = $orderDetailStoreForCommission->replicate();
         $orderDetailStoreForCommissionForMaster->user_id = $deposit->sender_receiver_id;
         $orderDetailStoreForCommissionForMaster->sender_receiver_id = $deposit->user_id;
@@ -691,13 +687,13 @@ class RequestMoneyService
         $orderDetailStoreForCommissionForMaster->step = 4;
         $orderDetailStoreForCommissionForMaster->save();
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
             'converted_currency' => $deposit->converted_currency,
         ]);
 
-        $userAccountData['deposit_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['deposit_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $deposit->user_id,
             'order_id' => $deposit->getKey(),

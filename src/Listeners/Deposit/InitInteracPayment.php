@@ -4,7 +4,6 @@ namespace Fintech\Reload\Listeners\Deposit;
 
 use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Reload\Events\InteracTransferReceived;
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -27,7 +26,7 @@ class InitInteracPayment implements ShouldQueue
         $orderType = OrderType::tryFrom($event->deposit->order_data['order_type']);
 
         if ($orderType == OrderType::InteracDeposit) {
-            Reload::assignVendor()->requestPayout($event->deposit);
+            reload()->assignVendor()->requestPayout($event->deposit);
         }
     }
 
@@ -36,7 +35,7 @@ class InitInteracPayment implements ShouldQueue
      */
     public function failed(InteracTransferReceived $event, \Throwable $exception): void
     {
-        Reload::deposit()->update($event->deposit->getKey(), [
+        reload()->deposit()->update($event->deposit->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'notes' => $exception->getMessage(),
         ]);

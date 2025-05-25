@@ -3,12 +3,9 @@
 namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\OrderPaymentRequest;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -24,13 +21,13 @@ class OrderPaymentController extends Controller
     {
         try {
 
-            $order = Transaction::order()->find($id);
+            $order = transaction()->order()->find($id);
 
             if (! $order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
-            $payoutService = Business::service()->findWhere(['service_slug' => 'interac_e_transfer', 'enabled' => true]);
+            $payoutService = business()->service()->findWhere(['service_slug' => 'interac_e_transfer', 'enabled' => true]);
 
             if (! $payoutService) {
                 throw new Exception(__('reload::messages.deposit.service_unavailable'));
@@ -43,7 +40,7 @@ class OrderPaymentController extends Controller
             $orderData['interac_email'] = $inputs['interac_email'];
 
             $payoutVendor = (empty($inputs['vendor']))
-                ? Business::serviceVendor()->findWhere(['service_vendor_slug' => $inputs['vendor'], 'enabled' => true, 'paginate' => false])
+                ? business()->serviceVendor()->findWhere(['service_vendor_slug' => $inputs['vendor'], 'enabled' => true, 'paginate' => false])
                 : $payoutService->serviceVendor;
 
             if (! $payoutVendor) {
@@ -71,7 +68,7 @@ class OrderPaymentController extends Controller
                 ],
             ];
 
-            if (! Transaction::order()->update($id, $data) || ! Reload::deposit()->create($payout)) {
+            if (!transaction()->order()->update($id, $data) || !reload()->deposit()->create($payout)) {
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 

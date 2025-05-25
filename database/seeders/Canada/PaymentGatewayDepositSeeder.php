@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders\Canada;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
@@ -16,13 +15,13 @@ class PaymentGatewayDepositSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $fundDepositParent = Business::serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
+            $fundDepositParent = business()->serviceType()->findWhere(['service_type_slug' => 'fund_deposit']);
 
             $servingCountries = MetaData::country()->servingIds(['iso2' => 'CA']);
 
-            $vendor = Business::serviceVendor()->findWhere(['service_vendor_slug' => 'leatherback']);
+            $vendor = business()->serviceVendor()->findWhere(['service_vendor_slug' => 'leatherback']);
 
-            Business::serviceTypeManager($this->data(), $fundDepositParent)
+            business()->serviceTypeManager($this->data(), $fundDepositParent)
                 ->srcCountries($servingCountries)
                 ->vendor($vendor)
                 ->enabled()

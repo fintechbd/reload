@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Illuminate\Database\Seeder;
 
@@ -15,10 +14,10 @@ class CardDepositOptionSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'card_deposit']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'card_deposit']);
 
             foreach ($this->data() as $entry) {
-                Business::serviceTypeManager($entry, $parent)
+                business()->serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->enabled()
                     ->execute();

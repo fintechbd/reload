@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Events;
 
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -26,6 +25,6 @@ class InteracTransferReceived
             'timestamp' => now(),
         ];
 
-        $this->deposit = Reload::deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
+        $this->deposit = reload()->deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Fintech\Reload\Events;
 
-use Fintech\Business\Facades\Business;
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +19,7 @@ class BankDepositReceived
     {
         $timeline = $deposit->timeline;
 
-        $service = Business::service()->find($deposit->service_id);
+        $service = business()->service()->find($deposit->service_id);
 
         $timeline[] = [
             'message' => ucwords(strtolower($service->service_name)).' bank deposit received',
@@ -29,6 +27,6 @@ class BankDepositReceived
             'timestamp' => now(),
         ];
 
-        $this->deposit = Reload::deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
+        $this->deposit = reload()->deposit()->update($deposit->getKey(), ['timeline' => $timeline]);
     }
 }

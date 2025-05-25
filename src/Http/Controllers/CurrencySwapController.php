@@ -3,29 +3,21 @@
 namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
-use Fintech\Auth\Facades\Auth;
-use Fintech\Business\Facades\Business;
-use Fintech\Core\Enums\Auth\RiskProfile;
-use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\IndexCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\StoreCurrencySwapRequest;
 use Fintech\Reload\Http\Requests\UpdateCurrencySwapRequest;
 use Fintech\Reload\Http\Resources\CurrencySwapCollection;
 use Fintech\Reload\Http\Resources\CurrencySwapResource;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Class CurrencySwapController
@@ -50,16 +42,16 @@ class CurrencySwapController extends Controller
     {
         try {
             $inputs = $request->validated();
-            // $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
+            // $inputs['transaction_form_id'] =transaction()->transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
             $inputs['transaction_form_code'] = 'currency_swap';
-            // $inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'currency_swap']);
+            // $inputs['service_id'] = business()->serviceType()->list(['service_type_slug'=>'currency_swap']);
             // $inputs['service_type_slug'] = 'currency_swap';
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
             }
 
-            $currencySwapPaginate = Reload::currencySwap()->list($inputs);
+            $currencySwapPaginate = reload()->currencySwap()->list($inputs);
 
             return new CurrencySwapCollection($currencySwapPaginate);
 
@@ -84,7 +76,7 @@ class CurrencySwapController extends Controller
         $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
 
         try {
-            $currencySwap = Reload::currencySwap()->create($inputs);
+            $currencySwap = reload()->currencySwap()->create($inputs);
 
             $service = $currencySwap->service;
 
@@ -95,7 +87,7 @@ class CurrencySwapController extends Controller
             ]);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
         }
@@ -112,7 +104,7 @@ class CurrencySwapController extends Controller
                 }
                 if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
-                    $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'currency' => $request->input('converted_currency', $depositor->profile?->presentCountry?->currency)]);
+                    $depositAccount =transaction()->userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'currency' => $request->input('converted_currency', $depositor->profile?->presentCountry?->currency)]);
 
                     if (! $depositAccount) {
                         throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
@@ -125,9 +117,9 @@ class CurrencySwapController extends Controller
                     }
 
                     //set pre-defined conditions of deposit
-                    $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
+                    $inputs['transaction_form_id'] =transaction()->transactionForm()->findWhere(['code' => 'currency_swap'])->getKey();
                     $inputs['user_id'] = $user_id ?? $depositor->getKey();
-                    $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                    $delayCheck =transaction()->order()->transactionDelayCheck($inputs);
                     if ($delayCheck['countValue'] > 0) {
                         throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
                     }
@@ -137,7 +129,7 @@ class CurrencySwapController extends Controller
                     $inputs['risk'] = RiskProfile::Low->value;
                     //$inputs['reverse'] = true;
 
-                    $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                    $inputs['order_data']['currency_convert_rate'] = business()->currencyRate()->convert($inputs);
                     unset($inputs['reverse']);
                     $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                     $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
@@ -157,7 +149,7 @@ class CurrencySwapController extends Controller
                     $inputs['destination_country_id'] = $inputs['order_data']['serving_country_id'];
 
                     unset($inputs['pin'], $inputs['password']);
-                    $currencySwap = Reload::currencySwap()->create($inputs);
+                    $currencySwap =reload()->currencySwap()->create($inputs);
 
                     if (! $currencySwap) {
                         throw (new StoreOperationException)->setModel(config('fintech.reload.currency_swap_model'));
@@ -166,12 +158,12 @@ class CurrencySwapController extends Controller
                     $order_data = $currencySwap->order_data;
                     $order_data['purchase_number'] = entry_number($currencySwap->getKey(), $currencySwap->sourceCountry->iso3, OrderStatus::Successful->value);
 
-                    $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($currencySwap);
+                    $order_data['service_stat_data'] = business()->serviceStat()->serviceStateData($currencySwap);
                     $order_data['user_name'] = $currencySwap->user->name;
                     $currencySwap->order_data = $order_data;
-                    $userUpdatedBalance = Reload::currencySwap()->debitTransaction($currencySwap);
+                    $userUpdatedBalance =reload()->currencySwap()->debitTransaction($currencySwap);
                     //source country or destination country change to currency name
-                    $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'currency' => $currencySwap->converted_currency]);
+                    $depositedAccount =transaction()->userAccount()->findWhere(['user_id' => $depositor->getKey(), 'currency' => $currencySwap->converted_currency]);
 
                     //update User Account
                     $depositedUpdatedAccount = $depositedAccount->toArray();
@@ -186,16 +178,16 @@ class CurrencySwapController extends Controller
                     }
                     $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                     $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-                    if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                    if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                         throw new Exception(__('User Account Balance does not update', [
                             'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                             'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                         ]));
                     }
 
-                    Reload::currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                   reload()->currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                     $this->__receiverStore($currencySwap->getKey());
-                    Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+                   transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                     DB::commit();
 
                     return response()->created([
@@ -207,7 +199,7 @@ class CurrencySwapController extends Controller
                     throw new Exception('Your another order is in process...!');
                 }
             } catch (Exception $exception) {
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+               transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                 DB::rollBack();
 
                 return response()->failed($exception);
@@ -226,7 +218,7 @@ class CurrencySwapController extends Controller
     {
         try {
 
-            $currencySwap = Reload::currencySwap()->find($id);
+            $currencySwap = reload()->currencySwap()->find($id);
 
             if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
@@ -234,7 +226,7 @@ class CurrencySwapController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Reload::currencySwap()->update($id, $inputs)) {
+            if (!reload()->currencySwap()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -253,7 +245,7 @@ class CurrencySwapController extends Controller
      */
     private function __receiverStore($id): bool
     {
-        $deposit = Reload::deposit()->find($id);
+        $deposit = reload()->deposit()->find($id);
         $receiverInputs = $deposit->toArray();
 
         $receiverInputs['amount'] = $deposit['converted_amount'];
@@ -261,18 +253,18 @@ class CurrencySwapController extends Controller
         $receiverInputs['converted_amount'] = $deposit['amount'];
         $receiverInputs['converted_currency'] = $deposit['currency'];
 
-        $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $receiverInputs['converted_currency']]);
+        $depositAccount = transaction()->userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $receiverInputs['converted_currency']]);
 
         if (! $depositAccount) {
             throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
         }
 
         // set pre defined conditions of deposit
-        $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'point_reload'])->getKey();
+        $receiverInputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'point_reload'])->getKey();
         $receiverInputs['notes'] = 'Currency Swap receive from '.$receiverInputs['amount'].' '.$receiverInputs['currency'].' to '.$receiverInputs['converted_amount'].' '.$receiverInputs['converted_currency'];
         $receiverInputs['parent_id'] = $id;
 
-        $currencySwap = Reload::currencySwap()->create($receiverInputs);
+        $currencySwap = reload()->currencySwap()->create($receiverInputs);
 
         if (! $currencySwap) {
             throw (new StoreOperationException)->setModel(config('fintech.airtime.currency_swap_model'));
@@ -281,12 +273,12 @@ class CurrencySwapController extends Controller
         $order_data = $currencySwap->order_data;
         $order_data['purchase_number'] = entry_number($currencySwap->getKey(), $currencySwap->sourceCountry->iso3, OrderStatus::Successful->value);
 
-        $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($currencySwap);
+        $order_data['service_stat_data'] = business()->serviceStat()->serviceStateData($currencySwap);
         $order_data['user_name'] = $currencySwap->user->name;
         $currencySwap->order_data = $order_data;
-        $userUpdatedBalance = Reload::currencySwap()->currencySwapAccept($currencySwap);
+        $userUpdatedBalance = reload()->currencySwap()->currencySwapAccept($currencySwap);
         // source country or destination country change to currency name
-        $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $currencySwap->user_id, 'currency' => $currencySwap->converted_currency]);
+        $depositedAccount = transaction()->userAccount()->findWhere(['user_id' => $currencySwap->user_id, 'currency' => $currencySwap->converted_currency]);
 
         // update User Account
         $depositedUpdatedAccount = $depositedAccount->toArray();
@@ -295,13 +287,13 @@ class CurrencySwapController extends Controller
 
         $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
         $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-        if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+        if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
             throw new Exception(__('User Account Balance does not update', [
                 'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                 'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
             ]));
         }
-        Reload::currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+        reload()->currencySwap()->update($currencySwap->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
         return true;
     }
@@ -318,7 +310,7 @@ class CurrencySwapController extends Controller
     {
         try {
 
-            $currencySwap = Reload::currencySwap()->find($id);
+            $currencySwap = reload()->currencySwap()->find($id);
 
             if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
@@ -342,13 +334,13 @@ class CurrencySwapController extends Controller
     {
         try {
 
-            $currencySwap = Reload::currencySwap()->find($id);
+            $currencySwap = reload()->currencySwap()->find($id);
 
             if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (! Reload::currencySwap()->destroy($id)) {
+            if (!reload()->currencySwap()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -372,13 +364,13 @@ class CurrencySwapController extends Controller
     {
         try {
 
-            $currencySwap = Reload::currencySwap()->find($id, true);
+            $currencySwap = reload()->currencySwap()->find($id, true);
 
             if (! $currencySwap) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
 
-            if (! Reload::currencySwap()->restore($id)) {
+            if (!reload()->currencySwap()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.currency_swap_model'), $id);
             }
@@ -403,7 +395,7 @@ class CurrencySwapController extends Controller
         try {
             $inputs = $request->validated();
 
-            $currencySwapPaginate = Reload::currencySwap()->export($inputs);
+            $currencySwapPaginate = reload()->currencySwap()->export($inputs);
 
             return response()->exported(__('core::messages.resource.exported', ['model' => 'Currency Swap']));
 
@@ -425,7 +417,7 @@ class CurrencySwapController extends Controller
         try {
             $inputs = $request->validated();
 
-            $currencySwapPaginate = Reload::currencySwap()->list($inputs);
+            $currencySwapPaginate = reload()->currencySwap()->list($inputs);
 
             return new CurrencySwapCollection($currencySwapPaginate);
 

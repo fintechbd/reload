@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Commands;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Illuminate\Console\Command;
 use Throwable;
@@ -49,10 +48,10 @@ class LeatherBackSetupCommand extends Command
             'enabled' => true,
         ];
 
-        if (Business::serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
+        if (business()->serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            Business::serviceVendor()->create($vendor);
+            business()->serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }

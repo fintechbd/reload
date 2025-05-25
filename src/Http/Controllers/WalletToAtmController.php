@@ -4,8 +4,6 @@ namespace Fintech\Reload\Http\Controllers;
 
 use Exception;
 use Fintech\Auth\Facades\Auth;
-use Fintech\Banco\Facades\Banco;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Transaction\OrderStatus;
@@ -15,14 +13,12 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\ImportWalletToAtmRequest;
 use Fintech\Reload\Http\Requests\IndexWalletToAtmRequest;
 use Fintech\Reload\Http\Requests\StoreWalletToAtmRequest;
 use Fintech\Reload\Http\Requests\UpdateWalletToAtmRequest;
 use Fintech\Reload\Http\Resources\WalletToAtmCollection;
 use Fintech\Reload\Http\Resources\WalletToAtmResource;
-use Fintech\Remit\Facades\Remit;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -53,13 +49,13 @@ class WalletToAtmController extends Controller
         try {
             $inputs = $request->validated();
 
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'local_atm_transfer'])->getKey();
+            $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'local_atm_transfer'])->getKey();
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
             }
 
-            $walletToAtmPaginate = Reload::walletToAtm()->list($inputs);
+            $walletToAtmPaginate = reload()->walletToAtm()->list($inputs);
 
             return new WalletToAtmCollection($walletToAtmPaginate);
 
@@ -87,7 +83,7 @@ class WalletToAtmController extends Controller
             }
             $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
-                $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
+                $depositAccount = transaction()->userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 
                 if (! $depositAccount) {
                     throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
@@ -100,9 +96,9 @@ class WalletToAtmController extends Controller
                 }
 
                 // set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'local_atm_transfer'])->getKey();
+                $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'local_atm_transfer'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
-                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                $delayCheck = transaction()->order()->transactionDelayCheck($inputs);
                 if ($delayCheck['countValue'] > 0) {
                     throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
                 }
@@ -111,7 +107,7 @@ class WalletToAtmController extends Controller
                 $inputs['status'] = OrderStatus::Pending->value;
                 $inputs['risk'] = RiskProfile::Low->value;
                 $inputs['reverse'] = true;
-                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                $inputs['order_data']['currency_convert_rate'] = business()->currencyRate()->convert($inputs);
                 unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                 $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
@@ -126,22 +122,22 @@ class WalletToAtmController extends Controller
                 $inputs['order_data']['order_type'] = OrderType::WalletToAtm;
                 unset($inputs['pin'], $inputs['password']);
 
-                $walletToAtm = Reload::walletToAtm()->create($inputs);
+                $walletToAtm = reload()->walletToAtm()->create($inputs);
 
                 if (! $walletToAtm) {
                     throw (new StoreOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'));
                 }
                 $order_data = $walletToAtm->order_data;
-                $service = Business::service()->find($inputs['service_id']);
+                $service = business()->service()->find($inputs['service_id']);
                 $order_data['service_slug'] = $service->service_slug;
                 $order_data['service_name'] = $service->service_name;
                 $order_data['purchase_number'] = entry_number($walletToAtm->getKey(), $walletToAtm->sourceCountry->iso3, OrderStatus::Successful->value);
-                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletToAtm);
+                $order_data['service_stat_data'] = business()->serviceStat()->serviceStateData($walletToAtm);
                 $order_data['user_name'] = $walletToAtm->user->name;
                 $walletToAtm->order_data = $order_data;
-                $userUpdatedBalance = Reload::walletToBank()->debitTransaction($walletToAtm);
+                $userUpdatedBalance = reload()->walletToBank()->debitTransaction($walletToAtm);
 
-                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $walletToAtm->source_country_id]);
+                $depositedAccount = transaction()->userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $walletToAtm->source_country_id]);
                 // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
@@ -157,18 +153,18 @@ class WalletToAtmController extends Controller
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
 
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletToAtm->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
                     ]));
                 }
                 // TODO ALL Beneficiary Data with bank and branch data
-                $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
+                $beneficiaryData = banco()->beneficiary()->manageBeneficiaryData($order_data);
                 $order_data['beneficiary_data'] = $beneficiaryData;
 
-                Remit::bankTransfer()->update($walletToAtm->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+                remit()->bankTransfer()->update($walletToAtm->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
                 // event(new RemitTransferRequested('bank_deposit', $walletToAtm));
 
@@ -186,7 +182,7 @@ class WalletToAtmController extends Controller
         } catch (Exception $exception) {
 
             DB::rollBack();
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+            transaction()->orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
             return response()->failed($exception);
         }
@@ -205,7 +201,7 @@ class WalletToAtmController extends Controller
     {
         try {
 
-            $walletToAtm = Reload::walletToAtm()->find($id);
+            $walletToAtm = reload()->walletToAtm()->find($id);
 
             if (! $walletToAtm) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
@@ -213,7 +209,7 @@ class WalletToAtmController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Reload::walletToAtm()->update($id, $inputs)) {
+            if (!reload()->walletToAtm()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
@@ -238,7 +234,7 @@ class WalletToAtmController extends Controller
     {
         try {
 
-            $walletToAtm = Reload::walletToAtm()->find($id);
+            $walletToAtm = reload()->walletToAtm()->find($id);
 
             if (! $walletToAtm) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
@@ -267,13 +263,13 @@ class WalletToAtmController extends Controller
     {
         try {
 
-            $walletToAtm = Reload::walletToAtm()->find($id);
+            $walletToAtm = reload()->walletToAtm()->find($id);
 
             if (! $walletToAtm) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            if (! Reload::walletToAtm()->destroy($id)) {
+            if (!reload()->walletToAtm()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
@@ -299,13 +295,13 @@ class WalletToAtmController extends Controller
     {
         try {
 
-            $walletToAtm = Reload::walletToAtm()->find($id, true);
+            $walletToAtm = reload()->walletToAtm()->find($id, true);
 
             if (! $walletToAtm) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
 
-            if (! Reload::walletToAtm()->restore($id)) {
+            if (!reload()->walletToAtm()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.wallet_to_atm_model'), $id);
             }
@@ -330,7 +326,7 @@ class WalletToAtmController extends Controller
         try {
             $inputs = $request->validated();
 
-            $walletToAtmPaginate = Reload::walletToAtm()->export($inputs);
+            $walletToAtmPaginate = reload()->walletToAtm()->export($inputs);
 
             return response()->exported(__('core::messages.resource.exported', ['model' => 'Wallet To Atm']));
 
@@ -354,7 +350,7 @@ class WalletToAtmController extends Controller
         try {
             $inputs = $request->validated();
 
-            $walletToAtmPaginate = Reload::walletToAtm()->list($inputs);
+            $walletToAtmPaginate = reload()->walletToAtm()->list($inputs);
 
             return new WalletToAtmCollection($walletToAtmPaginate);
 

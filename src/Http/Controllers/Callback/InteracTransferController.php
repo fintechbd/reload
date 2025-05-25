@@ -4,8 +4,6 @@ namespace Fintech\Reload\Http\Controllers\Callback;
 
 use Exception;
 use Fintech\Core\Enums\Reload\DepositStatus;
-use Fintech\Reload\Facades\Reload;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -26,7 +24,7 @@ class InteracTransferController extends Controller
 
     private function acceptOrder(Request $request): void
     {
-        $deposit = Reload::deposit()->findWhere([
+        $deposit = reload()->deposit()->findWhere([
             'paginate' => false,
             'purchase_number' => $request->input('Data.Reference'),
             'status' => [
@@ -54,20 +52,20 @@ class InteracTransferController extends Controller
                 throw new Exception(__('reload::messages.deposit.invalid_status', ['current_status' => $deposit->status->label(), 'target_status' => DepositStatus::Accepted->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'SUCCESSFUL') {
-                Reload::deposit()->accept($deposit, ['vendor_data' => $request->all()]);
+                reload()->deposit()->accept($deposit, ['vendor_data' => $request->all()]);
             }
 
         } catch (ModelNotFoundException $exception) {
             logger($exception);
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
+            transaction()->orderQueue()->removeFromQueueOrderWise($deposit->getKey());
             logger($exception);
         }
     }
 
     private function cancelOrder(Request $request): void
     {
-        $deposit = Reload::deposit()->findWhere([
+        $deposit = reload()->deposit()->findWhere([
             'paginate' => false,
             'purchase_number' => $request->input('Data.Reference'),
             'status' => [
@@ -97,13 +95,13 @@ class InteracTransferController extends Controller
                     'target_status' => DepositStatus::Rejected->label()]));
             }
             if ($request->input('Data.PaymentStatus') == 'FAILED') {
-                Reload::deposit()->reject($deposit, ['vendor_data' => $request->all()]);
+                reload()->deposit()->reject($deposit, ['vendor_data' => $request->all()]);
             }
 
         } catch (ModelNotFoundException $exception) {
             logger($exception);
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($deposit->getKey());
+            transaction()->orderQueue()->removeFromQueueOrderWise($deposit->getKey());
             logger($exception);
         }
     }

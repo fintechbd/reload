@@ -3,7 +3,6 @@
 namespace Fintech\Reload\Jobs\Deposit;
 
 use Fintech\Reload\Events\InteracTransferReceived;
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -24,7 +23,7 @@ class InteracExpiredRequestRejectJob implements ShouldQueue
      */
     public function __construct($order_id)
     {
-        $this->deposit = Reload::deposit()->find($order_id);
+        $this->deposit = reload()->deposit()->find($order_id);
     }
 
     /**
@@ -32,7 +31,7 @@ class InteracExpiredRequestRejectJob implements ShouldQueue
      */
     public function handle(InteracTransferReceived $event): void
     {
-        Reload::assignVendor()->requestPayout($event->deposit);
+        reload()->assignVendor()->requestPayout($event->deposit);
     }
 
     /**
@@ -40,7 +39,7 @@ class InteracExpiredRequestRejectJob implements ShouldQueue
      */
     public function failed(InteracTransferReceived $event, \Throwable $exception): void
     {
-        Reload::deposit()->update($event->deposit->getKey(), [
+        reload()->deposit()->update($event->deposit->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'notes' => $exception->getMessage(),
         ]);

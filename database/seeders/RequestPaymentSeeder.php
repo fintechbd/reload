@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
@@ -18,7 +17,7 @@ class RequestPaymentSeeder extends Seeder
 
             $servingCountries = MetaData::country()->servingIds();
 
-            Business::serviceTypeManager($this->data())
+            business()->serviceTypeManager($this->data())
                 ->hasService()
                 ->disabled()
                 ->distCountries($servingCountries)

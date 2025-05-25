@@ -2,7 +2,6 @@
 
 namespace Fintech\Reload\Seeders\Canada;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
@@ -16,18 +15,18 @@ class BankDepositSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'bank_deposit']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'bank_deposit']);
 
             $servingCountries = MetaData::country()->servingIds(['iso2' => 'CA']);
 
             $entries = $this->data();
 
-            Business::serviceTypeManager($entries[0], $parent)
+            business()->serviceTypeManager($entries[0], $parent)
                 ->hasService()
                 ->srcCountries($servingCountries)
                 ->execute();
 
-            Business::serviceTypeManager($entries[1], $parent)
+            business()->serviceTypeManager($entries[1], $parent)
                 ->hasService()
                 ->srcCountries($servingCountries)
                 ->execute();

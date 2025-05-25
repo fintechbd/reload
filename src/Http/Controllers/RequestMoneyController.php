@@ -5,7 +5,6 @@ namespace Fintech\Reload\Http\Controllers;
 use BackedEnum;
 use Exception;
 use Fintech\Auth\Facades\Auth;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Reload\DepositStatus;
@@ -17,7 +16,6 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Reload\Http\Requests\CheckDepositRequest;
 use Fintech\Reload\Http\Requests\ConfirmRequestMoneyRequest;
 use Fintech\Reload\Http\Requests\ImportRequestMoneyRequest;
@@ -54,16 +52,16 @@ class RequestMoneyController extends Controller
     {
         try {
             $inputs = $request->validated();
-            // $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+            // $inputs['transaction_form_id'] =transaction()->transactionForm()->findWhere(['code' => 'request_money'])->getKey();
             $inputs['transaction_form_code'] = 'request_money';
-            // $inputs['service_id'] = Business::serviceType()->list(['service_type_slug'=>'request_money']);
+            // $inputs['service_id'] = business()->serviceType()->list(['service_type_slug'=>'request_money']);
             // $inputs['service_type_slug'] = 'request_money';
 
             if ($request->isAgent()) {
                 $inputs['creator_id'] = $request->user('sanctum')->getKey();
             }
 
-            $requestMoneyPaginate = Reload::requestMoney()->list($inputs);
+            $requestMoneyPaginate = reload()->requestMoney()->list($inputs);
 
             return new RequestMoneyCollection($requestMoneyPaginate);
 
@@ -86,7 +84,7 @@ class RequestMoneyController extends Controller
         $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
 
         try {
-            $requestMoney = Reload::requestMoney()->create($inputs);
+            $requestMoney = reload()->requestMoney()->create($inputs);
 
             $service = $requestMoney->service;
 
@@ -97,7 +95,7 @@ class RequestMoneyController extends Controller
             ]);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
         }
@@ -115,7 +113,7 @@ class RequestMoneyController extends Controller
     {
         try {
 
-            $requestMoney = Reload::requestMoney()->find($id);
+            $requestMoney = reload()->requestMoney()->find($id);
 
             if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
@@ -123,7 +121,7 @@ class RequestMoneyController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Reload::requestMoney()->update($id, $inputs)) {
+            if (!reload()->requestMoney()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -148,7 +146,7 @@ class RequestMoneyController extends Controller
     {
         try {
 
-            $requestMoney = Reload::requestMoney()->find($id);
+            $requestMoney = reload()->requestMoney()->find($id);
 
             if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
@@ -157,13 +155,13 @@ class RequestMoneyController extends Controller
             $inputs = $request->validated();
 
             if ($inputs['action'] == RequestMoneyStatus::Accepted->value) {
-                if (! Reload::requestMoney()->accept($requestMoney, $inputs)) {
+                if (!reload()->requestMoney()->accept($requestMoney, $inputs)) {
                     throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
                 }
             }
 
             if ($inputs['action'] == RequestMoneyStatus::Rejected->value) {
-                if (! Reload::requestMoney()->reject($requestMoney, $inputs)) {
+                if (!reload()->requestMoney()->reject($requestMoney, $inputs)) {
                     throw (new UpdateOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
                 }
             }
@@ -182,24 +180,24 @@ class RequestMoneyController extends Controller
      */
     private function __receiverStore($id): bool
     {
-        $requestMoney = Reload::requestMoney()->find($id);
+        $requestMoney = reload()->requestMoney()->find($id);
         $receiverInputs = $requestMoney->toArray();
 
         $receiverInputs['user_id'] = $requestMoney['sender_receiver_id'];
         $receiverInputs['sender_receiver_id'] = $requestMoney['user_id'];
 
-        $requestMoneyAccount = Transaction::userAccount()->findWhere(['user_id' => $receiverInputs['user_id'], 'currency' => $receiverInputs['converted_currency']]);
+        $requestMoneyAccount = transaction()->userAccount()->findWhere(['user_id' => $receiverInputs['user_id'], 'currency' => $receiverInputs['converted_currency']]);
 
         if (! $requestMoneyAccount) {
             throw new CurrencyUnavailableException($request->input('source_country_id', $depositor->profile?->present_country_id));
         }
 
         // set pre defined conditions of deposit
-        $receiverInputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'request_money'])->getKey();
+        $receiverInputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'request_money'])->getKey();
         $receiverInputs['notes'] = 'Wallet to Wallet receive request from '.$requestMoney['order_data']['user_name'];
         $receiverInputs['parent_id'] = $id;
 
-        $requestMoney = Reload::requestMoney()->create($receiverInputs);
+        $requestMoney = reload()->requestMoney()->create($receiverInputs);
 
         if (! $requestMoney) {
             throw (new StoreOperationException)->setModel(config('fintech.reload.request_money_model'));
@@ -208,10 +206,10 @@ class RequestMoneyController extends Controller
         $order_data = $requestMoney->order_data;
         $order_data['purchase_number'] = entry_number($requestMoney->getKey(), $requestMoney->sourceCountry->iso3, OrderStatus::Successful->value);
 
-        $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($requestMoney);
+        $order_data['service_stat_data'] = business()->serviceStat()->serviceStateData($requestMoney);
         $order_data['user_name'] = $requestMoney->user->name;
         $requestMoney->order_data = $order_data;
-        Reload::requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+        reload()->requestMoney()->update($requestMoney->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
         return true;
     }
@@ -228,7 +226,7 @@ class RequestMoneyController extends Controller
     {
         try {
 
-            $requestMoney = Reload::requestMoney()->find($id);
+            $requestMoney = reload()->requestMoney()->find($id);
 
             if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
@@ -252,13 +250,13 @@ class RequestMoneyController extends Controller
     {
         try {
 
-            $requestMoney = Reload::requestMoney()->find($id);
+            $requestMoney = reload()->requestMoney()->find($id);
 
             if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (! Reload::requestMoney()->destroy($id)) {
+            if (!reload()->requestMoney()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -282,13 +280,13 @@ class RequestMoneyController extends Controller
     {
         try {
 
-            $requestMoney = Reload::requestMoney()->find($id, true);
+            $requestMoney = reload()->requestMoney()->find($id, true);
 
             if (! $requestMoney) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
 
-            if (! Reload::requestMoney()->restore($id)) {
+            if (!reload()->requestMoney()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.reload.request_money_model'), $id);
             }
@@ -313,8 +311,8 @@ class RequestMoneyController extends Controller
         try {
             $inputs = $request->validated();
 
-            // $requestMoneyPaginate = Reload::requestMoney()->export($inputs);
-            Reload::requestMoney()->export($inputs);
+            // $requestMoneyPaginate =reload()->requestMoney()->export($inputs);
+            reload()->requestMoney()->export($inputs);
 
             return response()->exported(__('core::messages.resource.exported', ['model' => 'Request Money']));
 
@@ -336,7 +334,7 @@ class RequestMoneyController extends Controller
         try {
             $inputs = $request->validated();
 
-            $requestMoneyPaginate = Reload::requestMoney()->list($inputs);
+            $requestMoneyPaginate = reload()->requestMoney()->list($inputs);
 
             return new RequestMoneyCollection($requestMoneyPaginate);
 
@@ -371,7 +369,7 @@ class RequestMoneyController extends Controller
                 $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
                 $updateData['order_data']['rejected_by_mobile_number'] = $approver->mobile;
 
-                if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
+                if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $deposit->currentStatus(),
                         'target_status' => DepositStatus::Rejected->name,
@@ -379,7 +377,7 @@ class RequestMoneyController extends Controller
                 }
 
                 $this->__receiverReject($id);
-                Transaction::orderQueue()->removeFromQueueOrderWise($id);
+                transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
                 return response()->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Rejected->name,
@@ -389,12 +387,12 @@ class RequestMoneyController extends Controller
             }
 
         } catch (ModelNotFoundException $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->notfound($exception);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->failed($exception);
         }
@@ -405,7 +403,7 @@ class RequestMoneyController extends Controller
      */
     private function authenticateDeposit(string|int $id, BackedEnum $requiredStatus, BackedEnum $targetStatus): BaseModel
     {
-        $deposit = Reload::deposit()->find($id);
+        $deposit = reload()->deposit()->find($id);
 
         if (! $deposit) {
             throw (new ModelNotFoundException)->setModel(config('fintech.reload.deposit_model'), $id);
@@ -425,9 +423,9 @@ class RequestMoneyController extends Controller
     private function __receiverReject($id): JsonResponse
     {
         try {
-            $requestMoneyActual = Reload::requestMoney()->find($id);
-            $requestMoneyChild = Reload::requestMoney()->findWhere(['parent_id' => $id]);
-            $requestMoney = Reload::requestMoney()->find($requestMoneyChild->id);
+            $requestMoneyActual = reload()->requestMoney()->find($id);
+            $requestMoneyChild = reload()->requestMoney()->findWhere(['parent_id' => $id]);
+            $requestMoney = reload()->requestMoney()->find($requestMoneyChild->id);
             $receiverInputs = $requestMoney->toArray();
             $deposit = $this->authenticateDeposit($requestMoneyChild->id, DepositStatus::Processing, DepositStatus::Rejected);
 
@@ -439,7 +437,7 @@ class RequestMoneyController extends Controller
             $updateData['order_number'] = entry_number($deposit->getKey(), $deposit->sourceCountry->iso3, OrderStatusConfig::Rejected->value);
             $updateData['order_data']['rejected_by_mobile_number'] = $requestMoneyActual['order_data']['rejected_by_mobile_number'];
 
-            if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
+            if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Rejected->name,
@@ -451,12 +449,12 @@ class RequestMoneyController extends Controller
             ]));
 
         } catch (ModelNotFoundException $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->notfound($exception);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->failed($exception);
         }
@@ -477,14 +475,14 @@ class RequestMoneyController extends Controller
             if (Transaction::orderQueue()->addToQueueOrderWise($id) > 0) {
                 $withdraw = $this->authenticateDeposit($id, DepositStatus::Processing, DepositStatus::Accepted);
 
-                $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $withdraw->user_id, 'currency' => $request->input('currency', $withdraw->profile?->presentCountry?->currency)]);
+                $depositAccount = transaction()->userAccount()->findWhere(['user_id' => $withdraw->user_id, 'currency' => $request->input('currency', $withdraw->profile?->presentCountry?->currency)]);
 
                 if (! $depositAccount) {
                     throw new CurrencyUnavailableException($request->input('source_country_id', $withdraw->profile?->present_country_id));
                 }
 
                 $receiver = Auth::user()->find($withdraw->sender_receiver_id);
-                $receiverDepositAccount = Transaction::userAccount()->findWhere(['user_id' => $withdraw->sender_receiver_id, 'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency)]);
+                $receiverDepositAccount = transaction()->userAccount()->findWhere(['user_id' => $withdraw->sender_receiver_id, 'currency' => $request->input('currency', $receiver->profile?->presentCountry?->currency)]);
 
                 if (! $receiverDepositAccount) {
                     throw new Exception("Receiver don't have account deposit balance");
@@ -497,7 +495,7 @@ class RequestMoneyController extends Controller
                 }
 
                 $updateData['status'] = DepositStatus::Accepted->value;
-                if (! Reload::requestMoney()->update($withdraw->getKey(), $updateData)) {
+                if (!reload()->requestMoney()->update($withdraw->getKey(), $updateData)) {
                     throw new Exception(__('reload::messages.status_change_failed', [
                         'current_status' => $withdraw->currentStatus(),
                         'target_status' => DepositStatus::Accepted->name,
@@ -505,9 +503,9 @@ class RequestMoneyController extends Controller
                 }
                 $withdraw['sender_receiver_id'] = $masterUser->getKey();
 
-                $userUpdatedBalance = Reload::requestMoney()->debitTransaction($withdraw);
+                $userUpdatedBalance = reload()->requestMoney()->debitTransaction($withdraw);
                 // source country or destination country change to currency name
-                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $withdraw->user_id, 'currency' => $withdraw->converted_currency]);
+                $depositedAccount = transaction()->userAccount()->findWhere(['user_id' => $withdraw->user_id, 'currency' => $withdraw->converted_currency]);
 
                 // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
@@ -517,16 +515,16 @@ class RequestMoneyController extends Controller
                 $order_data = $withdraw->order_data;
                 $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                         'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                     ]));
                 }
-                Reload::requestMoney()->update($withdraw->getKey(), ['order_data' => $order_data]);
+                reload()->requestMoney()->update($withdraw->getKey(), ['order_data' => $order_data]);
                 $this->__receiverAccept($withdraw->getKey());
 
-                Transaction::orderQueue()->removeFromQueueOrderWise($id);
+                transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
                 return response()->success(__('reload::messages.deposit.status_change_success', [
                     'status' => DepositStatus::Accepted->name,
@@ -536,12 +534,12 @@ class RequestMoneyController extends Controller
             }
 
         } catch (ModelNotFoundException $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->notfound($exception);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->failed($exception);
         }
@@ -550,18 +548,18 @@ class RequestMoneyController extends Controller
     public function __receiverAccept(string|int $id): JsonResponse
     {
         try {
-            $requestMoney = Reload::requestMoney()->findWhere(['parent_id' => $id]);
+            $requestMoney = reload()->requestMoney()->findWhere(['parent_id' => $id]);
 
             $deposit = $this->authenticateDeposit($requestMoney->id, DepositStatus::Processing, DepositStatus::Accepted);
 
-            $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $deposit->profile?->presentCountry?->currency]);
+            $depositAccount = transaction()->userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $deposit->profile?->presentCountry?->currency]);
 
             if (! $depositAccount) {
                 throw new CurrencyUnavailableException($deposit->profile?->present_country_id);
             }
 
             $receiver = Auth::user()->find($deposit->sender_receiver_id);
-            $receiverDepositAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->sender_receiver_id, 'currency' => $receiver->profile?->presentCountry?->currency]);
+            $receiverDepositAccount = transaction()->userAccount()->findWhere(['user_id' => $deposit->sender_receiver_id, 'currency' => $receiver->profile?->presentCountry?->currency]);
             // print_r($receiverDepositAccount);exit();
             if (! $receiverDepositAccount) {
                 throw new Exception("Receiver don't have account deposit balance");
@@ -574,16 +572,16 @@ class RequestMoneyController extends Controller
             }
 
             $updateData['status'] = DepositStatus::Accepted->value;
-            if (! Reload::requestMoney()->update($deposit->getKey(), $updateData)) {
+            if (!reload()->requestMoney()->update($deposit->getKey(), $updateData)) {
                 throw new Exception(__('reload::messages.status_change_failed', [
                     'current_status' => $deposit->currentStatus(),
                     'target_status' => DepositStatus::Accepted->name,
                 ]));
             }
             $deposit['sender_receiver_id'] = $masterUser->getKey();
-            $userUpdatedBalance = Reload::requestMoney()->creditTransaction($deposit);
+            $userUpdatedBalance = reload()->requestMoney()->creditTransaction($deposit);
             // source country or destination country change to currency name
-            $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $deposit->converted_currency]);
+            $depositedAccount = transaction()->userAccount()->findWhere(['user_id' => $deposit->user_id, 'currency' => $deposit->converted_currency]);
 
             // update User Account
             $depositedUpdatedAccount = $depositedAccount->toArray();
@@ -593,25 +591,25 @@ class RequestMoneyController extends Controller
             $order_data = $deposit->order_data;
             $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
             $order_data['order_data']['current_amount'] = (float) $userUpdatedBalance['current_amount'];
-            if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+            if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                 throw new Exception(__('User Account Balance does not update', [
                     'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
                     'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                 ]));
             }
-            Reload::requestMoney()->update($deposit->getKey(), ['order_data' => $order_data]);
+            reload()->requestMoney()->update($deposit->getKey(), ['order_data' => $order_data]);
 
             return response()->success(__('reload::messages.deposit.status_change_success', [
                 'status' => DepositStatus::Accepted->name,
             ]));
 
         } catch (ModelNotFoundException $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->notfound($exception);
 
         } catch (Exception $exception) {
-            Transaction::orderQueue()->removeFromQueueOrderWise($id);
+            transaction()->orderQueue()->removeFromQueueOrderWise($id);
 
             return response()->failed($exception);
         }

@@ -2,8 +2,6 @@
 
 namespace Fintech\Reload\Events;
 
-use Fintech\Business\Facades\Business;
-use Fintech\Reload\Facades\Reload;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +19,7 @@ class WalletToWalletReceived
     {
         $timeline = $walletToWallet->timeline;
 
-        $service = Business::service()->find($walletToWallet->service_id);
+        $service = business()->service()->find($walletToWallet->service_id);
 
         $timeline[] = [
             'message' => ucwords(strtolower($service->service_name)).' wallet to wallet transfer request received',
@@ -29,6 +27,6 @@ class WalletToWalletReceived
             'timestamp' => now(),
         ];
 
-        $this->walletToWallet = Reload::walletToWallet()->update($walletToWallet->getKey(), ['timeline' => $timeline]);
+        $this->walletToWallet = reload()->walletToWallet()->update($walletToWallet->getKey(), ['timeline' => $timeline]);
     }
 }
